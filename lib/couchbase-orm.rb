@@ -73,6 +73,10 @@ module Kernel
 
         raise ArgumentError, "invalid value for Boolean(): \"#{value.inspect}\""
     end
+
+    def Json(value)
+        value
+    end
 end
 class Boolean < TrueClass; end
 

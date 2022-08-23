@@ -208,7 +208,12 @@ module CouchbaseOrm
 
         def read_attribute(attr_name)
             read_fn = self.class.attributes[attr_name][:read_fn]
-            value = @__attributes__[attr_name]
+            if attr_name.starts_with?(TankerEncrypted::TANKER_ENCRYPTED_PREFIX)
+                value = @__attributes__["#{'encrypted$'.to_sym}#{attr_name}"][:ciphertext]
+                @__attributes__[attr_name] = value
+            else
+                value = @__attributes__[attr_name]
+            end
             value = read_fn.call(value) if read_fn
             value
         end
@@ -220,7 +225,12 @@ module CouchbaseOrm
                 value = Kernel.send(coerce.to_s, value) if coerce
             end
             attribute_will_change!(attr_name) unless @__attributes__[attr_name] == value
-            @__attributes__[attr_name] = value
+            if attr_name.starts_with?(TankerEncrypted::TANKER_ENCRYPTED_PREFIX)
+                @__attributes__["#{'encrypted$'.to_sym}#{attr_name}"] = value
+            else
+                @__attributes__[attr_name] = value
+            end
+
         end
         alias_method :[]=, :write_attribute
 
