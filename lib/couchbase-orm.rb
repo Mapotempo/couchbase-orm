@@ -7,6 +7,8 @@ module CouchbaseOrm
     autoload :Base,        'couchbase-orm/base'
     autoload :HasMany,     'couchbase-orm/utilities/has_many'
 
+    TANKER_ENCRYPTED_PREFIX = "tanker_encrypted_".freeze
+
     def self.logger
         @@logger ||= defined?(Rails) ? Rails.logger : Logger.new(STDOUT)
     end
@@ -72,10 +74,6 @@ module Kernel
         end
 
         raise ArgumentError, "invalid value for Boolean(): \"#{value.inspect}\""
-    end
-
-    def Json(value)
-        value
     end
 end
 class Boolean < TrueClass; end

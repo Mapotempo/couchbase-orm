@@ -233,6 +233,7 @@ module CouchbaseOrm
             run_callbacks :update do
                 run_callbacks :save do
                     # Ensure the type is set
+                    @__attributes__ = with_encrypted_attributes
                     @__attributes__[:type] = self.class.design_document
                     @__attributes__.delete(:id)
 
@@ -256,6 +257,7 @@ module CouchbaseOrm
             run_callbacks :create do
                 run_callbacks :save do
                     # Ensure the type is set
+                    @__attributes__ = with_encrypted_attributes
                     @__attributes__[:type] = self.class.design_document
                     @__attributes__.delete(:id)
 
@@ -278,6 +280,22 @@ module CouchbaseOrm
         def perform_validations(context, options = {})
             return valid?(context) if options[:validate] != false
             true
+        end
+
+        def with_encrypted_attributes
+            @__attributes__.map do |key, value|
+                if key.to_s.starts_with?(TANKER_ENCRYPTED_PREFIX)
+                    [
+                        "encrypted$#{key}".to_sym,
+                        {
+                            alg: "CB_MOBILE_CUSTOM",
+                            ciphertext: value
+                        }
+                    ]
+                else
+                    [ key, value ]
+                end
+            end.to_h
         end
     end
 end
