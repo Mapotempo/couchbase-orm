@@ -19,6 +19,14 @@ module CouchbaseOrm
             end
         end
 
+        @@couchbase_orm_config_n1ql = nil
+        def self.config(new_config = nil)
+            @@couchbase_orm_config_n1ql = new_config if new_config
+            @@couchbase_orm_config_n1ql || {
+              :scan_consistency => :request_plus
+            }
+        end
+
         module ClassMethods
             # Defines a query N1QL for the model
             #

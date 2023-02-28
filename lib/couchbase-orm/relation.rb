@@ -27,7 +27,7 @@ module CouchbaseOrm
             end
 
             def execute(n1ql_query)
-                result = @model.cluster.query(n1ql_query, Couchbase::Options::Query.new(scan_consistency: :request_plus))
+                result = @model.cluster.query(n1ql_query, Couchbase::Options::Query.new(scan_consistency: CouchbaseOrm::N1ql.config[:scan_consistency]))
                 CouchbaseOrm.logger.debug { "Relation query: #{n1ql_query} return #{result.rows.to_a.length} rows" }
                 N1qlProxy.new(result)
             end
