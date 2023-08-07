@@ -150,6 +150,7 @@ module CouchbaseOrm
                     @__metadata__.cas = model.cas
 
                     assign_attributes(decode_encrypted_attributes(doc))
+                    clear_changes_information
                 when CouchbaseOrm::Base
                     clear_changes_information
                     super(model.attributes.except(:id, 'type'))
