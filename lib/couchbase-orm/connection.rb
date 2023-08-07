@@ -8,7 +8,7 @@ module CouchbaseOrm
               :connection_string => "couchbase://#{ENV['COUCHBASE_HOST'] || '127.0.0.1'}",
               :username => ENV['COUCHBASE_USER'],
               :password => ENV['COUCHBASE_PASSWORD'],
-              :bucket => ENV['COUCHBASE_BUCKET']
+              :bucket => ENV['COUCHBASE_BUCKET'] || 'default'
             }
         end
 
