@@ -246,11 +246,14 @@ module CouchbaseOrm
 
                 ids = ids.flatten.select { |id| id.present? }
                 if ids.empty?
-                    raise CouchbaseOrm::Error::EmptyNotAllowed, 'no id(s) provided'
+                    raise CouchbaseOrm::Error::EmptyNotAllowed, 'no id(s) provided' unless quiet
+                    return nil if quiet
                 end
 
                 transcoder = CouchbaseOrm::JsonTranscoder.new(ignored_properties: ignored_properties)
                 records = quiet ? collection.get_multi(ids, transcoder: transcoder) : collection.get_multi!(ids, transcoder: transcoder)
+                return nil if records.nil?
+                
                 CouchbaseOrm.logger.debug { "Base.find found(#{records})" }
                 records = records.zip(ids).map { |record, id|
                     self.new(record, id: id) if record
