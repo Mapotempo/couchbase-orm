@@ -79,9 +79,10 @@ module CouchbaseOrm
         #
         # If the model is new, a record gets created in the database, otherwise
         # the existing record gets updated.
-        def save(**options)
+        def save(**options, &block)
             raise "Cannot save a destroyed document!" if destroyed?
-            self.new_record? ? _create_record(**options) : _update_record(**options)
+            @_with_cas = options[:with_cas]
+            create_or_update(**options, &block)
         end
 
         # Saves the model.
@@ -91,7 +92,7 @@ module CouchbaseOrm
         #
         # By default, #save! always runs validations. If any of them fail
         # CouchbaseOrm::Error::RecordInvalid gets raised, and the record won't be saved.
-        def save!(**options)
+        def save!(**options, &block)
             self.class.fail_validate!(self) unless self.save(**options)
             self
         end
@@ -101,8 +102,8 @@ module CouchbaseOrm
         # persisted). Returns the frozen instance.
         #
         # The record is simply removed, no callbacks are executed.
-        def delete(with_cas: false, **options)
-            options[:cas] = @__metadata__.cas if with_cas
+        def delete(**options)
+            options[:cas] = @__metadata__.cas if options.delete(:with_cas)
             CouchbaseOrm.logger.debug "Data - Delete #{self.id}"
             self.class.collection.remove(self.id, **options)
 
@@ -119,14 +120,14 @@ module CouchbaseOrm
         # that no changes should be made (since they can't be persisted).
         #
         # There's a series of callbacks associated with #destroy.
-        def destroy(with_cas: false, **options)
+        def destroy(**options)
             return self if destroyed?
             raise 'model not persisted' unless persisted?
 
             run_callbacks :destroy do
                 destroy_associations!
 
-                options[:cas] = @__metadata__.cas if with_cas
+                options[:cas] = @__metadata__.cas if options.delete(:with_cas)
                 CouchbaseOrm.logger.debug "Data - Destroy #{id}"
                 self.class.collection.remove(id, **options)
 
@@ -225,15 +226,17 @@ module CouchbaseOrm
             self
         end
 
+        def create_or_update(**, &block)
+            self.new_record? ? _create_record(&block) : _update_record(&block)
+        end
 
-
-        def _update_record(*_args, with_cas: false, **options)
-            return false unless perform_validations(:update, options)
+        def _update_record(*, &block)
             return true unless changed? || self.class.attribute_types.any? { |_, type| type.is_a?(CouchbaseOrm::Types::Nested) || type.is_a?(CouchbaseOrm::Types::Array)  }
 
             run_callbacks :update do
                 run_callbacks :save do
-                    options[:cas] = @__metadata__.cas if with_cas
+                    options = {}
+                    options[:cas] = @__metadata__.cas if @_with_cas
                     CouchbaseOrm.logger.debug { "_update_record - replace #{id} #{serialized_attributes.to_s.truncate(200)}" }
                     resp = self.class.collection.replace(id, serialized_attributes.except("id").merge(type: self.class.design_document), Couchbase::Options::Replace.new(**options))
 
@@ -245,14 +248,13 @@ module CouchbaseOrm
                 end
             end
         end
-        def _create_record(*_args, **options)
-            return false unless perform_validations(:create, options)
 
+        def _create_record(*, &block)
             run_callbacks :create do
                 run_callbacks :save do
                     assign_attributes(id: self.class.uuid_generator.next(self)) unless self.id
                     CouchbaseOrm.logger.debug { "_create_record - Upsert #{id} #{serialized_attributes.to_s.truncate(200)}" }
-                    resp = self.class.collection.upsert(self.id, serialized_attributes.except("id").merge(type: self.class.design_document), Couchbase::Options::Upsert.new(**options))
+                    resp = self.class.collection.upsert(self.id, serialized_attributes.except("id").merge(type: self.class.design_document), Couchbase::Options::Upsert.new)
 
                     # Ensure the model is up to date
                     @__metadata__.cas = resp.cas
@@ -261,11 +263,6 @@ module CouchbaseOrm
                     true
                 end
             end
-        end
-
-        def perform_validations(context, options = {})
-            return valid?(context) if options[:validate] != false
-            true
         end
     end
 end

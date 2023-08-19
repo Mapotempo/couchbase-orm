@@ -218,9 +218,9 @@ module CouchbaseOrm
     end
 
     class Base < Document
-        include ::ActiveRecord::Validations
         include Persistence
         include ::ActiveRecord::AttributeMethods::Dirty
+        include ::ActiveRecord::Validations # must be included after Persistence
         include ::ActiveRecord::Timestamp # must be included after Persistence
 
         include Associations
