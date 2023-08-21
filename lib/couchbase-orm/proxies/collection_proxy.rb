@@ -1,10 +1,13 @@
 require "couchbase"
+require 'couchbase-orm/error'
 
 module CouchbaseOrm
     class CollectionProxy
 
         def get!(id, **options)
             @proxyfied.get(id, Couchbase::Options::Get.new(**options))
+        rescue Couchbase::Error::DocumentNotFound => e
+            raise CouchbaseOrm::Error::DocumentNotFound
         end
 
         def get(id, **options)
@@ -16,7 +19,9 @@ module CouchbaseOrm
         def get_multi!(*ids, **options)
             result = @proxyfied.get_multi(*ids, Couchbase::Options::GetMulti.new(**options))
             first_result_with_error = result.find(&:error)
-            raise first_result_with_error.error if first_result_with_error
+            if first_result_with_error
+                raise CouchbaseOrm::Error::DocumentNotFound 
+            end
             result
         end
 
@@ -25,8 +30,22 @@ module CouchbaseOrm
             result.reject(&:error)
         end
 
+        def replace(id, content, **options)
+            @proxyfied.replace(id, content, Couchbase::Options::Replace.new(**options))
+        rescue Couchbase::Error::DocumentNotFound
+            raise CouchbaseOrm::Error::DocumentNotFound
+        end
+
+        def touch(id, expiry, **options)
+            @proxyfied.replace(id, expiry,  Options::Touch.new(**options))
+        rescue Couchbase::Error::DocumentNotFound
+            raise CouchbaseOrm::Error::DocumentNotFound
+        end
+
         def remove!(id, **options)
             @proxyfied.remove(id, Couchbase::Options::Remove.new(**options))
+        rescue Couchbase::Error::DocumentNotFound
+            raise CouchbaseOrm::Error::DocumentNotFound
         end
 
         def remove(id, **options)

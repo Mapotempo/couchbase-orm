@@ -238,7 +238,7 @@ module CouchbaseOrm
                     options = {}
                     options[:cas] = @__metadata__.cas if @_with_cas
                     CouchbaseOrm.logger.debug { "_update_record - replace #{id} #{serialized_attributes.to_s.truncate(200)}" }
-                    resp = self.class.collection.replace(id, serialized_attributes.except("id").merge(type: self.class.design_document), Couchbase::Options::Replace.new(**options))
+                    resp = self.class.collection.replace(id, serialized_attributes.except("id").merge(type: self.class.design_document), **options)
 
                     # Ensure the model is up to date
                     @__metadata__.cas = resp.cas
