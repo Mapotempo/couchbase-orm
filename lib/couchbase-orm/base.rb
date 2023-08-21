@@ -339,5 +339,11 @@ module CouchbaseOrm
         def ==(other)
             super || other.instance_of?(self.class) && !id.nil? && other.id == id
         end
+
+        private
+
+        def raise_validation_error
+            raise CouchbaseOrm::Error::RecordInvalid.new(self)
+        end
     end
 end
