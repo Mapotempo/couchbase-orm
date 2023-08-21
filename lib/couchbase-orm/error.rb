@@ -10,20 +10,20 @@ module CouchbaseOrm
         end
 
         class RecordInvalid < Error
-            def initialize(message = nil, record = nil)
+            def initialize(record = nil)
                 if record
-                    errors = record.errors.full_messages.join(", ")
-                    message = I18n.t(
-                        :"couchbase.#{record.class.design_document}.errors.messages.record_invalid", 
-                        errors: errors, 
-                        default: :"couchbase.errors.messages.record_invalid"
-                    )
+                    @record = record
+                    errors = @record.errors.full_messages.join(", ")
+                    message = I18n.t(:"#{@record.class.i18n_scope}.errors.messages.record_invalid", errors: errors, default: :"errors.messages.record_invalid")
+                else
+                    message = "Record invalid"
                 end
                 super(message, record)
             end
         end
         class TypeMismatchError < Error; end
         class RecordExists < Error; end
-        class CouchbaseOrm::Error::EmptyNotAllowed < Error; end
+        class EmptyNotAllowed < Error; end
+        class DocumentNotFound < Error; end
     end
 end
