@@ -35,6 +35,22 @@ module CouchbaseOrm
             nil
         end
 
+        def remove_multi!(ids, **options)
+            result = @proxyfied.remove_multi(ids, Couchbase::Options::RemoveMulti.new(**options))
+            first_result_with_error = result.find(&:error)
+            if first_result_with_error
+                raise CouchbaseOrm::Error::DocumentNotFound 
+            end
+            result
+        end
+
+        def remove_multi(ids, **options)
+            result = @proxyfied.remove_multi(ids, Couchbase::Options::RemoveMulti.new(**options))
+            result.reject(&:error)
+        end
+
+
+
         def initialize(proxyfied)
             raise "Must proxy a non nil object" if proxyfied.nil?
             @proxyfied = proxyfied
