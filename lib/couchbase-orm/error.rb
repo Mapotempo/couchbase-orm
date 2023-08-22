@@ -25,5 +25,6 @@ module CouchbaseOrm
         class RecordExists < Error; end
         class EmptyNotAllowed < Error; end
         class DocumentNotFound < Error; end
+        class RecordNotSaved < Error; end
     end
 end

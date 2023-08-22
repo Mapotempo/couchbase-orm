@@ -34,11 +34,6 @@ module CouchbaseOrm
                 end
             end
 
-            # Raise an error if validation failed.
-            def fail_validate!(document)
-                raise Error::RecordInvalid.new("Failed to save the record", document)
-            end
-
             # Allow classes to overwrite the default document name
             # extend ActiveModel::Naming (included by ActiveModel::Model)
             def design_document(name = nil)
@@ -80,9 +75,10 @@ module CouchbaseOrm
         # If the model is new, a record gets created in the database, otherwise
         # the existing record gets updated.
         def save(**options, &block)
-            raise "Cannot save a destroyed document!" if destroyed?
             @_with_cas = options[:with_cas]
             create_or_update(**options, &block)
+        rescue CouchbaseOrm::Error::RecordInvalid
+            false
         end
 
         # Saves the model.
@@ -93,8 +89,8 @@ module CouchbaseOrm
         # By default, #save! always runs validations. If any of them fail
         # CouchbaseOrm::Error::RecordInvalid gets raised, and the record won't be saved.
         def save!(**options, &block)
-            self.class.fail_validate!(self) unless self.save(**options)
-            self
+            @_with_cas = options[:with_cas]
+            create_or_update(**options, &block) || raise(CouchbaseOrm::Error::RecordNotSaved.new("Failed to save the record", self))
         end
 
         # Deletes the record in the database and freezes this instance to
