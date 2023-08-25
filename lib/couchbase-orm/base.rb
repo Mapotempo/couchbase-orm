@@ -168,35 +168,12 @@ module CouchbaseOrm
             run_callbacks :initialize
         end
 
-        def [](attr_name)
-            read_attribute(attr_name) { |n| missing_attribute(n, caller) }
+        def [](key)
+            send(key)
         end
 
-        def []=(attr_name, value)
-            write_attribute(attr_name, value)
-        end
-
-        def read_attribute(attr_name, &block)
-            name = if self.class.attribute_alias?(attr_name)
-                self.class.attribute_alias(attr_name).to_s
-              else
-                attr_name.to_s
-              end
-      
-              name = self.class.primary_key if name == "id".freeze && self.class.primary_key
-              _read_attribute(name, &block)
-        end
-
-        def write_attribute(attr_name, value)
-            name = if self.class.attribute_alias?(attr_name)
-              self.class.attribute_alias(attr_name).to_s
-            else
-              attr_name.to_s
-            end
-    
-            name = self.class.primary_key if name == "id".freeze && self.class.primary_key
-            @attributes.write_from_user(name, value)
-            value
+        def []=(key, value)
+            send(:"#{key}=", value)
         end
 
         protected
