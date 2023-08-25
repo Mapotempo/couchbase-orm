@@ -68,7 +68,11 @@ module CouchbaseOrm
             result.reject(&:error)
         end
 
-
+        def insert(id, content, **options)
+            @proxyfied.insert(id, content, Couchbase::Options::Insert.new(**options))
+        rescue Couchbase::Error::DocumentExists
+            raise CouchbaseOrm::Error::DocumentExists
+        end
 
         def initialize(proxyfied)
             raise "Must proxy a non nil object" if proxyfied.nil?

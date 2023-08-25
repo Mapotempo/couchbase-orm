@@ -249,8 +249,8 @@ module CouchbaseOrm
             run_callbacks :create do
                 run_callbacks :save do
                     assign_attributes(id: self.class.uuid_generator.next(self)) unless self.id
-                    CouchbaseOrm.logger.debug { "_create_record - Upsert #{id} #{serialized_attributes.to_s.truncate(200)}" }
-                    resp = self.class.collection.upsert(self.id, serialized_attributes.except("id").merge(type: self.class.design_document), Couchbase::Options::Upsert.new)
+                    CouchbaseOrm.logger.debug { "_create_record - insert #{id} #{serialized_attributes.to_s.truncate(200)}" }
+                    resp = self.class.collection.insert(self.id, serialized_attributes.except("id").merge(type: self.class.design_document))
 
                     # Ensure the model is up to date
                     @__metadata__.cas = resp.cas
