@@ -17,7 +17,7 @@ class TimestampTest < CouchbaseOrm::Base
 end
 
 class BaseTestWithIgnoredProperties < CouchbaseOrm::Base
-    ignored_properties :deprecated_property
+    self.ignored_properties += [:deprecated_property]
     attribute :name, :string
     attribute :job, :string
 end
@@ -212,12 +212,42 @@ describe CouchbaseOrm::Base do
         expect(base.created_at).to be_a(Time)
     end
 
+    it "should find multiple ids at same time" do
+        base1 = BaseTest.create!(name: 'joe1')
+        base2 = BaseTest.create!(name: 'joe2')
+        base3 = BaseTest.create!(name: 'joe3')
+        expect(BaseTest.find([base1.id, base2.id, base3.id])).to eq([base1, base2, base3])
+    end
+
+    it "should find multiple ids at same time with a not found id with exception" do
+        base1 = BaseTest.create!(name: 'joe1')
+        base2 = BaseTest.create!(name: 'joe2')
+        base3 = BaseTest.create!(name: 'joe3')
+        expect { BaseTest.find([base1.id, 't', base3.id]) }.to raise_error(Couchbase::Error::DocumentNotFound)
+    end
+
+    it "should find multiple ids at same time with a not found id without exception" do
+        base1 = BaseTest.create!(name: 'joe1')
+        base2 = BaseTest.create!(name: 'joe2')
+        base3 = BaseTest.create!(name: 'joe3')
+        expect(BaseTest.find([base1.id, 't', 't', base2.id, base3.id], quiet: true)).to eq([base1, base2, base3])
+    end
+
     describe BaseTest do
         it_behaves_like "ActiveModel"
     end
 
     describe CompareTest do
         it_behaves_like "ActiveModel"
+    end
+
+    it 'does not expose callbacks for nested that wont never be called' do
+        expect{
+            class InvalidNested < CouchbaseOrm::NestedDocument
+                before_save {p "this should raise on loading class"}
+            end
+
+        }.to raise_error NoMethodError
     end
 
     describe '.ignored_properties' do
@@ -253,6 +283,10 @@ describe CouchbaseOrm::Base do
                 expect{ loaded_model.save }.to change { BaseTestWithIgnoredProperties.bucket.default_collection.get(doc_id).content.keys.sort }.
                     from(%w[deprecated_property job name type]).
                     to(%w[job name type])
+            end
+
+            it 'does not raise for reload' do
+                expect{ loaded_model.reload }.not_to raise_error
             end
         end
     end

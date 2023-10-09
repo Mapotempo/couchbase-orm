@@ -123,7 +123,6 @@ module CouchbaseOrm
         extend Enum
 
         define_model_callbacks :initialize, :only => :after
-        define_model_callbacks :create, :destroy, :save, :update
 
         Metadata = Struct.new(:cas)
 
@@ -212,6 +211,8 @@ module CouchbaseOrm
         extend Index
         extend IgnoredProperties
 
+        define_model_callbacks :create, :destroy, :save, :update
+
         class << self
             def connect(**options)
                 @bucket = BucketProxy.new(::MTLibcouchbase::Bucket.new(**options))
@@ -241,7 +242,7 @@ module CouchbaseOrm
                 @uuid_generator = generator
             end
 
-            def find(*ids, quiet: false)
+            def find(*ids, quiet: false, with_strict_loading: false)
                 CouchbaseOrm.logger.debug { "Base.find(l##{ids.length}) #{ids}" }
 
                 ids = ids.flatten.select { |id| id.present? }
@@ -253,9 +254,14 @@ module CouchbaseOrm
                 records = quiet ? collection.get_multi(ids, transcoder: transcoder) : collection.get_multi!(ids, transcoder: transcoder)
                 CouchbaseOrm.logger.debug { "Base.find found(#{records})" }
                 records = records.zip(ids).map { |record, id|
-                    self.new(record, id: id) if record
-                }
-                records.compact!
+                    next unless record
+                    next if record.error
+                    new(record, id: id).tap do |instance|
+                        if with_strict_loading
+                            instance.strict_loading!
+                        end
+                    end
+                }.compact
                 ids.length > 1 ? records : records[0]
             end
 
