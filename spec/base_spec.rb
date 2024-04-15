@@ -13,16 +13,58 @@ end
 
 class TimestampTest < CouchbaseOrm::Base
     attribute :created_at, :datetime, precision: 6
-    attribute :deleted_at, :datetime, precision: 6
+    attribute :updated_at, :datetime, precision: 6
 end
 
 class BaseTestWithIgnoredProperties < CouchbaseOrm::Base
-    ignored_properties :deprecated_property
+    self.ignored_properties += [:deprecated_property]
     attribute :name, :string
     attribute :job, :string
 end
 
+class BaseTestWithPropertiesAlwaysExistsInDocument < CouchbaseOrm::Base
+    self.properties_always_exists_in_document = true
+    attribute :name, :string
+end
+
+class BaseTestWithTimeframe < CouchbaseOrm::Base
+    attribute :name, :string
+    attribute :start_date, :datetime
+    attribute :age, :integer
+end
+
+class DocInvalidOnUpdate < CouchbaseOrm::Base
+    attribute :title
+    validate :foo, on: :update
+
+    def foo
+      errors.add(:title, 'should not be updated')
+    end
+  end
+
 describe CouchbaseOrm::Base do
+
+    it 'should have clean model after find' do
+        base = BaseTest.create!(name: 'joe')
+        base = BaseTest.find base.id
+        expect(base.changed?).to be false
+    end
+
+    it 'stores not stringified changes' do
+        compare = CompareTest.create!
+        compare.age = '42'
+        compare.save!
+        expect(compare.saved_change_to_age).to eq [nil, 42]
+    end
+
+    it 'should update changed_attributes after update' do
+        base = BaseTest.create!(name: 'joe')
+        base = BaseTest.find base.id
+        base.name = 'toto'
+        base.save!
+        expect(base.saved_change_to_name?).to be true
+        expect(base.saved_change_to_name).to eq ["joe", "toto"]
+    end
     it "should be comparable to other objects" do
         base = BaseTest.create!(name: 'joe')
         base2 = BaseTest.create!(name: 'joe')
@@ -201,15 +243,30 @@ describe CouchbaseOrm::Base do
         expect{base.id = "foo"}.to raise_error(RuntimeError, 'ID cannot be changed')
     end
 
-    if ActiveModel::VERSION::MAJOR >= 6
-        it "should have timestamp attributes for create in model" do
-            expect(TimestampTest.timestamp_attributes_for_create_in_model).to eq(["created_at"])
-        end
-    end
-
     it "should generate a timestamp on creation" do
         base = TimestampTest.create!
         expect(base.created_at).to be_a(Time)
+    end
+
+    it "should find multiple ids at same time" do
+        base1 = BaseTest.create!(name: 'joe1')
+        base2 = BaseTest.create!(name: 'joe2')
+        base3 = BaseTest.create!(name: 'joe3')
+        expect(BaseTest.find([base1.id, base2.id, base3.id])).to eq([base1, base2, base3])
+    end
+
+    it "should find multiple ids at same time with a not found id with exception" do
+        base1 = BaseTest.create!(name: 'joe1')
+        base2 = BaseTest.create!(name: 'joe2')
+        base3 = BaseTest.create!(name: 'joe3')
+        expect { BaseTest.find([base1.id, 't', base3.id]) }.to raise_error(Couchbase::Error::DocumentNotFound)
+    end
+
+    it "should find multiple ids at same time with a not found id without exception" do
+        base1 = BaseTest.create!(name: 'joe1')
+        base2 = BaseTest.create!(name: 'joe2')
+        base3 = BaseTest.create!(name: 'joe3')
+        expect(BaseTest.find([base1.id, 't', 't', base2.id, base3.id], quiet: true)).to eq([base1, base2, base3])
     end
 
     describe BaseTest do
@@ -220,9 +277,26 @@ describe CouchbaseOrm::Base do
         it_behaves_like "ActiveModel"
     end
 
+    it 'does not expose callbacks for nested that wont never be called' do
+        expect{
+            class InvalidNested < CouchbaseOrm::NestedDocument
+                before_save {p "this should raise on loading class"}
+            end
+
+        }.to raise_error NoMethodError
+    end
+
+    it 'should unassign attributes on validation error' do
+        doc = DocInvalidOnUpdate.new(title: 'Test')
+        doc.save
+        expect(doc.title).to eq('Test')
+        expect { doc.update!(title: 'changed wich assignation should not stay after raise') }.to raise_error(CouchbaseOrm::Error::RecordInvalid)
+        expect(doc.title_was).to eq('Test') # raising in master with "changed wich assignation should not stay after raise"
+        expect(doc.title).not_to eq(doc.title_was)
+        expect(doc.title).to eq('changed wich assignation should not stay after raise')
+    end
+
     describe '.ignored_properties' do
-
-
         it 'returns an array of ignored properties' do
             expect(BaseTestWithIgnoredProperties.ignored_properties).to eq(['deprecated_property'])
         end
@@ -249,11 +323,71 @@ describe CouchbaseOrm::Base do
             end
 
             it 'delete the ignored properties on save' do
-                base = BaseTestWithIgnoredProperties.find(doc_id)
+                loaded_model.name = 'Updated Name'
                 expect{ loaded_model.save }.to change { BaseTestWithIgnoredProperties.bucket.default_collection.get(doc_id).content.keys.sort }.
                     from(%w[deprecated_property job name type]).
                     to(%w[job name type])
             end
+
+            it 'does not raise for reload' do
+                expect{ loaded_model.reload }.not_to raise_error
+            end
+        end
+    end
+
+    describe '.properties_always_exists_in_document' do
+        it 'Uses NOT VALUED when properties_always_exists_in_document = false' do
+            where_clause = BaseTest.where(name: nil)
+            expect(where_clause.to_n1ql).to include("AND name IS NOT VALUED")
+        end
+
+        it 'Uses VALUED when properties_always_exists_in_document = false' do
+            where_clause = BaseTest.where.not(name: nil)
+            expect(where_clause.to_n1ql).to include("AND name IS VALUED")
+        end
+
+        it 'Uses IS NULL when properties_always_exists_in_document = true' do
+            where_clause = BaseTestWithPropertiesAlwaysExistsInDocument.where(name: nil)
+            expect(where_clause.to_n1ql).to include("AND name IS NULL")
+        end
+
+        it 'Uses IS NOT NULL when properties_always_exists_in_document = true' do
+            where_clause = BaseTestWithPropertiesAlwaysExistsInDocument.where.not(name: nil)
+            expect(where_clause.to_n1ql).to include("AND name IS NOT NULL")
+        end
+    end
+
+    describe 'With a range in the where clause' do
+        before do
+            BaseTestWithTimeframe.delete_all
+            BaseTestWithTimeframe.create!(name: 'january', start_date: DateTime.new(2020, 1, 1), age: 10)
+            BaseTestWithTimeframe.create!(name: 'midjanuary', start_date: DateTime.new(2020, 1, 15), age: 15)
+            BaseTestWithTimeframe.create!(name: 'february', start_date: DateTime.new(2020, 2, 1), age: 20)
+        end
+
+        it 'manages the datetime range correctly' do
+            result = BaseTestWithTimeframe.where(start_date: DateTime.new(2020, 1, 1)..DateTime.new(2020, 1, 31)).pluck(:name)
+            expect(result).to eq(%w[january midjanuary])
+        end
+
+        it 'manages the date range correctly' do
+            result = BaseTestWithTimeframe.where(start_date: Date.new(2020, 1, 1)..Date.new(2020, 1, 31)).pluck(:name)
+            expect(result).to eq(%w[january midjanuary])
+        end
+
+        it 'manages the time range correctly' do
+            result = BaseTestWithTimeframe.where(start_date: Time.new(2020, 1, 1, 14, 35, 0)..Time.new(2020, 1, 31, 16, 35, 0)).pluck(:name)
+            expect(result).to eq(%w[january midjanuary])
+        end
+
+        it 'manages the integer range correctly' do
+            result = BaseTestWithTimeframe.where(age: 12..25).pluck(:name)
+            expect(result).to eq(%w[midjanuary february])
+        end
+
+        it 'manages the exclude end correctly' do
+            result = BaseTestWithTimeframe.where(age: 10...15).pluck(:name)
+            expect(result).to eq(%w[january])
         end
     end
 end
