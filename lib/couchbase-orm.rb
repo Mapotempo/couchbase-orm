@@ -15,6 +15,7 @@ module CouchbaseOrm
     autoload :Document,        'couchbase-orm/base'
     autoload :NestedDocument,   'couchbase-orm/base'
     autoload :HasMany,     'couchbase-orm/utilities/has_many'
+    autoload :AttributesDynamic,  'couchbase-orm/attributes/dynamic'
 
     def self.logger
         @@logger ||= defined?(Rails) ? Rails.logger : Logger.new(STDOUT).tap { |l| l.level = Logger::INFO unless ENV["COUCHBASE_ORM_DEBUG"] }

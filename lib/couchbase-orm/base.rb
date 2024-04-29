@@ -10,6 +10,7 @@ else
 end
 require 'active_support/hash_with_indifferent_access'
 require 'couchbase'
+require 'couchbase-orm/extensions/string'
 require 'couchbase-orm/error'
 require 'couchbase-orm/views'
 require 'couchbase-orm/n1ql'
@@ -86,7 +87,17 @@ module CouchbaseOrm
             value.inspect
         end
 
-        if ActiveModel::VERSION::MAJOR < 6
+        if ActiveModel::VERSION::MAJOR <= 6
+            def format_for_inspect(value)
+                if value.is_a?(String) && value.length > 50
+                    "#{value[0, 50]}...".inspect
+                elsif value.is_a?(Date) || value.is_a?(Time)
+                    %("#{value.to_s(:db)}")
+                else
+                    value.inspect
+                end
+            end
+
             def attribute_names
                 self.class.attribute_names
             end
@@ -103,6 +114,14 @@ module CouchbaseOrm
             def _write_attribute(attr_name, value)
                 @attributes.write_from_user(attr_name.to_s, value)
                 value
+            end
+
+            def read_attribute(attr_name, &block)
+                name = attr_name.to_s
+                name = self.class.attribute_aliases[name] || name
+        
+                name = @primary_key if name == "id" && @primary_key
+                @attributes.fetch_value(name, &block)
             end
         end
     end
