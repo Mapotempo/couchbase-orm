@@ -212,6 +212,14 @@ describe CouchbaseOrm::Base do
         expect(base.created_at).to be_a(Time)
     end
 
+    it 'should raise error when get object by nil id with quiet as false' do
+        expect { BaseTest.find(nil, quiet: false) }.to raise_error(CouchbaseOrm::Error::EmptyNotAllowed)
+    end
+
+    it 'should not raise error when get object by nil id with quiet as true' do
+        expect { BaseTest.find(nil, quiet: true) }.not_to raise_error
+    end
+
     describe BaseTest do
         it_behaves_like "ActiveModel"
     end
