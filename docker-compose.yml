@@ -1,0 +1,51 @@
+version: '3.7'
+
+x-app-args: &app-args
+  BUNDLE_VERSION: ${BUNDLE_VERSION:-2.2.19}
+  RUBY_VERSION: ${RUBY_VERSION:-2.7-slim-bullseye}
+  BUNDLE_WITHOUT: production
+
+services:
+  app:
+    build:
+      args:
+        <<: *app-args
+      context: .
+      dockerfile: Dockerfile
+    image: dev.example.com/mapotempo/couchbase-orm:ruby-${RUBY_VERSION:-2.7-slim-bullseye}_bundle-${BUNDLE_VERSION:-2.2.19}
+    volumes:
+      - ./:/srv/app/
+      - app_cache_vendor:/srv/app/vendor
+    environment:
+      - COUCHBASE_HOST=${COUCHBASE_HOST:-couchbase}
+      - COUCHBASE_USER=tester
+      - COUCHBASE_PASSWORD=password123
+      - COUCHBASE_BUCKET=default
+      - ACTIVE_MODEL_VERSION=5.2.7
+      - LOG_LEVEL=debug
+    tty: true
+    depends_on:
+      - couchbase
+
+  couchbase:
+    image: 'couchbase:enterprise-7.1.3'
+    ports:
+      - 8091:8091
+      - 8092:8092
+      - 8093:8093
+      - 8094:8094
+      - 8095:8095
+      - 8096:8096
+      - 11207:11207
+      - 11210:11210
+      - 11211:11211
+      - 18091:18091
+      - 18092:18092
+      - 18093:18093
+      - 18094:18094
+    volumes:
+      - ./couchbase/db:/opt/couchbase/var
+      - ./couchbase/dump:/couchbase-dump
+
+volumes:
+  app_cache_vendor:
