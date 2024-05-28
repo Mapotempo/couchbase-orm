@@ -201,6 +201,11 @@ describe CouchbaseOrm::Base do
         expect{base.id = "foo"}.to raise_error(RuntimeError, 'ID cannot be changed')
     end
 
+    it "attributes should be HashWithIndifferentAccess" do
+        base = BaseTest.create!(name: 'joe')
+        expect(base.attributes.class).to be(HashWithIndifferentAccess)
+    end
+
     if ActiveModel::VERSION::MAJOR >= 6
         it "should have timestamp attributes for create in model" do
             expect(TimestampTest.timestamp_attributes_for_create_in_model).to eq(["created_at"])
