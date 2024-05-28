@@ -58,6 +58,10 @@ module CouchbaseOrm
                 end
             end
 
+            define_method(:"#{model}_reset") do
+                self.remove_instance_variable(instance_var) if self.instance_variable_defined?(instance_var)
+            end
+
             @associations ||= []
             @associations << [model, options[:dependent]]
         end
