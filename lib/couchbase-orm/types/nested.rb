@@ -26,14 +26,14 @@ module CouchbaseOrm
             def cast(value)
                 return nil if value.nil?
                 return value if value.is_a?(@model_class)
-                return @model_class.new(value) if value.is_a?(Hash)
+                return @model_class.new(value) if value.is_a?(::Hash)
 
                 raise ArgumentError, "Nested: #{value.inspect} (#{value.class}) is not supported for cast"
             end
         
             def serialize(value)
                 return nil if value.nil?
-                value = @model_class.new(value) if value.is_a?(Hash)
+                value = @model_class.new(value) if value.is_a?(::Hash)
                 return value.send(:serialized_attributes) if value.is_a?(@model_class)
 
                 raise ArgumentError, "Nested: #{value.inspect} (#{value.class}) is not supported for serialization"

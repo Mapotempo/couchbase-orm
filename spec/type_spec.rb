@@ -41,6 +41,7 @@ class N1qlTypeTest < CouchbaseOrm::Base
     attribute :some_time, :timestamp
     attribute :precision3_time, :datetime3decimal
     attribute :active, :boolean
+    attribute :address, :hash
 
     index_n1ql :name, validate: false
     index_n1ql :age, validate: false
@@ -313,5 +314,31 @@ describe CouchbaseOrm::Base do
             expect(test.precision3_time).to eq(time.floor(3))
             expect(test.precision6_time).to eq(time.floor(6))
         end
+    end
+end
+
+describe CouchbaseOrm::Types::Hash do
+    it 'should cast Hash to HashWithIndifferentAccess' do
+        expect(CouchbaseOrm::Types::Hash.new.cast({'a' => 1}).class).to be(HashWithIndifferentAccess)
+    end
+
+    it 'should cast nil to nil' do
+        expect(CouchbaseOrm::Types::Hash.new.cast(nil)).to be_nil
+    end
+
+    it 'should cast HashWithIndifferentAccess to HashWithIndifferentAccess' do
+        expect(CouchbaseOrm::Types::Hash.new.cast({'a' => 1}.with_indifferent_access).class).to be(HashWithIndifferentAccess)
+    end
+
+    it 'should serialize Hash as json hash' do
+        expect(CouchbaseOrm::Types::Hash.new.serialize({'a' => 1}).class).to be(Hash)
+    end
+
+    it 'should serialize HashWithIndifferentAccess as json hash' do
+        expect(CouchbaseOrm::Types::Hash.new.serialize({'a' => 1}.with_indifferent_access).class).to be(Hash)
+    end
+
+    it 'should serialize nil as nil' do
+        expect(CouchbaseOrm::Types::Hash.new.serialize(nil)).to be_nil
     end
 end
