@@ -27,6 +27,7 @@ require 'couchbase-orm/utilities/has_many'
 require 'couchbase-orm/utilities/ensure_unique'
 require 'couchbase-orm/utilities/query_helper'
 require 'couchbase-orm/utilities/ignored_properties'
+require 'couchbase-orm/utilities/json_schema_validation'
 require 'couchbase-orm/json_transcoder'
 
 
@@ -142,7 +143,6 @@ module CouchbaseOrm
         extend Enum
 
         define_model_callbacks :initialize, :only => :after
-        define_model_callbacks :create, :destroy, :save, :update
 
         Metadata = Struct.new(:cas)
 
@@ -236,6 +236,8 @@ module CouchbaseOrm
         extend Index
         extend IgnoredProperties
 
+        define_model_callbacks :create, :destroy, :save, :update
+
         class << self
             def connect(**options)
                 @bucket = BucketProxy.new(::MTLibcouchbase::Bucket.new(**options))
@@ -274,7 +276,7 @@ module CouchbaseOrm
                     return nil if quiet
                 end
 
-                transcoder = CouchbaseOrm::JsonTranscoder.new(ignored_properties: ignored_properties)
+                transcoder = CouchbaseOrm::JsonTranscoder.new(ignored_properties: ignored_properties, json_schema: json_schema)
                 records = quiet ? collection.get_multi(ids, transcoder: transcoder) : collection.get_multi!(ids, transcoder: transcoder)
                 return nil if records.nil?
                 
