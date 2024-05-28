@@ -187,6 +187,10 @@ module CouchbaseOrm
             run_callbacks :initialize
         end
 
+        def attributes
+            super.with_indifferent_access
+        end
+
         def [](key)
             send(key)
         end
