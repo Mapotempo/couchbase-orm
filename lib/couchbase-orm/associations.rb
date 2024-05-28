@@ -53,6 +53,10 @@ module CouchbaseOrm
 
                     instance_variable_set(instance_var, value)
                 end
+
+                define_method(:"#{name}_reset") do
+                    remove_instance_variable(instance_var) if instance_variable_defined?(instance_var)
+                end
             end
 
             def has_and_belongs_to_many(name, **options)
@@ -104,6 +108,10 @@ module CouchbaseOrm
                     end
 
                     instance_variable_set(instance_var, value)
+                end
+
+                define_method(:"#{name}_reset") do
+                    self.remove_instance_variable(instance_var) if self.instance_variable_defined?(instance_var)
                 end
 
                 return unless options[:autosave]
