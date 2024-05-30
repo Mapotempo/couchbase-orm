@@ -218,9 +218,9 @@ module CouchbaseOrm
     end
 
     class Base < Document
-        include ::ActiveRecord::Validations
         include Persistence
         include ::ActiveRecord::AttributeMethods::Dirty
+        include ::ActiveRecord::Validations # must be included after Persistence
         include ::ActiveRecord::Timestamp # must be included after Persistence
 
         include Associations
@@ -338,6 +338,12 @@ module CouchbaseOrm
         # Returns a boolean.
         def ==(other)
             super || other.instance_of?(self.class) && !id.nil? && other.id == id
+        end
+
+        private
+
+        def raise_validation_error
+            raise CouchbaseOrm::Error::RecordInvalid.new(self)
         end
     end
 end
