@@ -14,7 +14,7 @@ module CouchbaseOrm
                 if record
                     @record = record
                     errors = @record.errors.full_messages.join(", ")
-                    message = I18n.t(:"#{@record.class.i18n_scope}.errors.messages.record_invalid", errors: errors, default: :"errors.messages.record_invalid")
+                    message = I18n.t(:"#{@record.class.i18n_scope}.errors.messages.record_invalid", errors: errors, default: :"couchbase.errors.messages.record_invalid")
                 else
                     message = "Record invalid"
                 end
