@@ -36,7 +36,7 @@ module CouchbaseOrm
 
             # Raise an error if validation failed.
             def fail_validate!(document)
-                raise Error::RecordInvalid.new("Failed to save the record", document)
+                raise Error::RecordInvalid.new(document)
             end
 
             # Allow classes to overwrite the default document name
