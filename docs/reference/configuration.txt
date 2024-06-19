@@ -1,0 +1,107 @@
+.. _configuration:
+
+*************
+Configuration
+*************
+
+.. default-domain:: woop
+
+.. contents:: On this page
+   :local:
+   :backlinks: none
+   :depth: 2
+   :class: singlecol
+
+CouchbaseOrm is customarily configured through a ``couchbase.yml`` file that specifies
+options and clients. The simplest configuration is as follows, which configures
+CouchbaseOrm to talk to a Couchbase server and use the database
+named "dev_bucket".
+
+.. code-block:: yaml
+
+    common: &common
+      connection_string: couchbase://localhost
+      username: dev_user
+      password: dev_password
+
+    development:
+      <<: *common
+      bucket: dev_bucket
+
+    test:
+      <<: *common
+      bucket: dev_bucket_test
+
+    # set these environment variables on your production server
+    production:
+      connection_string: <%= ENV['COUCHBASE_CONNECTION_STRING'] %>
+      bucket: <%= ENV['COUCHBASE_BUCKET'] %>
+      username: <%= ENV['COUCHBASE_USER'] %>
+      password: <%= ENV['COUCHBASE_PASSWORD'] %>
+
+The top level key in the configuration file, ``development`` in the above
+example, refers to the environment name which the application is executing in,
+i.e. ``development``, ``test`` or ``production``.
+
+Generating Default Configuration
+================================
+
+If you are using Ruby on Rails, you can have CouchbaseOrm generate a default
+configuration file for you by running the following command:
+
+.. code-block:: bash
+
+  rails g couchbase_orm:config
+
+The configuration file will be placed in ``config/couchbase.yml``. An
+It is recommended that all configuration
+be specified in ``config/couchbase.yml``, but if you prefer, the ``couchbase_orm.rb``
+initializer may also be used to set configuration options. Note, though, that
+settings in ``couchbase.yml`` always take precedence over settings in the
+initializer.
+
+If you are not using Rails, you can configure couchbase-orm with an initializer:
+
+.. code-block:: ruby
+
+  # config/initializers/couchbase_orm.rb
+  CouchbaseOrm::Connection.config = {
+    connection_string: "couchbase://localhost"
+    username: "dev_user"
+    password: "dev_password"
+    bucket: "dev_bucket"
+  }
+
+
+Loading CouchbaseOrm Configuration
+==================================
+
+If you are using Ruby on Rails, CouchbaseOrm configuration is automatically loaded
+for the current environment as stored in ``Rails.env`` when the application
+loads.
+
+ERb Preprocessing
+=================
+
+When loading a configuration file, Mongoid processes it with ERb before
+parsing it as YAML. This allows, for example, constructing the contents of
+the configuration file at runtime based on environment variables:
+
+.. code-block:: yaml
+
+  production:
+    connection_string: <%= ENV['COUCHBASE_CONNECTION_STRING'] %>
+    bucket: <%= ENV['COUCHBASE_BUCKET'] %>
+    username: <%= ENV['COUCHBASE_USER'] %>
+    password: <%= ENV['COUCHBASE_PASSWORD'] %>
+
+.. note::
+
+  When outputting values from ERb, ensure the values are valid YAML and
+  escape them as needed.
+
+.. note::
+
+  Since ERb rendering is performed prior to YAML parsing, all ERb directives
+  in the configuration file are evaluated, including those occurring in YAML
+  comments.

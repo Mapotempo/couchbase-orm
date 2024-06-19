@@ -1,0 +1,160 @@
+
+.. _compatibility:
+
+*************
+Compatibility
+*************
+
+.. default-domain:: mongodb
+
+.. contents:: On this page
+   :local:
+   :backlinks: none
+   :depth: 2
+   :class: singlecol
+
+Ruby Couchbase Driver Compatibility
+===================================
+
+The following compatibility table specifies the versions of `Ruby driver for
+Couchbase Ruby Client <https://docs.couchbase.com/ruby-sdk/current/project-docs/compatibility.html>`_
+(the ``couchbase`` gem) supported by the most recent patch releases of the
+specified Mongoid versions.
+
+.. note::
+
+  Older versions of CouchbaseOrm within the same minor release may support older
+  driver versions.
+
+.. list-table::
+   :header-rows: 1
+   :stub-columns: 1
+   :class: compatibility-large no-padding
+
+   * - CouchbaseOrm
+     - Couchbase SDK 3.3
+
+   * - last
+     - |checkmark|
+
+
+Ruby Compatibility
+==================
+
+The following compatibility table specifies the versions of Ruby interpreters
+supported by CouchbaseOrm. "D" in a column means support for that Ruby version
+is deprecated.
+
+.. list-table::
+   :header-rows: 1
+   :stub-columns: 1
+   :class: compatibility-large no-padding
+
+   * - CouchbaseOrm
+     - Ruby 3.2
+     - Ruby 3.1
+     - Ruby 3.0
+     - Ruby 2.7
+     - Ruby 2.6
+     - Ruby 2.5
+     - Ruby 2.4
+     - Ruby 2.3
+     - Ruby 2.2
+     - JRuby 9.4
+     - JRuby 9.3
+     - JRuby 9.2
+
+   * - last
+     - 
+     - |checkmark|
+     - |checkmark|
+     - |checkmark|
+     -
+     -
+     -
+     -
+     -
+     - 
+     -
+     -
+
+CouchbaseOrm Server Compatibility
+=================================
+
+The following compatibility table specifies the recommended
+version(s) of CouchbaseOrm for use with a specific version of Couchbase server.
+
+Note that in order to use features of a particular Couchbase server version,
+both the driver and CouchbaseOrm must support that server version.
+Please refer to `the driver compatibility page
+<https://docs.couchbase.com/ruby-sdk/current/project-docs/compatibility.html>`_
+for driver compatibility matrices.
+
+The following compatibility table specifies the versions of Ruby interpreters
+supported by CouchbaseOrm. "D" in a column means support for that Ruby version
+is deprecated.
+
+.. list-table::
+   :header-rows: 1
+   :stub-columns: 1
+   :class: compatibility-large no-padding
+
+   * - CouchbaseOrm
+     - Couchbase 7.6.0
+     - Couchbase 7.2.0
+     - Couchbase 7.2.0
+     - Couchbase 7.1.0
+     - Couchbase 7.0.0
+     - Couchbase 6.5.5
+
+   * - last
+     - |checkmark|
+     - |checkmark|
+     - |checkmark|
+     - |checkmark|
+     - |checkmark|
+     - |checkmark|
+
+.. _rails-compatibility:
+
+Rails Compatibility
+===================
+
+The following compatibility table specifies which versions of Ruby on Rails
+are supported by CouchbaseOrm.
+
+.. list-table::
+   :header-rows: 1
+   :stub-columns: 1
+   :class: compatibility-large no-padding
+
+   * - CouchbaseOrm
+     - Rails 7.1
+     - Rails 7.0
+     - Rails 6.1
+     - Rails 6.0
+     - Rails 5.2.7
+
+   * - last
+     - |checkmark|
+     - |checkmark|
+     - |checkmark|
+     - |checkmark|
+     - |checkmark|
+
+.. include:: /includes/unicode-checkmark.rst
+.. include:: /includes/unicode-ballot-x.rst
+
+Rails Frameworks Support
+------------------------
+
+Ruby on Rails is comprised of a number of frameworks, which CouchbaseOrm attempts to
+provide compatibility with wherever possible.
+
+Though CouchbaseOrm attempts to offer API compatibility with `Active Record <https://guides.rubyonrails.org/active_record_basics.html>`_,
+libraries that depend directly on Active Record may not work as expected when
+CouchabseOrm is used as a drop-in replacement.
+
+.. note::
+
+  CouchbaseOrm can be used alongside Active Record within the same application without issue.
