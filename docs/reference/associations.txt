@@ -130,14 +130,12 @@ macro with some additional options to tell CouchbaseOrm how to hook them up.
 
 .. code-block:: ruby
 
-   class Car
-     include CouchbaseOrm::Document
-     belongs_to :engine, class_name: "Motor", inverse_of: :machine
+   class Car < CouchabseOrm::Base
+     belongs_to :engine, class_name: "Motor"
    end
 
-   class Motor
-     include CouchbaseOrm::Document
-     has_many :machine, class_name: "Car", inverse_of: :engine
+   class Motor < CouchabseOrm::Base
+     has_many :machine, class_name: "Car"
    end
 
 Custom Foreign Keys

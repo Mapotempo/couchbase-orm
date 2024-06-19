@@ -56,8 +56,7 @@ for cross-cutting concerns, like queueing up background jobs.
 
 .. code-block:: ruby
 
-   class Article
-     include CouchbaseOrm::Document
+   class Article < CouchabseOrm::Base
      attribute :name, type: String
      attribute :body, type: String
      attribute :slug, type: String
@@ -79,8 +78,7 @@ syntax as well:
 
 .. code-block:: ruby
 
-   class Article
-     include CouchbaseOrm::Document
+   class Article < CouchabseOrm::Base
      attribute :name, type: String
 
      set_callback(:create, :before) do |document|
