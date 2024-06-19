@@ -5,7 +5,7 @@
 Compatibility
 *************
 
-.. default-domain:: mongodb
+.. default-domain:: woop
 
 .. contents:: On this page
    :local:
@@ -19,7 +19,7 @@ Ruby Couchbase Driver Compatibility
 The following compatibility table specifies the versions of `Ruby driver for
 Couchbase Ruby Client <https://docs.couchbase.com/ruby-sdk/current/project-docs/compatibility.html>`_
 (the ``couchbase`` gem) supported by the most recent patch releases of the
-specified Mongoid versions.
+specified CouchbaseOrm versions.
 
 .. note::
 

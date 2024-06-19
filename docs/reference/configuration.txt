@@ -83,7 +83,7 @@ loads.
 ERb Preprocessing
 =================
 
-When loading a configuration file, Mongoid processes it with ERb before
+When loading a configuration file, CouchabseOrm processes it with ERb before
 parsing it as YAML. This allows, for example, constructing the contents of
 the configuration file at runtime based on environment variables:
 

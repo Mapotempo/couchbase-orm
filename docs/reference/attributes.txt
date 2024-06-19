@@ -472,8 +472,8 @@ used for Couchbase serialization and deserialization as follows:
 .. code-block:: ruby
 
    point = Point.new(x: 12, y: 24)
-   venue = Venue.new(location: point) # This uses the Point#mongoize instance method.
-   venue = Venue.new(location: {x: 12, y: 24 }) # This uses the Point.mongoize class method.
+   venue = Venue.new(location: point)
+   venue = Venue.new(location: {x: 12, y: 24 })
 
 .. _dynamic-attributes:
 

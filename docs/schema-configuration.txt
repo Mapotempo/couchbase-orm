@@ -16,7 +16,7 @@ Schema Configuration
 Overview
 --------
 
-See the following sections to learn how to configure a schema with Mongoid:
+See the following sections to learn how to configure a schema with CouchbaseOrm:
 
 - :ref:`Attributes Definition <attributes>`
 - :ref:`Associations <associations>`
