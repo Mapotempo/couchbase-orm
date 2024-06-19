@@ -1,0 +1,17 @@
+.. _couchbaseorm:
+
+************
+CouchbaseOrm
+************
+
+.. default-domain:: woop
+
+CouchbaseOrm is the non-official supported object-document record (ORM) for Couchbase in
+Ruby.
+
+.. toctree::
+  :titlesonly:
+
+  installation-configuration
+  schema-configuration
+  working-with-data
