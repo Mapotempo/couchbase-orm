@@ -1,3 +1,5 @@
+Copyright (c) 2023-Present Woop.
+Copyright (c) 2021-2022 Mapotempo.
 Copyright (c) 2016 ACAProjects
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,6 +21,3 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ===
-
-This license applies to all parts of the libcouchbase gem (Ruby FFI bindings for libcouchbase only)
-Libcouchbase itself [is using the Couchbase license](https://github.com/couchbase/libcouchbase/blob/master/LICENSE)
