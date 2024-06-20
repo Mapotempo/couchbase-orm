@@ -1,7 +1,7 @@
 CouchbaseOrm
 ============
 
-CouchbaseOrm is an ODM (Object-Record Mapper) framework for Couchbase in Ruby.
+CouchbaseOrm is an ORM (Object-Record Mapper) framework for Couchbase in Ruby.
 
 Documentation
 -------------
