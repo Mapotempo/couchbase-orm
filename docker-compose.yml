@@ -1,7 +1,7 @@
 version: '3.7'
 
 x-app-args: &app-args
-  BUNDLE_VERSION: ${BUNDLE_VERSION:-2.2.19}
+  BUNDLE_VERSION: ${BUNDLE_VERSION:-2.4.22}
   RUBY_VERSION: ${RUBY_VERSION:-2.7-slim-bullseye}
   BUNDLE_WITHOUT: production
 
@@ -12,7 +12,7 @@ services:
         <<: *app-args
       context: .
       dockerfile: Dockerfile
-    image: dev.example.com/mapotempo/couchbase-orm:ruby-${RUBY_VERSION:-2.7-slim-bullseye}_bundle-${BUNDLE_VERSION:-2.2.19}
+    image: dev.example.com/mapotempo/couchbase-orm:ruby-${RUBY_VERSION:-2.7-slim-bullseye}_bundle-${BUNDLE_VERSION:-2.4.22}
     volumes:
       - ./:/srv/app/
       - app_cache_vendor:/srv/app/vendor
