@@ -1,40 +1,41 @@
 # frozen_string_literal: true, encoding: ASCII-8BIT
+# frozen_string_literal: true
 
 require 'couchbase-orm/proxies/results_proxy'
 
 module CouchbaseOrm
-    class N1qlProxy
-        def initialize(proxyfied)
-            @proxyfied = proxyfied
+  class N1qlProxy
+    def initialize(proxyfied)
+      @proxyfied = proxyfied
 
-            self.class.define_method(:results) do |*params, &block|
-                @results = nil if @current_query != self.to_s
-                @current_query = self.to_s
-                return @results if @results
+      self.class.define_method(:results) do |*_params, &block|
+        @results = nil if @current_query != self.to_s
+        @current_query = self.to_s
+        return @results if @results
 
-                CouchbaseOrm.logger.debug { 'Query - ' + self.to_s }
+        CouchbaseOrm.logger.debug { 'Query - ' + self.to_s }
 
-                results = @proxyfied.rows
-                results = results.map { |r| block.call(r) } if block
-                @results = ResultsProxy.new(results.to_a)
-            end
+        results = @proxyfied.rows
+        results = results.map { |r| block.call(r) } if block
+        @results = ResultsProxy.new(results.to_a)
+      end
 
-            self.class.define_method(:to_s) do
-                @proxyfied.to_s.tr("\n", ' ')
-            end
+      self.class.define_method(:to_s) do
+        @proxyfied.to_s.tr("\n", ' ')
+      end
 
-            proxyfied.public_methods.each do |method|
-                next if self.public_methods.include?(method)
+      proxyfied.public_methods.each do |method|
+        next if self.public_methods.include?(method)
 
-                self.class.define_method(method) do |*params, &block|
-                    ret = @proxyfied.send(method, *params, &block)
-                    ret.is_a?(@proxyfied.class) ? self : ret
-                end
-            end
+        self.class.define_method(method) do |*params, &block|
+          ret = @proxyfied.send(method, *params, &block)
+          ret.is_a?(@proxyfied.class) ? self : ret
         end
-
-        def method_missing(m, *args, &block)
-            self.results.send(m, *args, &block)
-        end
+      end
     end
+
+    def method_missing(m, *args, &block)
+      self.results.send(m, *args, &block)
+    end
+  end
 end

@@ -1,0 +1,17 @@
+inherit_from: .rubocop_todo.yml
+
+inherit_gem:
+  mapotempo_rubocop:
+    - rubocop-default.yml
+
+require:
+  - rubocop-rspec
+  - rubocop-rake
+
+AllCops:
+  TargetRubyVersion: 2.7
+  CacheRootDirectory: rubocop_cache
+  Exclude:
+    - 'tmp/**/*'
+    - 'bin/**/*'
+    - 'vendor/**/*'

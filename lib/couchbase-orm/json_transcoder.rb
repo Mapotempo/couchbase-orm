@@ -1,9 +1,10 @@
-require "json"
+# frozen_string_literal: true
+
+require 'json'
 require 'couchbase/json_transcoder'
 
 module CouchbaseOrm
   class JsonTranscoder < Couchbase::JsonTranscoder
-
     attr_reader :ignored_properties
 
     def initialize(ignored_properties: [], **options, &block)
