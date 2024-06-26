@@ -19,3 +19,4 @@ vendor
 couchbase
 
 *.gem
+rubocop_cache

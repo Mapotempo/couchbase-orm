@@ -1,23 +1,24 @@
 # frozen_string_literal: true, encoding: ASCII-8BIT
+# frozen_string_literal: true
 
 module CouchbaseOrm
-    class ResultsProxy
-        def initialize(proxyfied)
-            @proxyfied = proxyfied
-            
-            raise ArgumentError, "Proxyfied object must respond to :to_a" unless @proxyfied.respond_to?(:to_a)
+  class ResultsProxy
+    def initialize(proxyfied)
+      @proxyfied = proxyfied
 
-            proxyfied.public_methods.each do |method|
-                next if self.public_methods.include?(method)
+      raise ArgumentError.new('Proxyfied object must respond to :to_a') unless @proxyfied.respond_to?(:to_a)
 
-                self.class.define_method(method) do |*params, &block|
-                    @proxyfied.send(method, *params, &block)
-                end
-            end
+      proxyfied.public_methods.each do |method|
+        next if self.public_methods.include?(method)
+
+        self.class.define_method(method) do |*params, &block|
+          @proxyfied.send(method, *params, &block)
         end
-        
-        def method_missing(m, *args, &block)
-            @proxyfied.to_a.send(m, *args, &block)
-        end
+      end
     end
+
+    def method_missing(m, *args, &block)
+      @proxyfied.to_a.send(m, *args, &block)
+    end
+  end
 end

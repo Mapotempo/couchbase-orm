@@ -1,322 +1,336 @@
 # frozen_string_literal: true, encoding: ASCII-8BIT
+# frozen_string_literal: true
 
-require File.expand_path("../support", __FILE__)
+require File.expand_path('support', __dir__)
 
-require "action_controller"
+require 'action_controller'
 
 class BasicModel < CouchbaseOrm::Base
-    attribute :name
-    attribute :address
-    attribute :age
+  attribute :name
+  attribute :address
+  attribute :age
 end
 
 class ModelWithDefaults < CouchbaseOrm::Base
-    attribute :name, default: proc { 'bob' }
-    attribute :address
-    attribute :age, default: 23
+  attribute :name, default: proc { 'bob' }
+  attribute :address
+  attribute :age, default: 23
 end
 
 class ModelWithCallbacks < CouchbaseOrm::Base
-    attribute :name
-    attribute :address
-    attribute :age
+  attribute :name
+  attribute :address
+  attribute :age
 
-    before_create :update_name
-    before_save   :set_address
-    before_update :set_age
-    after_initialize do
-        self.age = 10
-    end
-    before_destroy do
-        self.name = 'joe'
-    end
+  before_create :update_name
+  before_save   :set_address
+  before_update :set_age
+  after_initialize do
+    self.age = 10
+  end
+  before_destroy do
+    self.name = 'joe'
+  end
 
-    def update_name; self.name = 'bob'; end
-    def set_address; self.address = '23'; end
-    def set_age; self.age = 30; end
+  def update_name
+    self.name = 'bob'
+  end
+
+  def set_address
+    self.address = '23'
+  end
+
+  def set_age
+    self.age = 30
+  end
 end
 
 class ModelWithValidations < CouchbaseOrm::Base
-    attribute :name, type: String
-    attribute :address, type: String
-    attribute :age, type: :Integer
+  attribute :name, type: String
+  attribute :address, type: String
+  attribute :age, type: :Integer
 
-    validates :name, presence: true
-    validates :age,  numericality: { only_integer: true }
+  validates :name, presence: true
+  validates :age,  numericality: { only_integer: true }
 end
 
-
 describe CouchbaseOrm::Persistence do
-    it "should save a model" do
-        model = BasicModel.new
+  it 'saves a model' do
+    model = BasicModel.new
 
-        expect(model.new_record?).to be(true)
-        expect(model.destroyed?).to be(false)
-        expect(model.persisted?).to be(false)
+    expect(model.new_record?).to be(true)
+    expect(model.destroyed?).to be(false)
+    expect(model.persisted?).to be(false)
 
-        model.name = 'bob'
-        expect(model.name).to eq('bob')
+    model.name = 'bob'
+    expect(model.name).to eq('bob')
 
-        model.address = 'somewhere'
-        model.age = 34
+    model.address = 'somewhere'
+    model.age = 34
 
-        expect(model.new_record?).to be(true)
-        expect(model.destroyed?).to be(false)
-        expect(model.persisted?).to be(false)
+    expect(model.new_record?).to be(true)
+    expect(model.destroyed?).to be(false)
+    expect(model.persisted?).to be(false)
 
-        result = model.save
-        expect(result).to be(true)
-        
-        expect(model.new_record?).to be(false)
-        expect(model.destroyed?).to be(false)
-        expect(model.persisted?).to be(true)
+    result = model.save
+    expect(result).to be(true)
 
-        model.destroy
-        expect(model.new_record?).to be(false)
-        expect(model.destroyed?).to be(true)
-        expect(model.persisted?).to be(false)
+    expect(model.new_record?).to be(false)
+    expect(model.destroyed?).to be(false)
+    expect(model.persisted?).to be(true)
+
+    model.destroy
+    expect(model.new_record?).to be(false)
+    expect(model.destroyed?).to be(true)
+    expect(model.persisted?).to be(false)
+  end
+
+  it 'saves a model with defaults' do
+    model = ModelWithDefaults.new
+
+    expect(model.name).to eq('bob')
+    expect(model.age).to be(23)
+    expect(model.address).to be_nil
+
+    expect(model.new_record?).to be(true)
+    expect(model.destroyed?).to be(false)
+    expect(model.persisted?).to be(false)
+
+    result = model.save
+    expect(result).to be(true)
+
+    expect(model.new_record?).to be(false)
+    expect(model.destroyed?).to be(false)
+    expect(model.persisted?).to be(true)
+
+    model.destroy
+    expect(model.new_record?).to be(false)
+    expect(model.destroyed?).to be(true)
+    expect(model.persisted?).to be(false)
+  end
+
+  it 'executes callbacks' do
+    model = ModelWithCallbacks.new
+
+      # Test initialize
+    expect(model.name).to be_nil
+    expect(model.age).to be(10)
+    expect(model.address).to be_nil
+
+    expect(model.new_record?).to be(true)
+    expect(model.destroyed?).to be(false)
+    expect(model.persisted?).to be(false)
+
+      # Test create
+    result = model.save
+    expect(result).to be(true)
+
+    expect(model.name).to eq('bob')
+    expect(model.age).to be(10)
+    expect(model.address).to eq('23')
+
+      # Test Update
+    model.address = 'other'
+    expect(model.address).to eq('other')
+    model.save
+
+    expect(model.name).to eq('bob')
+    expect(model.age).to be(30)
+    expect(model.address).to eq('23')
+
+      # Test destroy
+    model.destroy
+    expect(model.new_record?).to be(false)
+    expect(model.destroyed?).to be(true)
+    expect(model.persisted?).to be(false)
+
+    expect(model.name).to eq('joe')
+  end
+
+  it 'skips callbacks when updating columns' do
+    model = ModelWithCallbacks.new
+
+      # Test initialize
+    expect(model.name).to be_nil
+    expect(model.age).to be(10)
+    expect(model.address).to be_nil
+
+    expect(model.new_record?).to be(true)
+    expect(model.destroyed?).to be(false)
+    expect(model.persisted?).to be(false)
+
+      # Test create
+    result = model.save
+    expect(result).to be(true)
+
+    expect(model.name).to eq('bob')
+    expect(model.age).to be(10)
+    expect(model.address).to eq('23')
+
+      # Test Update
+    model.update_columns(address: 'other')
+    expect(model.address).to eq('other')
+    loaded = ModelWithCallbacks.find model.id
+    expect(loaded.address).to eq('other')
+
+      # Test delete skipping callbacks
+    model.delete
+    expect(model.new_record?).to be(false)
+    expect(model.destroyed?).to be(true)
+    expect(model.persisted?).to be(false)
+
+    expect(model.name).to eq('bob')
+  end
+
+  it 'performs validations' do
+    model = ModelWithValidations.new
+
+    expect(model.valid?).to be(false)
+
+      # Test create
+    result = model.save
+    expect(result).to be(false)
+    expect(model.errors.count).to be(2)
+
+    begin
+      model.save!
+    rescue ::CouchbaseOrm::Error::RecordInvalid => e
+      expect(e.record).to be(model)
     end
 
-    it "should save a model with defaults" do
-        model = ModelWithDefaults.new
+    model.name = 'bob'
+    model.age = 23
+    expect(model.valid?).to be(true)
+    expect(model.save).to be(true)
 
-        expect(model.name).to eq('bob')
-        expect(model.age).to be(23)
-        expect(model.address).to be(nil)
-
-        expect(model.new_record?).to be(true)
-        expect(model.destroyed?).to be(false)
-        expect(model.persisted?).to be(false)
-
-        result = model.save
-        expect(result).to be(true)
-
-        expect(model.new_record?).to be(false)
-        expect(model.destroyed?).to be(false)
-        expect(model.persisted?).to be(true)
-
-        model.destroy
-        expect(model.new_record?).to be(false)
-        expect(model.destroyed?).to be(true)
-        expect(model.persisted?).to be(false)
+      # Test update
+    model.name = nil
+    expect(model.valid?).to be(false)
+    expect(model.save).to be(false)
+    begin
+      model.save!
+    rescue ::CouchbaseOrm::Error::RecordInvalid => e
+      expect(e.record).to be(model)
     end
 
-    it "should execute callbacks" do
-        model = ModelWithCallbacks.new
+    model.age = '23' # This value will be coerced
+    model.name = 'joe'
+    expect(model.valid?).to be(true)
+    expect(model.save!).to be(model)
 
-        # Test initialize
-        expect(model.name).to be(nil)
-        expect(model.age).to be(10)
-        expect(model.address).to be(nil)
+      # coercion will fail here
+    model.age = 'a23'
+    expect{ model.save! }.to raise_error(CouchbaseOrm::Error::RecordInvalid)
 
-        expect(model.new_record?).to be(true)
-        expect(model.destroyed?).to be(false)
-        expect(model.persisted?).to be(false)
+    model.destroy
+  end
 
-        # Test create
-        result = model.save
-        expect(result).to be(true)
+  it 'reloads a model' do
+    model = BasicModel.new
 
-        expect(model.name).to eq('bob')
-        expect(model.age).to be(10)
-        expect(model.address).to eq('23')
+    model.name = 'bob'
+    model.address = 'somewhere'
+    model.age = 34
 
-        # Test Update
-        model.address = 'other'
-        expect(model.address).to eq('other')
-        model.save
+    expect(model.save).to be(true)
+    id = model.id
+    model.name = nil
+    expect(model.changed?).to be(true)
 
-        expect(model.name).to eq('bob')
-        expect(model.age).to be(30)
-        expect(model.address).to eq('23')
+    model.reload
+    expect(model.changed?).to be(false)
+    expect(model.id).to eq(id)
 
-        # Test destroy
-        model.destroy
-        expect(model.new_record?).to be(false)
-        expect(model.destroyed?).to be(true)
-        expect(model.persisted?).to be(false)
+    model.destroy
+    expect(model.destroyed?).to be(true)
+  end
 
-        expect(model.name).to eq('joe')
-    end
+  it 'updates with action controler parameters' do
+    model = BasicModel.create!
+    params = ActionController::Parameters.new({
+          name: 'Francesco',
+          age: 22,
+          foo: 'bar'
+      })
+    model.update!(params.permit(:name, :age))
+    model.reload
+    expect(model.age).to eq(22)
+  end
 
-    it "should skip callbacks when updating columns" do
-        model = ModelWithCallbacks.new
+  it 'updates attributes' do
+    model = BasicModel.new
 
-        # Test initialize
-        expect(model.name).to be(nil)
-        expect(model.age).to be(10)
-        expect(model.address).to be(nil)
+    model.update_attributes({
+        name: 'bob',
+        age: 34
+    })
 
-        expect(model.new_record?).to be(true)
-        expect(model.destroyed?).to be(false)
-        expect(model.persisted?).to be(false)
+    expect(model.new_record?).to be(false)
+    expect(model.destroyed?).to be(false)
+    expect(model.persisted?).to be(true)
 
-        # Test create
-        result = model.save
-        expect(result).to be(true)
+    expect(model.name).to eq('bob')
+    expect(model.age).to be(34)
+    expect(model.address).to be_nil
 
-        expect(model.name).to eq('bob')
-        expect(model.age).to be(10)
-        expect(model.address).to eq('23')
+    model.destroy
+    expect(model.destroyed?).to be(true)
+  end
 
-        # Test Update
-        model.update_columns(address: 'other')
-        expect(model.address).to eq('other')
-        loaded = ModelWithCallbacks.find model.id
-        expect(loaded.address).to eq('other')
+  it 'does not allow to update unkown attributes' do
+    model = BasicModel.new
 
-        # Test delete skipping callbacks
-        model.delete
-        expect(model.new_record?).to be(false)
-        expect(model.destroyed?).to be(true)
-        expect(model.persisted?).to be(false)
+    expect{
+      model.update_attributes({
+        name: 'bob',
+        age: 34,
+        foo: 'bar'
+      })
+    }.to raise_error(ActiveModel::UnknownAttributeError)
+  end
 
-        expect(model.name).to eq('bob')
-    end
-
-    it "should perform validations" do
-        model = ModelWithValidations.new
-
-        expect(model.valid?).to be(false)
-
-        # Test create
-        result = model.save
-        expect(result).to be(false)
-        expect(model.errors.count).to be(2)
-
-        begin
-            model.save!
-        rescue ::CouchbaseOrm::Error::RecordInvalid => e
-            expect(e.record).to be(model)
-        end
-
-        model.name = 'bob'
-        model.age = 23
-        expect(model.valid?).to be(true)
-        expect(model.save).to be(true)
-
-        # Test update
-        model.name = nil
-        expect(model.valid?).to be(false)
-        expect(model.save).to be(false)
-        begin
-            model.save!
-        rescue ::CouchbaseOrm::Error::RecordInvalid => e
-            expect(e.record).to be(model)
-        end
-
-        model.age = '23'    # This value will be coerced
-        model.name = 'joe'
-        expect(model.valid?).to be(true)
-        expect(model.save!).to be(model)
-
-        # coercion will fail here
-        model.age = "a23"
-        expect{ model.save! }.to raise_error(CouchbaseOrm::Error::RecordInvalid)
-
-        model.destroy
-    end
-
-    it "should reload a model" do
-        model = BasicModel.new
-
-        model.name = 'bob'
-        model.address = 'somewhere'
-        model.age = 34
-
-        expect(model.save).to be(true)
-        id = model.id
-        model.name = nil
-        expect(model.changed?).to be(true)
-
-        model.reload
-        expect(model.changed?).to be(false)
-        expect(model.id).to eq(id)
-
-        model.destroy
-        expect(model.destroyed?).to be(true)
-    end
-
-    it "should update with action controler parameters" do
-        model = BasicModel.create!
-        params = ActionController::Parameters.new({
-              name: 'Francesco',
-              age:  22,
-              foo: 'bar'
+  it 'does not allow to create with unkown attributes' do
+    expect{
+      BasicModel.create({
+        name: 'bob',
+        age: 34,
+        foo: 'bar'
           })
-        model.update!(params.permit(:name, :age))
-        model.reload
-        expect(model.age).to eq(22)
-    end
+    }.to raise_error(ActiveModel::UnknownAttributeError)
+  end
 
-    it "should update attributes" do
-        model = BasicModel.new
+  it 'does not allow to update with unkown attributes' do
+    model = BasicModel.create!(name: 'bob', age: 34)
+    expect{
+      model.update({
+        foo: 'bar'
+      })
+    }.to raise_error(ActiveModel::UnknownAttributeError)
+  end
 
-        model.update_attributes({
-            name: 'bob',
-            age: 34
-        })
+  it 'does not perform validation with validate true' do
+    model = ModelWithValidations.new
 
-        expect(model.new_record?).to be(false)
-        expect(model.destroyed?).to be(false)
-        expect(model.persisted?).to be(true)
+    expect(model.valid?).to be(false)
+    expect(model.save(validate: false)).to be(true)
+    expect(model.persisted?).to be(true)
 
-        expect(model.name).to eq('bob')
-        expect(model.age).to be(34)
-        expect(model.address).to be(nil)
+    model.destroy
+  end
 
-        model.destroy
-        expect(model.destroyed?).to be(true)
-    end
+  describe BasicModel do
+    it_behaves_like 'ActiveModel'
+  end
 
-    it "should not allow to update unkown attributes" do
-        model = BasicModel.new
-        
-        expect{ model.update_attributes({
-            name: 'bob',
-            age: 34,
-            foo: 'bar'
-        }) }.to raise_error(ActiveModel::UnknownAttributeError) 
-    end
+  describe ModelWithDefaults do
+    it_behaves_like 'ActiveModel'
+  end
 
-    it "should not allow to create with unkown attributes" do
-        expect{ BasicModel.create({
-            name: 'bob',
-            age: 34,
-            foo: 'bar'
-        }) }.to raise_error(ActiveModel::UnknownAttributeError) 
-    end
+  describe ModelWithCallbacks do
+    it_behaves_like 'ActiveModel'
+  end
 
-    it "should not allow to update with unkown attributes" do
-        model = BasicModel.create!(name: 'bob', age: 34)
-        expect{ model.update({
-            foo: 'bar'
-        }) }.to raise_error(ActiveModel::UnknownAttributeError) 
-    end
-
-    it "should not perform validation with validate true" do
-        model = ModelWithValidations.new
-
-        expect(model.valid?).to be(false)
-        expect(model.save(validate: false)).to be(true)
-        expect(model.persisted?).to be(true)
-
-        model.destroy
-    end
-
-    describe BasicModel do
-        it_behaves_like "ActiveModel"
-    end
-
-    describe ModelWithDefaults do
-        it_behaves_like "ActiveModel"
-    end
-
-    describe ModelWithCallbacks do
-        it_behaves_like "ActiveModel"
-    end
-
-    describe ModelWithValidations do
-        it_behaves_like "ActiveModel"
-    end
+  describe ModelWithValidations do
+    it_behaves_like 'ActiveModel'
+  end
 end
