@@ -30,6 +30,7 @@ jobs:
           bundle exec yard
       - name: Merge Doc
         run: |
+          mkdir docs/_build/html/api 
           mv yard_docs/* docs/_build/html/api
       - name: Deploy to Github Pages
         uses: peaceiris/actions-gh-pages@v4
