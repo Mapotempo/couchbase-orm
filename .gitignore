@@ -17,6 +17,7 @@ bin
 Gemfile-custom
 vendor
 couchbase
+yard_docs
 
 *.gem
 rubocop_cache

@@ -20,6 +20,16 @@ jobs:
         run: |
           cd docs/
           make html
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          ruby-version: 2.7
+      - name: Yard Doc build
+        run: |
+          bundle exec yard
+      - name: Merge Doc
+        run: |
+          mv yard_docs/* docs/_build/html/api
       - name: Deploy to Github Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
