@@ -20,20 +20,46 @@ module CouchbaseOrm
     end
 
     module ClassMethods
-        # Defines a query N1QL for the model
-        #
-        # @param [Symbol, String, Array] names names of the views
-        # @param [Hash] options options passed to the {Couchbase::N1QL}
-        #
-        # @example Define some N1QL queries for a model
-        #  class Post < CouchbaseOrm::Base
-        #    n1ql :by_rating, emit_key: :rating
-        #  end
-        #
-        #  Post.by_rating do |response|
-        #    # ...
-        #  end
-        # TODO: add range keys [:startkey, :endkey]
+      # Defines a N1QL query method with dynamic method creation.
+      #
+      # N1QL (Non-first Normal Form Query Language) is a powerful query language for Couchbase
+      # that allows you to perform complex queries on your data.
+      # For more details, see the [Couchbase N1QL Documentation](https://docs.couchbase.com/server/current/n1ql/n1ql-intro/index.html).
+      #
+      # @param name [Symbol, String] The name of the N1QL query method.
+      # @param query_fn [Proc, nil] An optional function to customize the query.
+      # @param emit_key [Symbol, Array<Symbol>] The key(s) to emit from the query (optional, defaults to an empty array).
+      # @param custom_order [String, nil] An optional parameter to define custom ordering for the query.
+      # @param options [Hash] Additional options for the N1QL query.
+      # @return [void]
+      # @raise [ArgumentError] if the class already responds to the given name.
+      #
+      # @example Define a N1QL query to find documents by `email`
+      #   class User
+      #     include CouchbaseOrm::Model
+      #     n1ql :find_by_email, emit_key: :email
+      #   end
+      #
+      #   # This creates a query method `find_by_email`
+      #   users = User.find_by_email(key: 'user@example.com')
+      #
+      # @example Define a N1QL query with custom ordering
+      #   class User
+      #     include CouchbaseOrm::Model
+      #     n1ql :ordered_by_creation, emit_key: :created_at, custom_order: 'ORDER BY created_at DESC'
+      #   end
+      #
+      #   # This creates a query method `ordered_by_creation`
+      #   users = User.ordered_by_creation
+      #
+      # @example Define a N1QL query with a custom query function
+      #   class User
+      #     include CouchbaseOrm::Model
+      #     n1ql :custom_query, query_fn: ->(keys) { "SELECT * FROM `bucket` WHERE #{keys.map { |k| "`#{k}` = ?" }.join(' AND ')}" }, emit_key: [:email, :username]
+      #   end
+      #
+      #   # This creates a query method `custom_query`
+      #   users = User.custom_query(key: { email: 'user@example.com', username: 'johndoe' })
       def n1ql(name, query_fn: nil, emit_key: [], custom_order: nil, **options)
         raise ArgumentError.new("#{self} already respond_to? #{name}") if self.respond_to?(name)
 
@@ -65,8 +91,38 @@ module CouchbaseOrm
       end
       N1QL_DEFAULTS = { include_docs: true }.freeze
 
-        # add a n1ql query and lookup method to the model for finding all records
-        # using a value in the supplied attr.
+      # Sets up a Couchbase N1QL query and a corresponding finder method for the given attribute.
+      #
+      # N1QL (Non-first Normal Form Query Language) is a powerful query language for Couchbase
+      # that allows you to perform complex queries on your data.
+      # For more details, see the [Couchbase N1QL Documentation](https://docs.couchbase.com/server/current/n1ql/n1ql-intro/index.html).
+      #
+      # @param attr [Symbol] The attribute to create the N1QL query and finder method for.
+      # @param validate [Boolean] Whether to validate the presence of the attribute (default: true).
+      # @param find_method [Symbol, String, nil] The name of the finder method to be created (optional).
+      # @param n1ql_method [Symbol, String, nil] The name of the N1QL query method to be created (optional).
+      # @return [void]
+      # @raise [ArgumentError] if the class already responds to the given name.
+      #
+      # @example Define an index N1QL query for the `email` attribute
+      #   class User
+      #     include CouchbaseOrm::Model
+      #     index_n1ql :email
+      #   end
+      #
+      #   # This creates a N1QL query method `by_email` and a finder method `find_by_email`
+      #   users = User.by_email(key: ['user@example.com'])
+      #   user = User.find_by_email('user@example.com')
+      #
+      # @example Define an index N1QL query for the `username` attribute with custom method names
+      #   class User
+      #     include CouchbaseOrm::Model
+      #     index_n1ql :username, find_method: :find_user_by_username, n1ql_method: :by_username_n1ql
+      #   end
+      #
+      #   # This creates a N1QL query method `by_username_n1ql` and a finder method `find_user_by_username`
+      #   users = User.by_username_n1ql(key: ['john_doe'])
+      #   user = User.find_user_by_username('john_doe')
       def index_n1ql(attr, validate: true, find_method: nil, n1ql_method: nil)
         n1ql_method ||= "by_#{attr}"
         find_method ||= "find_#{n1ql_method}"
