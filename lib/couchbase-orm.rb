@@ -30,10 +30,10 @@ module CouchbaseOrm
                                                   }
   end
 
-  # Allows you to set a logger for CouchbaseOrm, 
-  # which can be usueful for logging messages or errors related to CouchbaseOrm 
+  # Allows you to set a logger for CouchbaseOrm,
+  # which can be usueful for logging messages or errors related to CouchbaseOrm
   # @param [ Logger ] logger your custom logger
-  # 
+  #
   # @example Setting the logger in code
   #   require 'logger'
   #   my_logger = Logger.new(STDOUT)
@@ -47,7 +47,7 @@ module CouchbaseOrm
 
   # Attempts to load a record or records from the Couchbase database.
   #
-  # This method can handle both single IDs and arrays of IDs. 
+  # This method can handle both single IDs and arrays of IDs.
   # It adapts its behavior based on the type and quantity of the input.
   #
   # @param [String, Array<String>] id The ID or array of IDs of the records to load.
