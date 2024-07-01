@@ -158,6 +158,25 @@ module CouchbaseOrm
                 ", __FILE__, __LINE__ - 4
       end
 
+      # Ensures that the Couchbase design document is up-to-date with the defined views.
+      #
+      # This method checks the current state of the design document in the Couchbase bucket
+      # and updates it if there are any discrepancies with the views defined in the current class.
+      #
+      # @return [Boolean] `true` if the design document was updated, `false` otherwise.
+      #
+      # @raise [Couchbase::Error::DesignDocumentNotFound] if the design document is not found.
+      #
+      # @example Ensure the design document is up-to-date
+      #   class User
+      #     include CouchbaseOrm::Model
+      #
+      #     view :by_email, emit_key: :email
+      #     view :by_username, emit_key: :username
+      #   end
+      #
+      #   # This will check the current design document for discrepancies and update if needed
+      #   User.ensure_design_document!
       def ensure_design_document!
         return false unless @views && !@views.empty?
 
