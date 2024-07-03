@@ -207,7 +207,7 @@ module CouchbaseOrm
       #   class User < Couchbase::Base
       #
       #     def self.active_user_names
-      #       where(active = true").pluck(:name)
+      #       where(active: true).pluck(:name)
       #     end
       #   end
       #
@@ -240,7 +240,7 @@ module CouchbaseOrm
       #   class User < Couchbase::Base
       #
       #     def self.active_users
-      #       where(active = true").to_ary
+      #       where(active: true).to_ary
       #     end
       #   end
       #
