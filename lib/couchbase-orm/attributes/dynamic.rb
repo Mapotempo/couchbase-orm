@@ -31,11 +31,40 @@ module CouchbaseOrm
       if responds
         public_send(name.writer, value)
       else
-        type = value.class.to_s.underscore.to_sym
-        type = :hash if type == :"active_support/hash_with_indifferent_access"
-        type = ActiveModel::Type.lookup(type)
+        type = define_attribute_type(value)
+        type = if type == :array
+                 item_type = define_attribute_type(value.first)
+                 ActiveModel::Type.lookup(type, type: item_type)
+               else
+                 ActiveModel::Type.lookup(type)
+               end
         @attributes[name] = ActiveModel::Attribute.from_database(name, value, type)
       end
+    end
+
+    # Determines the attribute type based on the value provided.
+    #
+    # This method converts the class of the value to a symbol and handles special cases
+    # for `ActiveSupport::HashWithIndifferentAccess`, booleans, and nil values.
+    #
+    # @param [Object] value The value whose type needs to be determined.
+    # @return [Symbol] The determined type of the attribute.
+    #
+    # @example Determining types of various values
+    #   define_attribute_type(123)                                   # => :integer
+    #   define_attribute_type("Hello")                               # => :string
+    #   define_attribute_type(true)                                  # => :boolean
+    #   define_attribute_type(false)                                 # => :boolean
+    #   define_attribute_type(nil)                                   # => :raw
+    #   define_attribute_type(ActiveSupport::HashWithIndifferentAccess.new) # => :hash
+    def define_attribute_type(value)
+      type = value.class.to_s.underscore.to_sym
+      return :hash if type == :"active_support/hash_with_indifferent_access"
+      return :boolean if type == :true_class
+      return :boolean if type == :false_class
+      return :raw if type == :nil_class
+
+      type
     end
 
       # Define a reader method  for a dynamic attribute.
