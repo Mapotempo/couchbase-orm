@@ -26,17 +26,29 @@ describe CouchbaseOrm::AttributesDynamic do
     end
 
     context 'with integer' do
-      it 'accepts unknown attribute from Coucbbase' do
+      it 'accepts unknown small integer from Coucbbase' do
         dynamic = AttributeDynamicTest.create!(name: 'joe', new_attribute: 2)
         expect(AttributeDynamicTest.find_by_id(dynamic.id)).to have_attributes(new_attribute: 2)
+        dynamic.destroy
+      end
+
+      it 'accepts unknown long integer from Coucbbase' do
+        dynamic = AttributeDynamicTest.create!(name: 'joe', new_attribute: 202302241231)
+        expect(AttributeDynamicTest.find_by_id(dynamic.id)).to have_attributes(new_attribute: 202302241231)
         dynamic.destroy
       end
     end
 
     context 'with decimal' do
-      it 'accepts unknown attribute from Coucbbase' do
+      it 'accepts unknown small decimal from Coucbbase' do
         dynamic = AttributeDynamicTest.create!(name: 'joe', new_attribute: 2.0)
         expect(AttributeDynamicTest.find_by_id(dynamic.id)).to have_attributes(new_attribute: 2.0)
+        dynamic.destroy
+      end
+
+      it 'accepts unknown long decimal from Coucbbase' do
+        dynamic = AttributeDynamicTest.create!(name: 'joe', new_attribute: 2.02302241231)
+        expect(AttributeDynamicTest.find_by_id(dynamic.id)).to have_attributes(new_attribute: 2.02302241231)
         dynamic.destroy
       end
     end

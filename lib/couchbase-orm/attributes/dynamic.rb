@@ -51,7 +51,7 @@ module CouchbaseOrm
     # @return [Symbol] The determined type of the attribute.
     #
     # @example Determining types of various values
-    #   define_attribute_type(123)                                   # => :integer
+    #   define_attribute_type(123)                                   # => :big_integer
     #   define_attribute_type("Hello")                               # => :string
     #   define_attribute_type(true)                                  # => :boolean
     #   define_attribute_type(false)                                 # => :boolean
@@ -63,6 +63,7 @@ module CouchbaseOrm
       return :boolean if type == :true_class
       return :boolean if type == :false_class
       return :raw if type == :nil_class
+      return :big_integer if type == :integer
 
       type
     end
