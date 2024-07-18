@@ -2,5 +2,5 @@
 # frozen_string_literal: true
 
 module CouchbaseOrm
-  VERSION = '1.2.3'
+  VERSION = '1.2.4'
 end
