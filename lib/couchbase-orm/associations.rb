@@ -89,7 +89,7 @@ module CouchbaseOrm
                 elsif options[:polymorphic]
                   ::CouchbaseOrm.try_load(ref_value)
                 else
-                  assoc.constantize.find(ref_value)
+                  assoc.constantize.find(ref_value, quiet: true)
                 end
           val = Array.wrap(val || [])
           instance_variable_set(instance_var, val)
