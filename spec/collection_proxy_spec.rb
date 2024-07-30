@@ -136,7 +136,7 @@ describe CouchbaseOrm::CollectionProxy do
     end
   end
 
-  describe '#remov_multi!' do
+  describe '#remove_multi!' do
     subject(:ok_proxy) { described_class.new(OKProxyfied.new) }
 
     it { expect(ok_proxy.remove_multi!(['key'])).not_to be_nil }
