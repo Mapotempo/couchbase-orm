@@ -137,7 +137,6 @@ describe CouchbaseOrm::N1ql do
     expect(N1QLTest.find(t.id).name).to eq(special_name)
     expect(N1QLTest.by_name(key: special_name).to_a.first).to eq(t)
     expect(N1QLTest.where(name: special_name).to_a.first).to eq(t)
-    puts N1QLTest.where(name: special_name).to_n1ql
   end
 
   it 'returns matching results with custom n1ql query' do
