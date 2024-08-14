@@ -27,7 +27,7 @@ module CouchbaseOrm
       #
       # @return [ Object ] value of attribute
     def _assign_attribute(name, value)
-      setter = name.writer
+      setter = name.to_s.writer
       responds = setter == 'id=' || respond_to?(setter)
       if responds
         public_send(setter, value)
