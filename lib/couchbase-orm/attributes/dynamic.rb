@@ -27,9 +27,10 @@ module CouchbaseOrm
       #
       # @return [ Object ] value of attribute
     def _assign_attribute(name, value)
-      responds = name.reader == 'id' || respond_to?(name.writer)
+      setter = name.writer
+      responds = setter == 'id=' || respond_to?(setter)
       if responds
-        public_send(name.writer, value)
+        public_send(setter, value)
       else
         type = define_attribute_type(value)
         type = if type == :array
@@ -114,9 +115,11 @@ module CouchbaseOrm
       # @return [ Object ] The result of the method call.
     def method_missing(name, *args)
       attr = name.to_s
-      return super unless attr.reader != 'id' && has_attribute?(attr.reader)
-
       getter = attr.reader
+
+      return super if getter == 'id'
+      return super if has_attribute?(getter)
+
       if attr.writer?
         define_dynamic_writer(getter)
         @attributes.write_from_user(getter, args.first)

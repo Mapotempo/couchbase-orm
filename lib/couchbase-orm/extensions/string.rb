@@ -4,11 +4,11 @@ module CouchbaseOrm
   module Extensions
     module String
       def reader
-        delete('=').sub(/_before_type_cast\z/, '')
+        delete_suffix('_before_type_cast').delete('=')
       end
 
       def writer
-        sub(/_before_type_cast\z/, '') + '='
+        delete_suffix('_before_type_cast') + '='
       end
 
       def writer?
