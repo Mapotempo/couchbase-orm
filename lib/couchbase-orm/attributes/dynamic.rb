@@ -15,7 +15,7 @@ module CouchbaseOrm
       #
       # @return [ true | false ] True if it does, false if not.
     def respond_to?(name, include_private = false)
-      super || attributes&.key?(name.to_s.reader)
+      super || has_attribute?(name.to_s.reader)
     end
 
     private
@@ -114,7 +114,7 @@ module CouchbaseOrm
       # @return [ Object ] The result of the method call.
     def method_missing(name, *args)
       attr = name.to_s
-      return super unless attr.reader != 'id' && attributes.key?(attr.reader)
+      return super unless attr.reader != 'id' && has_attribute?(attr.reader)
 
       getter = attr.reader
       if attr.writer?
