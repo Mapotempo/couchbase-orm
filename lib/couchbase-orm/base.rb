@@ -156,9 +156,9 @@ module CouchbaseOrm
       if model
         case model
         when Couchbase::Collection::GetResult
-          doc = HashWithIndifferentAccess.new(model.content) || raise('empty response provided')
-          type = doc.delete(:type)
-          doc.delete(:id)
+          doc = model.content || raise('empty response provided')
+          type = doc.delete('type')
+          doc.delete('id')
 
           if type && !ignore_doc_type && type.to_s != self.class.design_document
             raise CouchbaseOrm::Error::TypeMismatchError.new(
@@ -176,7 +176,7 @@ module CouchbaseOrm
           super(model.attributes.except(:id, 'type'))
         else
           clear_changes_information
-          super(decode_encrypted_attributes(**attributes.merge(Hash(model)).symbolize_keys))
+          super(decode_encrypted_attributes(**attributes.merge(Hash(model))))
         end
       else
         clear_changes_information
