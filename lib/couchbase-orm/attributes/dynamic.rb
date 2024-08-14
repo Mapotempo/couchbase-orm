@@ -117,8 +117,7 @@ module CouchbaseOrm
       attr = name.to_s
       getter = attr.reader
 
-      return super if getter == 'id'
-      return super if attributes.key?(getter)
+      return super unless getter == 'id' && attributes.key?(getter)
 
       if attr.writer?
         define_dynamic_writer(getter)
