@@ -15,7 +15,7 @@ module CouchbaseOrm
       #
       # @return [ true | false ] True if it does, false if not.
     def respond_to?(name, include_private = false)
-      super || attributes.key?(name.to_s.reader)
+      super || attributes&.key?(name.to_s.reader)
     end
 
     private
@@ -27,10 +27,9 @@ module CouchbaseOrm
       #
       # @return [ Object ] value of attribute
     def _assign_attribute(name, value)
-      setter = name.to_s.writer
-      responds = setter == 'id=' || respond_to?(setter)
+      responds = name.reader == 'id' || respond_to?(name.writer)
       if responds
-        public_send(setter, value)
+        public_send(name.writer, value)
       else
         type = define_attribute_type(value)
         type = if type == :array
@@ -80,7 +79,7 @@ module CouchbaseOrm
 
       instance_eval do
         define_singleton_method(name) do
-          @attributes[name].value
+          @attributes[getter].value
         end
       end
     end
@@ -115,10 +114,9 @@ module CouchbaseOrm
       # @return [ Object ] The result of the method call.
     def method_missing(name, *args)
       attr = name.to_s
+      return super unless attr.reader != 'id' && attributes.key?(attr.reader)
+
       getter = attr.reader
-
-      return super unless getter == 'id' && attributes.key?(getter)
-
       if attr.writer?
         define_dynamic_writer(getter)
         @attributes.write_from_user(getter, args.first)
