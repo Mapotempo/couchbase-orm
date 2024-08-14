@@ -80,7 +80,7 @@ module CouchbaseOrm
 
       instance_eval do
         define_singleton_method(name) do
-          @attributes[getter].value
+          @attributes[name].value
         end
       end
     end
