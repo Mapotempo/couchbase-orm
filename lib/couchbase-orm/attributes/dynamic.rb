@@ -15,7 +15,7 @@ module CouchbaseOrm
       #
       # @return [ true | false ] True if it does, false if not.
     def respond_to?(name, include_private = false)
-      super || has_attribute?(name.to_s.reader)
+      super || attributes.key?(name.to_s.reader)
     end
 
     private
@@ -118,7 +118,7 @@ module CouchbaseOrm
       getter = attr.reader
 
       return super if getter == 'id'
-      return super if has_attribute?(getter)
+      return super if attributes.key?(getter)
 
       if attr.writer?
         define_dynamic_writer(getter)
