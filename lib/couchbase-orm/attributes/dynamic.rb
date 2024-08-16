@@ -27,6 +27,7 @@ module CouchbaseOrm
       #
       # @return [ Object ] value of attribute
     def _assign_attribute(name, value)
+      name = name.to_s
       responds = name.reader == 'id' || respond_to?(name.writer)
       if responds
         public_send(name.writer, value)
