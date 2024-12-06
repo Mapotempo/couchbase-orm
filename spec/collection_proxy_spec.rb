@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'ostruct'
 require File.expand_path('support', __dir__)
 require File.expand_path('../lib/couchbase-orm/proxies/collection_proxy', __dir__)
 
