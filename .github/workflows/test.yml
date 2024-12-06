@@ -35,7 +35,7 @@ jobs:
     name: ${{ matrix.ruby }} rails-${{ matrix.gemfile }}  couchbase-${{ matrix.couchbase }}
     steps:
     - uses: actions/checkout@v3
-    - run: sudo apt-get update && sudo apt-get install libevent-dev libev-dev
+    - run: sudo apt-get update && sudo apt-get install libevent-dev libev-dev libtinfo5
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
