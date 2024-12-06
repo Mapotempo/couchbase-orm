@@ -28,7 +28,7 @@ services:
       - couchbase
 
   couchbase:
-    image: 'couchbase:enterprise-7.1.3'
+    image: 'couchbase:enterprise-7.6.3'
     ports:
       - 8091:8091
       - 8092:8092
