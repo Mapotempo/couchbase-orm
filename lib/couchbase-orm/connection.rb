@@ -22,7 +22,7 @@ module CouchbaseOrm
       @cluster ||= begin
         cb_config = Couchbase::Configuration.new
         cb_config.connection_string = config[:connection_string].presence.try do |s|
-          if s.start_with?("couchbase://", "couchbases://")
+          if s.start_with?('couchbase://', 'couchbases://')
             s
           else
             "couchbase://#{s}"
