@@ -21,9 +21,13 @@ module CouchbaseOrm
     def self.cluster
       @cluster ||= begin
         cb_config = Couchbase::Configuration.new
-        cb_config.connection_string = config[:connection_string].presence.try { |s|
-          "couchbase://#{s}"
-        } || raise(CouchbaseOrm::Error.new('Missing CouchbaseOrm host'))
+        cb_config.connection_string = config[:connection_string].presence.try do |s|
+          if s.start_with?("couchbase://", "couchbases://")
+            s
+          else
+            "couchbase://#{s}"
+          end
+        end || raise(CouchbaseOrm::Error.new('Missing CouchbaseOrm host'))
         cb_config.username = config[:username].presence || raise(CouchbaseOrm::Error.new('Missing CouchbaseOrm username'))
         cb_config.password = config[:password].presence || raise(CouchbaseOrm::Error.new('Missing CouchbaseOrm password'))
         Couchbase::Cluster.connect(cb_config)
