@@ -264,27 +264,23 @@ module CouchbaseOrm
 
       attr_writer :uuid_generator
 
-      def find(*ids, quiet: false)
+      def find(*ids, **options)
         CouchbaseOrm.logger.debug { "Base.find(l##{ids.length}) #{ids}" }
 
+        chunck = (options.delete(:chunck) || 25).to_i
+        quiet = options.delete(:quiet) || false
         ids = ids.flatten.select(&:present?)
         if ids.empty?
           raise CouchbaseOrm::Error::EmptyNotAllowed.new('no id(s) provided') unless quiet
           return nil if quiet
         end
 
-        transcoder = CouchbaseOrm::JsonTranscoder.new(ignored_properties: ignored_properties)
-        records = quiet ? collection.get_multi(ids,
-                                               transcoder: transcoder) : collection.get_multi!(ids,
-                                                                                               transcoder: transcoder)
-        return nil if records.nil?
+        records = ids.each_slice(chunck).each_with_object([]) do |chunck_ids, res|
+          data = Array.wrap(_find_records(chunck_ids, quiet))
+          res.push(*data) unless data.empty?
+        end
 
-        CouchbaseOrm.logger.debug { "Base.find found(#{records})" }
-        records = records.zip(ids).map { |record, id|
-          self.new(record, id: id) if record
-        }
-        records.compact!
-        ids.length > 1 ? records : records[0]
+        ids.length > 1 ? records : records.first
       end
 
       def find_by_id(*ids, **options)
@@ -298,6 +294,20 @@ module CouchbaseOrm
         collection.exists(id).exists
       end
       alias has_key? exists?
+
+      private
+
+      def _find_records(ids, quiet)
+        transcoder = CouchbaseOrm::JsonTranscoder.new(ignored_properties: ignored_properties)
+        data = if quiet
+                  collection.get_multi(ids, transcoder: transcoder)
+               else
+                  collection.get_multi!(ids, transcoder: transcoder)
+               end.to_a
+        Array.wrap(data).zip(ids).each_with_object([]) do |data, records|
+          records << self.new(data[0], id: data[1]) if data[0]
+        end
+      end
     end
 
     def id=(value)

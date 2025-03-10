@@ -80,10 +80,15 @@ module CouchbaseOrm
           current_query = run_query(method_opts[:emit_key], values, query_fn, custom_order: custom_order,
                                                                               **opts.except(:include_docs, :key))
           if result_modifier
-            opts[:include_docs] = true
             current_query.results(&result_modifier)
           elsif opts[:include_docs]
-            current_query.results { |res| find(res) }
+            results = current_query.results.to_a
+            results = if results.empty?
+                        results
+                      else
+                        find(results, **opts.slice(:quiet, :chunck))
+                      end
+            ResultsProxy.new(Array.wrap(results))
           else
             current_query.results
           end
