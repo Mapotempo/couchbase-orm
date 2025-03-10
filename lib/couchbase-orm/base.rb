@@ -304,8 +304,8 @@ module CouchbaseOrm
                else
                  collection.get_multi!(ids, transcoder: transcoder)
                end.to_a
-        Array.wrap(data).zip(ids).each_with_object([]) do |data, records|
-          records << self.new(data[0], id: data[1]) if data[0]
+        Array.wrap(data).zip(ids).each_with_object([]) do |pair, records|
+          records << self.new(pair[0], id: pair[1]) if pair[0]
         end
       end
     end
