@@ -300,9 +300,9 @@ module CouchbaseOrm
       def _find_records(ids, quiet)
         transcoder = CouchbaseOrm::JsonTranscoder.new(ignored_properties: ignored_properties)
         data = if quiet
-                  collection.get_multi(ids, transcoder: transcoder)
+                 collection.get_multi(ids, transcoder: transcoder)
                else
-                  collection.get_multi!(ids, transcoder: transcoder)
+                 collection.get_multi!(ids, transcoder: transcoder)
                end.to_a
         Array.wrap(data).zip(ids).each_with_object([]) do |data, records|
           records << self.new(data[0], id: data[1]) if data[0]
