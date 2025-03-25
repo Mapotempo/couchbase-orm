@@ -219,10 +219,9 @@ module CouchbaseOrm
 
     def ==(other)
       other.instance_of?(self.class) &&
-      ((respond_to?(:id) && !id.nil? &&
-      other.id == id) || other.serialized_attributes == serialized_attributes)
+        ((respond_to?(:id) && !id.nil? && other.id == id) || other.serialized_attributes == serialized_attributes)
     end
-    alias_method :eql?, :==
+    alias eql? ==
   end
 
   class Base < Document
