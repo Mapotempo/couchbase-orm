@@ -65,7 +65,7 @@ describe CouchbaseOrm::Types::Nested do
     obj = TypeNestedTest.find(obj.id)
     expect(obj.send(:serialized_attributes)).to eq({
         'id' => obj.id,
-        'main' => { 'child'=>nil, 'flags'=>[], 'milestones'=>[], 'name'=>nil, 'tags'=>[], 'things'=>nil},
+        'main' => { 'child' => nil, 'flags' => [], 'milestones' => [], 'name' => nil, 'tags' => [], 'things' => nil},
         'flags' => [],
         'others' => [
             {
