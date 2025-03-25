@@ -216,6 +216,12 @@ module CouchbaseOrm
 
       assign_attributes(id: SecureRandom.hex)
     end
+
+    def ==(other)
+      other.instance_of?(self.class) &&
+        ((respond_to?(:id) && !id.nil? && other.id == id) || other.serialized_attributes == serialized_attributes)
+    end
+    alias eql? ==
   end
 
   class Base < Document

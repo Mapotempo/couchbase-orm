@@ -14,7 +14,7 @@ class SubTypeTest < CouchbaseOrm::NestedDocument
 end
 
 class TypeNestedTest < CouchbaseOrm::Base
-  attribute :main, :nested, type: SubTypeTest
+  attribute :main, :nested, type: SubTypeTest, default: SubTypeTest.new
   attribute :others, :array, type: SubTypeTest
   attribute :flags, :array, type: :boolean
 end
@@ -65,7 +65,7 @@ describe CouchbaseOrm::Types::Nested do
     obj = TypeNestedTest.find(obj.id)
     expect(obj.send(:serialized_attributes)).to eq({
         'id' => obj.id,
-        'main' => nil,
+        'main' => { 'child' => nil, 'flags' => [], 'milestones' => [], 'name' => nil, 'tags' => [], 'things' => nil},
         'flags' => [],
         'others' => [
             {
