@@ -11,6 +11,13 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
+      - name: Downgrade to CMake 3.27
+        run: |
+          sudo apt-get remove -y cmake
+          wget https://github.com/Kitware/CMake/releases/download/v3.27.9/cmake-3.27.9-linux-x86_64.sh
+          chmod +x cmake-3.27.9-linux-x86_64.sh
+          sudo ./cmake-3.27.9-linux-x86_64.sh --skip-license --prefix=/usr/local
+      - run: cmake --version
       - name: Set up ruby
         uses: ruby/setup-ruby@v1
         with:
