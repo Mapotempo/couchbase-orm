@@ -1,0 +1,1057 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>CRUD Operations &#8212; CouchbaseOrm  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'reference/crud';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Queries" href="queries.html" />
+    <link rel="prev" title="Working With Data" href="../working-with-data.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">CouchbaseOrm  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation-configuration.html">Installation &amp; Configuration</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installations.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compatibility.html">Compatibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rails-integration.html">Rails Integration</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../schema-configuration.html">Schema Configuration</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="attributes.html">Attribute Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="associations.html">Associations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="validations.html">Validation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../working-with-data.html">Working With Data</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">CRUD Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="queries.html">Queries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callbacks.html">Callbacks</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference external" href="https://mapotempo.github.io/couchbase-orm/api/">API</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/reference/crud.txt" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.txt</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>CRUD Operations</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#saving-documents">Saving Documents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#standard">Standard</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reloading">Reloading</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getters-setters">Getters &amp; Setters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-getters-setters">Custom Getters &amp; Setters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#read-attribute-write-attribute"><code class="docutils literal notranslate"><span class="pre">read_attribute</span></code> &amp; <code class="docutils literal notranslate"><span class="pre">write_attribute</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hash-access">Hash Access</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dirty-tracking">Dirty Tracking</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#viewing-changes">Viewing Changes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#resetting-changes">Resetting Changes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#persistence">Persistence</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#viewing-previous-changes">Viewing Previous Changes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-container-fields">Updating Container Fields</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="crud-operations">
+<span id="crud"></span><h1>CRUD Operations<a class="headerlink" href="#crud-operations" title="Link to this heading">#</a></h1>
+<nav class="contents singlecol local" id="on-this-page">
+<p class="topic-title">On this page</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#saving-documents" id="id1">Saving Documents</a></p>
+<ul>
+<li><p><a class="reference internal" href="#standard" id="id2">Standard</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#reloading" id="id3">Reloading</a></p>
+<ul>
+<li><p><a class="reference internal" href="#getters-setters" id="id4">Getters &amp; Setters</a></p></li>
+<li><p><a class="reference internal" href="#custom-getters-setters" id="id5">Custom Getters &amp; Setters</a></p></li>
+<li><p><a class="reference internal" href="#read-attribute-write-attribute" id="id6"><code class="docutils literal notranslate"><span class="pre">read_attribute</span></code> &amp; <code class="docutils literal notranslate"><span class="pre">write_attribute</span></code></a></p></li>
+<li><p><a class="reference internal" href="#hash-access" id="id7">Hash Access</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#dirty-tracking" id="id8">Dirty Tracking</a></p>
+<ul>
+<li><p><a class="reference internal" href="#viewing-changes" id="id9">Viewing Changes</a></p></li>
+<li><p><a class="reference internal" href="#resetting-changes" id="id10">Resetting Changes</a></p></li>
+<li><p><a class="reference internal" href="#persistence" id="id11">Persistence</a></p></li>
+<li><p><a class="reference internal" href="#viewing-previous-changes" id="id12">Viewing Previous Changes</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#updating-container-fields" id="id13">Updating Container Fields</a></p></li>
+</ul>
+</nav>
+<section id="saving-documents">
+<h2>Saving Documents<a class="headerlink" href="#saving-documents" title="Link to this heading">#</a></h2>
+<p>CouchbaseOrm supports all expected CRUD operations for those familiar with other
+Ruby mappers like Active Record or Data Mapper. What distinguishes CouchbaseOrm
+from other mappers for Couchbase is that the general persistence operations
+perform atomic updates on only the attributes that have changed instead of
+writing the entire document to the database each time.</p>
+<p>The persistence sections will provide examples on what database operation is
+performed when executing the documented command.</p>
+<section id="standard">
+<h3>Standard<a class="headerlink" href="#standard" title="Link to this heading">#</a></h3>
+<p>CouchbaseOrm’s standard persistence methods come in the form of common methods you
+would find in other mapping frameworks. The following table shows all standard
+operations with examples.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 33.3%" />
+<col style="width: 66.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Operation</p></th>
+<th class="head"><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Model#attributes</span></code></p>
+<p><em>Returns the document’s attributes as a</em> <code class="docutils literal notranslate"><span class="pre">ActiveSupport::HashWithIndifferentAccess</span></code> <em>, and its values in Ruby form.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heinrich&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">last_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heine&quot;</span><span class="p">)</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">attributes</span>
+<span class="c1"># =&gt; { &quot;_id&quot; =&gt; &#39;633467d03282a43784c2d56e&#39;, &quot;first_name&quot; =&gt; &quot;Heinrich&quot;, &quot;last_name&quot; =&gt; &quot;Heine&quot; }</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Model.create!</span></code></p>
+<p><em>Insert a document, raising an
+error if a validation or server error occurs.</em></p>
+<p><em>Pass a hash of attributes to create one document with the specified
+attributes.
+If a single hash is passed, the corresponding document is returned.</em></p>
+<p><em>If a block is given to</em> <code class="docutils literal notranslate"><span class="pre">create!</span></code> <em>, it will be invoked with each
+document as the argument in turn prior to attempting to save that
+document.</em></p>
+<p><em>If there is a problem saving any of the documents, such as
+a validation error or a server error, an exception is raised
+and, consequently, none of the documents are returned.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Person</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span>
+<span class="w">  </span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heinrich&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="ss">last_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heine&quot;</span>
+<span class="p">)</span><span class="w"> </span><span class="c1"># =&gt; Person instance</span>
+
+<span class="no">Person</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="o">[</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heinrich&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">last_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heine&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Willy&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">last_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Brandt&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="o">]</span><span class="p">)</span><span class="w"> </span><span class="c1"># =&gt; Array of two Person instances</span>
+
+<span class="no">Person</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heinrich&quot;</span><span class="p">)</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="o">|</span><span class="n">doc</span><span class="o">|</span>
+<span class="w">  </span><span class="n">doc</span><span class="o">.</span><span class="n">last_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Heine&quot;</span>
+<span class="k">end</span><span class="w"> </span><span class="c1"># =&gt; Person instance</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Model.create</span></code></p>
+<p><em>Instantiate a document and, if validations pass,
+insert them into the database.</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">create</span></code> <em>is similar to</em> <code class="docutils literal notranslate"><span class="pre">create!</span></code> <em>but does not raise
+exceptions on validation errors. It still raises errors on server
+errors, such as trying to insert a document with an</em> <code class="docutils literal notranslate"><span class="pre">_id</span></code> <em>that
+already exists in the collection.</em></p>
+<p><em>If any validation errors are encountered, the respective document
+is not inserted but is returned along with documents that were inserted.
+Use</em> <code class="docutils literal notranslate"><span class="pre">persisted?</span></code> <em>,</em> <code class="docutils literal notranslate"><span class="pre">new_record?</span></code> <em>or</em> <code class="docutils literal notranslate"><span class="pre">errors</span></code> <em>methods
+to check which of the returned documents were inserted into the
+database.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Person</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<span class="w">  </span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heinrich&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="ss">last_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heine&quot;</span>
+<span class="p">)</span><span class="w"> </span><span class="c1"># =&gt; Person instance</span>
+
+<span class="no">Person</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">[</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heinrich&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">last_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heine&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Willy&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">last_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Brandt&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="o">]</span><span class="p">)</span><span class="w"> </span><span class="c1"># =&gt; Array of two Person instances</span>
+
+<span class="no">Person</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heinrich&quot;</span><span class="p">)</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="o">|</span><span class="n">doc</span><span class="o">|</span>
+<span class="w">  </span><span class="n">doc</span><span class="o">.</span><span class="n">last_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Heine&quot;</span>
+<span class="k">end</span><span class="w"> </span><span class="c1"># =&gt; Person instance</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Post</span><span class="w">  </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">validates_uniqueness_of</span><span class="w"> </span><span class="ss">:title</span>
+<span class="k">end</span>
+
+<span class="n">posts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Post</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">[</span><span class="p">{</span><span class="ss">title</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="ss">title</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">}</span><span class="o">]</span><span class="p">)</span>
+<span class="c1"># =&gt; array of two Post instances</span>
+<span class="n">posts</span><span class="o">.</span><span class="n">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">|</span><span class="n">post</span><span class="o">|</span><span class="w"> </span><span class="n">post</span><span class="o">.</span><span class="n">persisted?</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1"># =&gt; [true, false]</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Model#save!</span></code></p>
+<p><em>Save the changed attributes to the database atomically, or insert the document if
+new. Raises an exception if validations fail or there is a server error.</em></p>
+<p><em>Returns true if the changed attributes were saved, raises an exception otherwise.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+<span class="w">  </span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heinrich&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="ss">last_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heine&quot;</span>
+<span class="p">)</span>
+<span class="n">person</span><span class="o">.</span><span class="n">save!</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">first_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Christian Johan&quot;</span>
+<span class="n">person</span><span class="o">.</span><span class="n">save!</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Model#save</span></code></p>
+<p><em>Save the changed attributes to the database atomically, or insert the document
+if new.</em></p>
+<p><em>Returns true if the changed attributes were saved. Returns false
+if there were any validation errors. Raises an exception if
+the document passed validation but there was a server error during
+the save.</em></p>
+<p><em>Pass</em> <code class="docutils literal notranslate"><span class="pre">validate:</span> <span class="pre">false</span></code> <em>option to bypass validations.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+<span class="w">  </span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heinrich&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="ss">last_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heine&quot;</span>
+<span class="p">)</span>
+<span class="n">person</span><span class="o">.</span><span class="n">save</span>
+<span class="n">person</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="ss">validate</span><span class="p">:</span><span class="w"> </span><span class="kp">false</span><span class="p">)</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">first_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Christian Johan&quot;</span>
+<span class="n">person</span><span class="o">.</span><span class="n">save</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Model#update_attributes</span></code></p>
+<p><em>Update the document attributes in the database. Will return true if validation passed,
+false if not.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span>
+<span class="w">  </span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jean&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="ss">last_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Zorg&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Model#update_attributes!</span></code></p>
+<p><em>Update the document attributes in the database and raise an error if validation failed.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="o">.</span><span class="n">update_attributes!</span><span class="p">(</span>
+<span class="w">  </span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Leo&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="ss">last_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tolstoy&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Model#update_attribute</span></code></p>
+<p><em>Update a single attribute, bypassing validations.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="o">.</span><span class="n">update_attribute</span><span class="p">(</span><span class="ss">:first_name</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Jean&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Model#touch</span></code></p>
+<p><em>Update the document’s updated_at timestamp</em></p>
+<p><em>Attempting to touch a destroyed document will raise</em> <code class="docutils literal notranslate"><span class="pre">FrozenError</span></code>,
+<em>same as if attempting to update an attribute on a destroyed
+document.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="o">.</span><span class="n">touch</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Model#delete</span></code></p>
+<p><em>Deletes the document from the database without running callbacks.</em></p>
+<p><em>If the document is not persisted, CouchbaseOrm will attempt to delete from
+the database any document with the same</em> <code class="docutils literal notranslate"><span class="pre">_id</span></code>.</p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="o">.</span><span class="n">delete</span>
+
+<span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">unsaved_person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span><span class="w"> </span><span class="n">person</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="n">unsaved_person</span><span class="o">.</span><span class="n">delete</span>
+<span class="n">person</span><span class="o">.</span><span class="n">reload</span>
+<span class="c1"># raises CouchbaseOrm::Errors::DocumentNotFound because the person was deleted</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Model#destroy</span></code></p>
+<p><em>Deletes the document from the database while running destroy callbacks.</em></p>
+<p><em>If the document is not persisted, CouchbaseOrm will attempt to delete from
+the database any document with the same</em> <code class="docutils literal notranslate"><span class="pre">_id</span></code>.</p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="o">.</span><span class="n">destroy</span>
+
+<span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">unsaved_person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span><span class="w"> </span><span class="n">person</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="n">unsaved_person</span><span class="o">.</span><span class="n">destroy</span>
+<span class="n">person</span><span class="o">.</span><span class="n">reload</span>
+<span class="c1"># raises CouchbaseOrm::Errors::DocumentNotFound because the person was deleted</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Model.delete_all</span></code></p>
+<p><em>Deletes all documents from the database without running any callbacks.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Person</span><span class="o">.</span><span class="n">delete_all</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>CouchbaseOrm provides the following persistence-related attributes:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 33.3%" />
+<col style="width: 66.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Model#new_record?</span></code></p>
+<p><em>Returns</em> <code class="docutils literal notranslate"><span class="pre">true</span></code> <em>if the model instance has not yet been saved
+to the database. Opposite of</em> <code class="docutils literal notranslate"><span class="pre">persisted?</span></code></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+<span class="w">  </span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heinrich&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="ss">last_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heine&quot;</span>
+<span class="p">)</span>
+<span class="n">person</span><span class="o">.</span><span class="n">new_record?</span><span class="w"> </span><span class="c1"># =&gt; true</span>
+<span class="n">person</span><span class="o">.</span><span class="n">save!</span>
+<span class="n">person</span><span class="o">.</span><span class="n">new_record?</span><span class="w"> </span><span class="c1"># =&gt; false</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Model#persisted?</span></code></p>
+<p><em>Returns</em> <code class="docutils literal notranslate"><span class="pre">true</span></code> <em>if the model instance has been saved
+to the database. Opposite of</em> <code class="docutils literal notranslate"><span class="pre">new_record?</span></code></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+<span class="w">  </span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heinrich&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="ss">last_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Heine&quot;</span>
+<span class="p">)</span>
+<span class="n">person</span><span class="o">.</span><span class="n">persisted?</span><span class="w"> </span><span class="c1"># =&gt; false</span>
+<span class="n">person</span><span class="o">.</span><span class="n">save!</span>
+<span class="n">person</span><span class="o">.</span><span class="n">persisted?</span><span class="w"> </span><span class="c1"># =&gt; true</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="reloading">
+<h2>Reloading<a class="headerlink" href="#reloading" title="Link to this heading">#</a></h2>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">reload</span></code> method to fetch the most recent version of a document from
+the database. Any unsaved modifications to the document’s attributes are lost:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">band</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Band</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;Band _id: 6206d06de1b8324561f179c9, name: &quot;foo&quot;, description: nil, likes: nil&gt;</span>
+
+<span class="n">band</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;bar&#39;</span>
+<span class="n">band</span>
+<span class="c1"># =&gt; #&lt;Band _id: 6206d06de1b8324561f179c9, name: &quot;bar&quot;, description: nil, likes: nil&gt;</span>
+
+<span class="n">band</span><span class="o">.</span><span class="n">reload</span>
+<span class="c1"># =&gt; #&lt;Band _id: 6206d06de1b8324561f179c9, name: &quot;foo&quot;, description: nil, likes: nil&gt;</span>
+</pre></div>
+</div>
+<p>If a document has referenced associations, the loaded
+associations’ are not reloaded but their values are cleared, such that these
+associations would be loaded from the database at the next access.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some operations on associations, for example assignment, persists the new
+document. In these cases there may not be any unsaved modifications to
+revert by reloading. In the following example, the assignment of the
+empty array to the association is immediately persisted and reloading
+does not make any changes to the document:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assuming band has many tours, which could be referenced:</span>
+<span class="n">band</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Band</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">tours</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="no">Tour</span><span class="o">.</span><span class="n">create!</span><span class="o">]</span><span class="p">)</span>
+<span class="c1"># ... or embedded:</span>
+<span class="n">band</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Band</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">tours</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="no">Tour</span><span class="o">.</span><span class="n">new</span><span class="o">]</span><span class="p">)</span>
+
+<span class="c1"># This writes the empty tour list into the database.</span>
+<span class="n">band</span><span class="o">.</span><span class="n">tours</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">[]</span>
+
+<span class="c1"># There are no unsaved modifications in band at this point to be reverted.</span>
+<span class="n">band</span><span class="o">.</span><span class="n">reload</span>
+
+<span class="c1"># Returns the empty array since this is what is in the database.</span>
+<span class="n">band</span><span class="o">.</span><span class="n">tours</span>
+<span class="c1"># =&gt; []</span>
+</pre></div>
+</div>
+</div>
+<section id="getters-setters">
+<h3>Getters &amp; Setters<a class="headerlink" href="#getters-setters" title="Link to this heading">#</a></h3>
+<p>The recommended way is to use the getter and setter methods generated for
+each declared attribute:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:first_name</span>
+<span class="k">end</span>
+
+<span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">first_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Artem&quot;</span>
+<span class="n">person</span><span class="o">.</span><span class="n">first_name</span>
+<span class="c1"># =&gt; &quot;Artem&quot;</span>
+</pre></div>
+</div>
+<p>To use this mechanism, each attribute must be explicitly declared, or the
+model class must enable <a class="reference internal" href="attributes.html#dynamic-attributes"><span class="std std-ref">dynamic attributes</span></a>.</p>
+</section>
+<section id="custom-getters-setters">
+<h3>Custom Getters &amp; Setters<a class="headerlink" href="#custom-getters-setters" title="Link to this heading">#</a></h3>
+<p>It is possible to explicitly define the getter and setter methods to provide
+custom behavior when reading or writing attributes, for example value
+transformations or storing values under different attribute names. In this case
+<code class="docutils literal notranslate"><span class="pre">read_attribute</span></code> and <code class="docutils literal notranslate"><span class="pre">write_attribute</span></code> methods can be used to read and
+write the values directly into the attributes hash:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="w">  </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nf">first_name</span>
+<span class="w">    </span><span class="n">read_attribute</span><span class="p">(</span><span class="ss">:fn</span><span class="p">)</span>
+<span class="w">  </span><span class="k">end</span>
+
+<span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nf">first_name=</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+<span class="w">    </span><span class="n">write_attribute</span><span class="p">(</span><span class="ss">:fn</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">)</span>
+<span class="w">  </span><span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">first_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Artem&quot;</span>
+<span class="n">person</span><span class="o">.</span><span class="n">first_name</span>
+<span class="c1"># =&gt; &quot;Artem&quot;</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">attributes</span>
+<span class="c1"># =&gt; {&quot;_id&quot;=&gt; &#39;606477dc2c97a628cf47075b&#39;, &quot;fn&quot;=&gt;&quot;Artem&quot;}</span>
+</pre></div>
+</div>
+</section>
+<section id="read-attribute-write-attribute">
+<span id="read-write-attribute"></span><h3><code class="docutils literal notranslate"><span class="pre">read_attribute</span></code> &amp; <code class="docutils literal notranslate"><span class="pre">write_attribute</span></code><a class="headerlink" href="#read-attribute-write-attribute" title="Link to this heading">#</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">read_attribute</span></code> and <code class="docutils literal notranslate"><span class="pre">write_attribute</span></code> methods can be used explicitly
+as well.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="w">  </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:first_name</span><span class="p">,</span><span class="w"> </span><span class="ss">as</span><span class="p">:</span><span class="w"> </span><span class="ss">:fn</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:last_name</span><span class="p">,</span><span class="w"> </span><span class="ss">as</span><span class="p">:</span><span class="w"> </span><span class="ss">:ln</span>
+<span class="k">end</span>
+
+<span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Artem&quot;</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;Person _id: 60647a522c97a6292c195b4b, first_name(fn): &quot;Artem&quot;, last_name(ln): nil&gt;</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">read_attribute</span><span class="p">(</span><span class="ss">:first_name</span><span class="p">)</span>
+<span class="c1"># =&gt; &quot;Artem&quot;</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">read_attribute</span><span class="p">(</span><span class="ss">:fn</span><span class="p">)</span>
+<span class="c1"># =&gt; &quot;Artem&quot;</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">write_attribute</span><span class="p">(</span><span class="ss">:last_name</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Pushkin&quot;</span><span class="p">)</span>
+<span class="n">person</span>
+<span class="c1"># =&gt; #&lt;Person _id: 60647a522c97a6292c195b4b, first_name(fn): &quot;Artem&quot;, last_name(ln): &quot;Pushkin&quot;&gt;</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">write_attribute</span><span class="p">(</span><span class="ss">:ln</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Medvedev&quot;</span><span class="p">)</span>
+<span class="n">person</span>
+<span class="c1"># =&gt; #&lt;Person _id: 60647a522c97a6292c195b4b, first_name(fn): &quot;Artem&quot;, last_name(ln): &quot;Medvedev&quot;&gt;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">read_attribute</span></code> and <code class="docutils literal notranslate"><span class="pre">write_attribute</span></code> do not require that a attribute with
+the used name is defined, but writing attribute values with <code class="docutils literal notranslate"><span class="pre">write_attribute</span></code>
+does not cause the respective attribute to be defined either:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="o">.</span><span class="n">write_attribute</span><span class="p">(</span><span class="ss">:undefined</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span>
+<span class="n">person</span>
+<span class="c1"># =&gt; #&lt;Person _id: 60647b212c97a6292c195b4c, first_name(fn): &quot;Artem&quot;, last_name(ln): &quot;Medvedev&quot;&gt;</span>
+<span class="n">person</span><span class="o">.</span><span class="n">attributes</span>
+<span class="c1"># =&gt; {&quot;_id&quot;=&gt; &#39;60647b212c97a6292c195b4c&#39;, &quot;first_name&quot;=&gt;&quot;Artem&quot;, &quot;last_name&quot;=&gt;&quot;Medvedev&quot;, &quot;undefined&quot;=&gt;&quot;Hello&quot;}</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">read_attribute</span><span class="p">(</span><span class="ss">:undefined</span><span class="p">)</span>
+<span class="c1"># =&gt; &quot;Hello&quot;</span>
+<span class="n">person</span><span class="o">.</span><span class="n">undefined</span>
+<span class="c1"># raises NoMethodError</span>
+</pre></div>
+</div>
+<p>When <code class="docutils literal notranslate"><span class="pre">read_attribute</span></code> is used to access a missing attribute, it returns <code class="docutils literal notranslate"><span class="pre">nil</span></code>.</p>
+</section>
+<section id="hash-access">
+<h3>Hash Access<a class="headerlink" href="#hash-access" title="Link to this heading">#</a></h3>
+<p>CouchbaseOrm model instances define the <code class="docutils literal notranslate"><span class="pre">[]</span></code> and <code class="docutils literal notranslate"><span class="pre">[]=</span></code> methods to provide
+<code class="docutils literal notranslate"><span class="pre">ActiveSupport::HashWithIndifferentAccess</span> <span class="pre">``</span> <span class="pre">style</span> <span class="pre">access</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">attributes.</span> <span class="pre">``[]</span></code> is an alias for
+<code class="docutils literal notranslate"><span class="pre">read_attribute</span></code> and <code class="docutils literal notranslate"><span class="pre">[]=</span></code> is an alias for <code class="docutils literal notranslate"><span class="pre">write_attribute</span></code>; see
+the section on <a class="reference internal" href="#read-write-attribute"><span class="std std-ref">read_attribute and write_attribute</span></a>
+for the detailed description of their behavior.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:first_name</span><span class="p">,</span><span class="w"> </span><span class="ss">as</span><span class="p">:</span><span class="w"> </span><span class="ss">:fn</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:last_name</span><span class="p">,</span><span class="w"> </span><span class="ss">as</span><span class="p">:</span><span class="w"> </span><span class="ss">:ln</span>
+<span class="k">end</span>
+
+<span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">first_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Artem&quot;</span><span class="p">)</span>
+
+<span class="n">person</span><span class="o">[</span><span class="s2">&quot;fn&quot;</span><span class="o">]</span>
+<span class="c1"># =&gt; &quot;Artem&quot;</span>
+
+<span class="n">person</span><span class="o">[</span><span class="ss">:first_name</span><span class="o">]</span>
+<span class="c1"># =&gt; &quot;Artem&quot;</span>
+
+<span class="n">person</span><span class="o">[</span><span class="ss">:ln</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Medvedev&quot;</span>
+<span class="n">person</span>
+<span class="c1"># =&gt; #&lt;Person _id: 606483742c97a629bdde5cfc, first_name(fn): &quot;Artem&quot;, last_name(ln): &quot;Medvedev&quot;&gt;</span>
+
+<span class="n">person</span><span class="o">[</span><span class="s2">&quot;last_name&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Pushkin&quot;</span>
+<span class="n">person</span>
+<span class="c1"># =&gt; #&lt;Person _id: 606483742c97a629bdde5cfc, first_name(fn): &quot;Artem&quot;, last_name(ln): &quot;Pushkin&quot;&gt;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="dirty-tracking">
+<h2>Dirty Tracking<a class="headerlink" href="#dirty-tracking" title="Link to this heading">#</a></h2>
+<p>CouchbaseOrm supports tracking of changed or “dirty” attributes with an API that mirrors that of
+Active Model. If a defined attribute has been modified in a model the model will be marked as
+dirty and some additional behavior comes into play.</p>
+<section id="viewing-changes">
+<h3>Viewing Changes<a class="headerlink" href="#viewing-changes" title="Link to this heading">#</a></h3>
+<p>There are various ways to view what has been altered on a model. Changes are recorded
+from the time a document is instantiated, either as a new document or via loading from
+the database up to the time it is saved. Any persistence operation clears the changes.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:name</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="k">end</span>
+
+<span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">first</span>
+<span class="n">person</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Alan Garner&quot;</span>
+
+<span class="c1"># Check to see if the document has changed.</span>
+<span class="n">person</span><span class="o">.</span><span class="n">changed?</span><span class="w"> </span><span class="c1"># true</span>
+
+<span class="c1"># Get an array of the names of the changed attributes.</span>
+<span class="n">person</span><span class="o">.</span><span class="n">changed</span><span class="w"> </span><span class="c1"># [ :name ]</span>
+
+<span class="c1"># Get a hash of the old and changed values for each attribute.</span>
+<span class="n">person</span><span class="o">.</span><span class="n">changes</span><span class="w"> </span><span class="c1"># { &quot;name&quot; =&gt; [ &quot;Alan Parsons&quot;, &quot;Alan Garner&quot; ] }</span>
+
+<span class="c1"># Check if a specific attribute has changed.</span>
+<span class="n">person</span><span class="o">.</span><span class="n">name_changed?</span><span class="w"> </span><span class="c1"># true</span>
+
+<span class="c1"># Get the changes for a specific attribute.</span>
+<span class="n">person</span><span class="o">.</span><span class="n">name_change</span><span class="w"> </span><span class="c1"># [ &quot;Alan Parsons&quot;, &quot;Alan Garner&quot; ]</span>
+
+<span class="c1"># Get the previous value for a attribute.</span>
+<span class="n">person</span><span class="o">.</span><span class="n">name_was</span><span class="w"> </span><span class="c1"># &quot;Alan Parsons&quot;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Setting the associations on a document does not cause the <code class="docutils literal notranslate"><span class="pre">changes</span></code> or
+<code class="docutils literal notranslate"><span class="pre">changed_attributes</span></code> hashes to be modified. This is true for all associations
+whether referenced or embedded. Note that changing the _id(s) attribute on
+referenced associations does cause the changes to show up in the <code class="docutils literal notranslate"><span class="pre">changes</span></code>
+and the <code class="docutils literal notranslate"><span class="pre">changed_attributes</span></code> hashes.</p>
+</div>
+</section>
+<section id="resetting-changes">
+<h3>Resetting Changes<a class="headerlink" href="#resetting-changes" title="Link to this heading">#</a></h3>
+<p>You can reset changes of a attribute to its previous value by calling the reset method.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">first</span>
+<span class="n">person</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Alan Garner&quot;</span>
+
+<span class="c1"># Reset the changed name back to the original</span>
+<span class="n">person</span><span class="o">.</span><span class="n">reset_name!</span>
+<span class="n">person</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="c1"># &quot;Alan Parsons&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="persistence">
+<h3>Persistence<a class="headerlink" href="#persistence" title="Link to this heading">#</a></h3>
+<p>CouchbaseOrm uses dirty tracking as the core of its persistence operations. It looks at the
+changes on a document and atomically updates only what has changed, unlike other frameworks
+that write the entire document on each save. If no changes have been made, CouchbaseOrm will
+not hit the database on a call to <code class="docutils literal notranslate"><span class="pre">Model#save</span></code>.</p>
+</section>
+<section id="viewing-previous-changes">
+<h3>Viewing Previous Changes<a class="headerlink" href="#viewing-previous-changes" title="Link to this heading">#</a></h3>
+<p>After a document has been persisted, you can see what the changes were previously by
+calling <code class="docutils literal notranslate"><span class="pre">Model#previous_changes</span></code>.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">first</span>
+<span class="n">person</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Alan Garner&quot;</span>
+<span class="n">person</span><span class="o">.</span><span class="n">save</span><span class="w"> </span><span class="c1"># Clears out current changes.</span>
+
+<span class="c1"># View the previous changes.</span>
+<span class="n">person</span><span class="o">.</span><span class="n">previous_changes</span><span class="w"> </span><span class="c1"># { &quot;name&quot; =&gt; [ &quot;Alan Parsons&quot;, &quot;Alan Garner&quot; ] }</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="updating-container-fields">
+<h2>Updating Container Fields<a class="headerlink" href="#updating-container-fields" title="Link to this heading">#</a></h2>
+<p>Be aware that, until
+is resolved, all attributes including container ones must be assigned to for
+their values to be persisted to the database.</p>
+<p>For example, adding to a set like this does not work:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Band</span><span class="w">  </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:tours</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="no">Set</span>
+<span class="k">end</span>
+
+<span class="n">band</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Band</span><span class="o">.</span><span class="n">new</span>
+<span class="n">band</span><span class="o">.</span><span class="n">tours</span>
+<span class="c1"># =&gt; #&lt;Set: {}&gt;</span>
+
+<span class="n">band</span><span class="o">.</span><span class="n">tours</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s1">&#39;London&#39;</span>
+<span class="c1"># =&gt; #&lt;Set: {&quot;London&quot;}&gt;</span>
+<span class="n">band</span><span class="o">.</span><span class="n">tours</span>
+<span class="c1"># =&gt; #&lt;Set: {}&gt;</span>
+</pre></div>
+</div>
+<p>Instead, the attribute value must be modified outside of the model and assigned
+back to the model as follows:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Band</span><span class="w">  </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:tours</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="no">Set</span>
+<span class="k">end</span>
+
+<span class="n">band</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Band</span><span class="o">.</span><span class="n">new</span>
+
+<span class="n">tours</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">band</span><span class="o">.</span><span class="n">tours</span>
+<span class="c1"># =&gt; #&lt;Set: {}&gt;</span>
+
+<span class="n">tours</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s1">&#39;London&#39;</span>
+<span class="c1"># =&gt; #&lt;Set: {&quot;London&quot;}&gt;</span>
+
+<span class="n">band</span><span class="o">.</span><span class="n">tours</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tours</span>
+<span class="c1"># =&gt; #&lt;Set: {&quot;London&quot;}&gt;</span>
+
+<span class="n">band</span><span class="o">.</span><span class="n">tours</span>
+<span class="c1"># =&gt; #&lt;Set: {&quot;London&quot;}&gt;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../working-with-data.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Working With Data</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="queries.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Queries</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#saving-documents">Saving Documents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#standard">Standard</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reloading">Reloading</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getters-setters">Getters &amp; Setters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-getters-setters">Custom Getters &amp; Setters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#read-attribute-write-attribute"><code class="docutils literal notranslate"><span class="pre">read_attribute</span></code> &amp; <code class="docutils literal notranslate"><span class="pre">write_attribute</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#hash-access">Hash Access</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dirty-tracking">Dirty Tracking</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#viewing-changes">Viewing Changes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#resetting-changes">Resetting Changes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#persistence">Persistence</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#viewing-previous-changes">Viewing Previous Changes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-container-fields">Updating Container Fields</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Woop.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
