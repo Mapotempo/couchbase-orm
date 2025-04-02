@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
       - name: Downgrade to CMake 3.27
         run: |
           sudo apt-get remove -y cmake
@@ -24,6 +23,7 @@ jobs:
         with:
           bundler-cache: true
           ruby-version: 2.7
+      - uses: actions/setup-python@v5
       - name: Install dependencies
         run: |
           pip install sphinx sphinx-book-theme
