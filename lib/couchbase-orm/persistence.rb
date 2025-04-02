@@ -248,10 +248,10 @@ module CouchbaseOrm
       self
     end
 
-    def create_or_update(**, &block)
+    def create_or_update(*args, &block)
       raise 'Cannot create_or_update an embedded document!' if embedded?
 
-      self.new_record? ? _create_record(&block) : _update_record(&block)
+      self.new_record? ? _create_record(&block) : _update_record(*args, &block)
     end
 
     def _update_record(*)
