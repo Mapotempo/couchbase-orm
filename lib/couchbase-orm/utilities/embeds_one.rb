@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CouchbaseOrm
   module EmbedsOne
     def embeds_one(name, class_name: nil)
@@ -8,13 +10,13 @@ module CouchbaseOrm
 
       define_method(name) do
         return self.instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
- 
+
         raw = self.read_attribute(name)
         return self.instance_variable_set(instance_var, nil) unless raw.present?
 
         obj = class_name.new(raw)
         obj.instance_variable_set(:@_embedded, true)
-        self.instance_variable_set(instance_var,obj)
+        self.instance_variable_set(instance_var, obj)
       end
 
       define_method("#{name}=") do |val|

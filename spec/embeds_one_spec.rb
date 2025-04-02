@@ -2,19 +2,20 @@
 
 require File.expand_path('support', __dir__)
 
+class Profile < CouchbaseOrm::Base
+  attribute :bio, :string
+end
+
+class User < CouchbaseOrm::Base
+  embeds_one :profile, class_name: 'Profile'
+end
+
+class Node < CouchbaseOrm::Base
+  attribute :value, :string
+  embeds_one :child, class_name: 'Node'
+end
+
 describe CouchbaseOrm::EmbedsOne do
-  before do
-    class Profile < CouchbaseOrm::Base
-      attribute :bio, :string
-    end
-
-    class User < CouchbaseOrm::Base
-      extend CouchbaseOrm::EmbedsOne
-
-      embeds_one :profile, class_name: 'Profile'
-    end
-  end
-
   let(:raw_data) { { bio: 'Software Engineer' } }
 
   it 'defines an attribute with default empty hash' do
@@ -76,7 +77,7 @@ describe CouchbaseOrm::EmbedsOne do
   end
 
   describe 'embedded object from embeds_one' do
-    subject { user.profile }
+    subject(:embedded_profile) { user.profile }
 
     let(:profile) { Profile.new(bio: 'forbidden') }
     let(:user) do
@@ -86,53 +87,44 @@ describe CouchbaseOrm::EmbedsOne do
     end
 
     it 'raises when trying to save/save! an embedded document' do
-      expect { subject.save }.to raise_error('Cannot save an embedded document!')
-      expect { subject.save! }.to raise_error('Cannot save! an embedded document!')
+      expect { embedded_profile.save }.to raise_error('Cannot save an embedded document!')
+      expect { embedded_profile.save! }.to raise_error('Cannot save! an embedded document!')
     end
 
     it 'raises when trying to destroy/destroy! an embedded document' do
-      expect { subject.destroy }.to raise_error('Cannot destroy an embedded document!')
-      expect { subject.destroy! }.to raise_error('Cannot destroy an embedded document!')
+      expect { embedded_profile.destroy }.to raise_error('Cannot destroy an embedded document!')
+      expect { embedded_profile.destroy! }.to raise_error('Cannot destroy an embedded document!')
     end
 
     it 'raises when trying to update/update_attribute/update_attributes an embedded document' do
-      expect { subject.update(bio: 'new value') }.to raise_error('Cannot update an embedded document!')
-      expect { subject.update_attribute(:bio, 'new value') }.to raise_error('Cannot update_attribute an embedded document!')
-      expect { subject.update_attributes(bio: 'new value') }.to raise_error('Cannot update an embedded document!')
+      expect { embedded_profile.update(bio: 'new value') }.to raise_error('Cannot update an embedded document!')
+      expect { embedded_profile.update_attribute(:bio, 'new value') }.to raise_error('Cannot update_attribute an embedded document!')
+      expect { embedded_profile.update_attributes(bio: 'new value') }.to raise_error('Cannot update an embedded document!')
     end
 
     it 'raises when trying to delete/remove an embedded document' do
-      expect { subject.remove }.to raise_error('Cannot delete an embedded document!')
-      expect { subject.delete }.to raise_error('Cannot delete an embedded document!')
+      expect { embedded_profile.remove }.to raise_error('Cannot delete an embedded document!')
+      expect { embedded_profile.delete }.to raise_error('Cannot delete an embedded document!')
     end
 
     it 'raises when trying to update_columns an embedded document' do
-      expect { subject.update_columns(bio: 'new value') }.to raise_error('Cannot update_columns an embedded document!')
+      expect { embedded_profile.update_columns(bio: 'new value') }.to raise_error('Cannot update_columns an embedded document!')
     end
 
     it 'raises when trying to reload an embedded document' do
-      expect { subject.reload }.to raise_error('Cannot reload an embedded document!')
+      expect { embedded_profile.reload }.to raise_error('Cannot reload an embedded document!')
     end
 
     it 'raises when trying to touch an embedded document' do
-      expect { subject.touch }.to raise_error('Cannot touch an embedded document!')
+      expect { embedded_profile.touch }.to raise_error('Cannot touch an embedded document!')
     end
 
     it 'raises when trying to create_or_update an embedded document' do
-      expect { subject.create_or_update(bio: 'new value') }.to raise_error('Cannot create_or_update an embedded document!')
+      expect { embedded_profile.create_or_update(bio: 'new value') }.to raise_error('Cannot create_or_update an embedded document!')
     end
   end
 
   describe 'recursive embeds_one loop' do
-    before do
-      class Node < CouchbaseOrm::Base
-        extend CouchbaseOrm::EmbedsOne
-
-        attribute :value, :string
-        embeds_one :child, class_name: 'Node'
-      end
-    end
-
     it 'can embed a single child recursively' do
       child = Node.new(value: 'Child')
       parent = Node.new(value: 'Parent', child: child)

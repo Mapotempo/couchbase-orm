@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CouchbaseOrm
   module EmbedsMany
     def embeds_many(name, class_name: nil)

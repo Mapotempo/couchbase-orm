@@ -4,6 +4,7 @@
 require 'active_model'
 require 'active_support/hash_with_indifferent_access'
 
+# rubocop:disable Metrics/ModuleLength
 module CouchbaseOrm
   module Persistence
     extend ActiveSupport::Concern
@@ -293,3 +294,4 @@ module CouchbaseOrm
     end
   end
 end
+# rubocop:enable Metrics/ModuleLength

@@ -15,7 +15,7 @@ module CouchbaseOrm
       else
         return if value.nil? || value.valid?
 
-        record.errors.add(attribute, "is invalid")
+        record.errors.add(attribute, 'is invalid')
         value.errors.each do |k, msg|
           record.errors.add("#{attribute}_#{k}".to_sym, msg)
         end
