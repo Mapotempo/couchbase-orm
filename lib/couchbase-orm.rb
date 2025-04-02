@@ -19,6 +19,9 @@ module CouchbaseOrm
   autoload :NestedDocument, 'couchbase-orm/base'
   autoload :HasMany, 'couchbase-orm/utilities/has_many'
   autoload :AttributesDynamic, 'couchbase-orm/attributes/dynamic'
+  autoload :EmbedsOne, 'couchbase-orm/utilities/embeds_one'
+  autoload :EmbedsMany, 'couchbase-orm/utilities/embeds_many'
+  autoload :EmbeddedAssociatedValidator, 'couchbase-orm/validators/embedded_associated_validator'
 
   # if COUCHBASE_ORM_DEBUG environement variable exist then logger is set to Logger::DEBUG level
   # else logger is set to Logger::INFO level

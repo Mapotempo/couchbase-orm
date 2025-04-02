@@ -1,0 +1,38 @@
+module CouchbaseOrm
+  module EmbedsOne
+    def embeds_one(name, class_name: nil)
+      attribute name, :hash, default: {}
+
+      instance_var = "@__assoc_#{name}"
+      class_name = (class_name || name.to_s.camelize).constantize
+
+      define_method(name) do
+        return self.instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
+ 
+        raw = self.read_attribute(name)
+        return self.instance_variable_set(instance_var, nil) unless raw.present?
+
+        obj = class_name.new(raw)
+        obj.instance_variable_set(:@_embedded, true)
+        self.instance_variable_set(instance_var,obj)
+      end
+
+      define_method("#{name}=") do |val|
+        if val.nil?
+          self.write_attribute(name, {})
+          instance_variable_set(instance_var, nil)
+          next
+        end
+
+        obj = val.is_a?(class_name) ? val : class_name.new(val)
+        obj&.instance_variable_set(:@_embedded, true)
+        self.write_attribute(name, obj.serialized_attributes.merge(type: self.class.design_document))
+        instance_variable_set(instance_var, obj)
+      end
+
+      define_method(:"#{name}_reset") do
+        remove_instance_variable(instance_var) if instance_variable_defined?(instance_var)
+      end
+    end
+  end
+end

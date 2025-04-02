@@ -28,6 +28,7 @@ require 'couchbase-orm/utilities/ensure_unique'
 require 'couchbase-orm/utilities/query_helper'
 require 'couchbase-orm/utilities/ignored_properties'
 require 'couchbase-orm/json_transcoder'
+require 'couchbase-orm/utilities/validates_embedded'
 
 module CouchbaseOrm
   module ActiveRecordCompat
@@ -235,6 +236,7 @@ module CouchbaseOrm
     include QueryHelper
     include N1ql
     include Relation
+    include ValidatesEmbedded
 
     extend Join
     extend Enum
@@ -242,6 +244,8 @@ module CouchbaseOrm
     extend HasMany
     extend Index
     extend IgnoredProperties
+    extend EmbedsOne
+    extend EmbedsMany
 
     class << self
       def connect(**options)

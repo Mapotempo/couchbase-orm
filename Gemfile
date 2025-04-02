@@ -6,3 +6,7 @@ git_source(:github) do |repo_name|
 end
 source 'https://rubygems.org'
 gemspec
+
+gem 'rspec-benchmark'
+gem 'byebug'
+gem 'benchmark-ips'

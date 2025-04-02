@@ -76,11 +76,16 @@ module CouchbaseOrm
     end
     alias exists? persisted?
 
+    def embedded?
+      !!@_embedded
+    end
+
       # Saves the model.
       #
       # If the model is new, a record gets created in the database, otherwise
       # the existing record gets updated.
     def save(**options, &block)
+      raise 'Cannot save an embedded document!' if embedded?
       raise 'Cannot save a destroyed document!' if destroyed?
 
       @_with_cas = options[:with_cas]
@@ -95,6 +100,8 @@ module CouchbaseOrm
       # By default, #save! always runs validations. If any of them fail
       # CouchbaseOrm::Error::RecordInvalid gets raised, and the record won't be saved.
     def save!(**options)
+      raise 'Cannot save! an embedded document!' if embedded?
+
       self.class.fail_validate!(self) unless self.save(**options)
       self
     end
@@ -105,6 +112,8 @@ module CouchbaseOrm
       #
       # The record is simply removed, no callbacks are executed.
     def delete(**options)
+      raise 'Cannot delete an embedded document!' if embedded?
+
       options[:cas] = @__metadata__.cas if options.delete(:with_cas)
       CouchbaseOrm.logger.debug "Data - Delete #{self.id}"
       self.class.collection.remove(self.id, **options)
@@ -123,6 +132,8 @@ module CouchbaseOrm
       #
       # There's a series of callbacks associated with #destroy.
     def destroy(**options)
+      raise 'Cannot destroy an embedded document!' if embedded?
+
       return self if destroyed?
       raise 'model not persisted' unless persisted?
 
@@ -148,6 +159,8 @@ module CouchbaseOrm
       # * Validation is skipped.
       # * \Callbacks are invoked.
     def update_attribute(name, value)
+      raise 'Cannot update_attribute an embedded document!' if embedded?
+
       public_send(:"#{name}=", value)
       changed? ? save(validate: false) : true
     end
@@ -159,6 +172,8 @@ module CouchbaseOrm
       # Updates the attributes of the model from the passed-in hash and saves the
       # record. If the object is invalid, the saving will fail and false will be returned.
     def update(hash)
+      raise 'Cannot update an embedded document!' if embedded?
+
       assign_attributes(hash)
       save
     end
@@ -177,6 +192,7 @@ module CouchbaseOrm
       # except if there is more than 16 attributes, in which case
       # the whole record is saved.
     def update_columns(with_cas: false, **hash)
+      raise 'Cannot update_columns an embedded document!' if embedded?
       raise 'unable to update columns, model not persisted' unless id
 
       assign_attributes(hash)
@@ -208,6 +224,7 @@ module CouchbaseOrm
       #
       # This method finds record by its key and modifies the receiver in-place:
     def reload
+      raise 'Cannot reload an embedded document!' if embedded?
       raise 'unable to reload, model not persisted' unless id
 
       CouchbaseOrm.logger.debug "Data - Get #{id}"
@@ -222,6 +239,8 @@ module CouchbaseOrm
 
       # Updates the TTL of the document
     def touch(**options)
+      raise 'Cannot touch an embedded document!' if embedded?
+
       CouchbaseOrm.logger.debug "Data - Touch #{id}"
       _res = self.class.collection.touch(id, async: false, **options)
       @__metadata__.cas = resp.cas
@@ -229,6 +248,8 @@ module CouchbaseOrm
     end
 
     def create_or_update(**, &block)
+      raise 'Cannot create_or_update an embedded document!' if embedded?
+
       self.new_record? ? _create_record(&block) : _update_record(&block)
     end
 
