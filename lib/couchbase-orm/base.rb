@@ -208,6 +208,26 @@ module CouchbaseOrm
         [k, self.class.attribute_types[k].serialize(v)]
       }.to_h
     end
+
+    private
+
+    # Reads a value from an attribute by name following aliases if necessary.
+    # Remove in ActiveModel 7.0
+    def read_attribute(attr_name)
+      name = attr_name.to_s
+      name = self.class.attribute_aliases[name] || name
+
+      @attributes.fetch_value(name)
+    end
+
+    # Writes a value to an attribute by name following aliases if necessary.
+    # Remove in ActiveModel 7.0
+    def write_attribute(attr_name, value)
+      name = attr_name.to_s
+      name = self.class.attribute_aliases[name] || name
+
+      @attributes.write_from_user(name, value)
+    end
   end
 
   class NestedDocument < Document
