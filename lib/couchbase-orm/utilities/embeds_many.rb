@@ -3,7 +3,6 @@
 module CouchbaseOrm
   module EmbedsMany
     def embeds_many(name, class_name: nil)
-
       attribute name, :array, type: :hash, default: []
 
       instance_var = "@__assoc_#{name}"

@@ -11,7 +11,6 @@ module CouchbaseOrm
     end
 
     def _assign_attributes(attrs)
-
       embedded_attrs, normal_attrs = attrs.partition { |k, _| self.class.embedded.include?(k) }.map(&:to_h)
 
       super(normal_attrs)
