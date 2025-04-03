@@ -32,7 +32,7 @@ module CouchbaseOrm
           end
         else
           tab = Array(value)
-          if Array(value).first.is_a?(embedded[:class_name])
+          if tab.first.is_a?(embedded[:class_name])
             _assign_attribute(key, tab)
           else
             write_attribute(key, tab)
