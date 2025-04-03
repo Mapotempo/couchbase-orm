@@ -248,6 +248,8 @@ module CouchbaseOrm
       self
     end
 
+    private
+
     def create_or_update(*args, &block)
       raise 'Cannot create_or_update an embedded document!' if embedded?
 

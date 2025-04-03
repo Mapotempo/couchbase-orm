@@ -118,10 +118,6 @@ describe CouchbaseOrm::EmbedsOne do
     it 'raises when trying to touch an embedded document' do
       expect { embedded_profile.touch }.to raise_error('Cannot touch an embedded document!')
     end
-
-    it 'raises when trying to create_or_update an embedded document' do
-      expect { embedded_profile.create_or_update(bio: 'new value') }.to raise_error('Cannot create_or_update an embedded document!')
-    end
   end
 
   describe 'recursive embeds_one loop' do
