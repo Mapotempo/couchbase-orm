@@ -29,6 +29,7 @@ require 'couchbase-orm/utilities/query_helper'
 require 'couchbase-orm/utilities/ignored_properties'
 require 'couchbase-orm/json_transcoder'
 require 'couchbase-orm/utilities/validates_embedded'
+require 'couchbase-orm/utilities/attribute_processing'
 
 module CouchbaseOrm
   module ActiveRecordCompat
@@ -137,6 +138,7 @@ module CouchbaseOrm
 
     include ::ActiveRecord::Core
     include ActiveRecordCompat
+    include AttributeProcessing
     include Encrypt
 
     extend Enum

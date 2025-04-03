@@ -8,6 +8,14 @@ module CouchbaseOrm
       instance_var = "@__assoc_#{name}"
       class_name = (class_name || name.to_s.camelize).constantize
 
+      embedded[name.to_s] = {
+        type: :one,
+        class_name: class_name,
+        key: name,
+        name: name,
+        instance_var: instance_var,
+      }
+
       define_method(name) do
         return self.instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
 
