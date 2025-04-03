@@ -85,12 +85,12 @@ module CouchbaseOrm
       #
       # If the model is new, a record gets created in the database, otherwise
       # the existing record gets updated.
-    def save(**options, &block)
+    def save(**options)
       raise 'Cannot save an embedded document!' if embedded?
       raise 'Cannot save a destroyed document!' if destroyed?
 
       @_with_cas = options[:with_cas]
-      create_or_update(**options, &block)
+      create_or_update
     end
 
       # Saves the model.
@@ -250,10 +250,8 @@ module CouchbaseOrm
 
     private
 
-    def create_or_update(*args, &block)
-      raise 'Cannot create_or_update an embedded document!' if embedded?
-
-      self.new_record? ? _create_record(&block) : _update_record(*args, &block)
+    def create_or_update(*)
+      self.new_record? ? _create_record : _update_record
     end
 
     def _update_record(*)

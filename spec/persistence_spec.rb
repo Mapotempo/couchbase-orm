@@ -308,7 +308,7 @@ describe CouchbaseOrm::Persistence do
     }.to raise_error(ActiveModel::UnknownAttributeError)
   end
 
-  it 'does not perform validation with validate true' do
+  it 'does not perform validation with validate false' do
     model = ModelWithValidations.new
 
     expect(model.valid?).to be(false)
@@ -316,6 +316,14 @@ describe CouchbaseOrm::Persistence do
     expect(model.persisted?).to be(true)
 
     model.destroy
+  end
+
+  it 'does perform validation with validate true' do
+    model = ModelWithValidations.new
+
+    expect(model.valid?).to be(false)
+    expect(model.save(validate: true)).to be(false)
+    expect(model.persisted?).to be(false)
   end
 
   describe BasicModel do
