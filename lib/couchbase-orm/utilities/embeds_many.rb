@@ -2,24 +2,25 @@
 
 module CouchbaseOrm
   module EmbedsMany
-    def embeds_many(name, class_name: nil)
-      attribute name, :array, type: :hash, default: []
+    def embeds_many(name, class_name: nil, store_as: nil)
+      storage_key = (store_as || name).to_sym
+      attribute storage_key, :array, type: :hash, default: []
 
       instance_var = "@__assoc_#{name}"
       class_name = (class_name || name.to_s.singularize.camelize).constantize
 
-      embedded[name] = {
+      set_embedded(name, {
         type: :many,
         class_name: class_name,
-        key: name,
+        key: storage_key,
         name: name,
         instance_var: instance_var,
-      }
+      })
 
       define_method(name) do
         return self.instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
 
-        embedded_objects = self.read_attribute(name).map do |raw|
+        embedded_objects = self.read_attribute(storage_key).map do |raw|
           obj = class_name.new(raw)
           obj.instance_variable_set(:@_embedded, true)
           obj
@@ -39,7 +40,7 @@ module CouchbaseOrm
           serialized << obj.serialized_attributes.merge(type: self.class.design_document)
         end
 
-        write_attribute(name, serialized)
+        write_attribute(storage_key, serialized)
         instance_variable_set(instance_var, embedded_objects)
       end
 

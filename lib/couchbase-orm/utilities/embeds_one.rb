@@ -2,24 +2,25 @@
 
 module CouchbaseOrm
   module EmbedsOne
-    def embeds_one(name, class_name: nil)
-      attribute name, :hash, default: {}
+    def embeds_one(name, class_name: nil, store_as: nil)
+      storage_key = (store_as || name).to_sym
+      attribute storage_key, :hash, default: {}
 
       instance_var = "@__assoc_#{name}"
       class_name = (class_name || name.to_s.camelize).constantize
 
-      embedded[name] = {
+      set_embedded(name, {
         type: :one,
         class_name: class_name,
-        key: name,
+        key: storage_key,
         name: name,
         instance_var: instance_var,
-      }
+      })
 
       define_method(name) do
         return self.instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
 
-        raw = self.read_attribute(name)
+        raw = self.read_attribute(storage_key)
         return self.instance_variable_set(instance_var, nil) unless raw.present?
 
         obj = class_name.new(raw)
@@ -29,14 +30,14 @@ module CouchbaseOrm
 
       define_method("#{name}=") do |val|
         if val.nil?
-          self.write_attribute(name, {})
+          self.write_attribute(storage_key, {})
           instance_variable_set(instance_var, nil)
           next
         end
 
         obj = val.is_a?(class_name) ? val : class_name.new(val)
         obj&.instance_variable_set(:@_embedded, true)
-        self.write_attribute(name, obj.serialized_attributes.merge(type: self.class.design_document))
+        self.write_attribute(storage_key, obj.serialized_attributes.merge(type: self.class.design_document))
         instance_variable_set(instance_var, obj)
       end
 

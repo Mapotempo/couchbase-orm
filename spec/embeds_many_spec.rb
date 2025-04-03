@@ -16,6 +16,10 @@ class Category < CouchbaseOrm::Base
   embeds_many :subcategories, class_name: 'Category'
 end
 
+class AliasPerson < CouchbaseOrm::Base
+  embeds_many :addresses, store_as: 'a'
+end
+
 describe CouchbaseOrm::EmbedsMany do
   let(:raw_data) { [{ street: '123 Main St' }, { street: '456 Elm St' }] }
 
@@ -59,6 +63,22 @@ describe CouchbaseOrm::EmbedsMany do
     _ = person.addresses
 
     expect(person.instance_variable_defined?(:@__assoc_addresses)).to be true
+  end
+
+  describe 'with store_as / alias support' do
+    it 'stores and retrieves using store_as alias' do
+      person = AliasPerson.new(addresses: [{ street: '789 Oak St' }])
+      person.save!
+
+      # Re-fetch to ensure correct storage and retrieval
+      loaded = AliasPerson.find(person.id)
+      expect(loaded.addresses.first.street).to eq('789 Oak St')
+
+      # Check raw attribute storage (simulate serialized JSON)
+      raw = person.send(:serialized_attributes)
+      expect(raw['a']).to be_an(Array)
+      expect(raw['a'].first['street']).to eq('789 Oak St')
+    end
   end
 
   describe 'embedded object from embeds_many' do

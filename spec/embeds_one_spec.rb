@@ -15,6 +15,10 @@ class Node < CouchbaseOrm::Base
   embeds_one :child, class_name: 'Node'
 end
 
+class AliasUser < CouchbaseOrm::Base
+  embeds_one :profile, store_as: 'p'
+end
+
 describe CouchbaseOrm::EmbedsOne do
   let(:raw_data) { { bio: 'Software Engineer' } }
 
@@ -74,6 +78,22 @@ describe CouchbaseOrm::EmbedsOne do
     _ = user.profile
 
     expect(user.instance_variable_defined?(:@__assoc_profile)).to be true
+  end
+
+  describe 'with store_as / alias support' do
+    it 'stores and retrieves using store_as alias' do
+      person = AliasUser.new(profile: raw_data)
+      person.save!
+
+      # Re-fetch to ensure correct storage and retrieval
+      loaded = AliasUser.find(person.id)
+      expect(loaded.profile.bio).to eq('Software Engineer')
+
+      # Check raw attribute storage (simulate serialized JSON)
+      raw = person.send(:serialized_attributes)
+      expect(raw['p']).to be_an(Hash)
+      expect(raw['p']['bio']).to eq('Software Engineer')
+    end
   end
 
   describe 'embedded object from embeds_one' do
