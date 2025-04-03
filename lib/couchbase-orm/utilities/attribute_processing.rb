@@ -22,7 +22,7 @@ module CouchbaseOrm
 
     def assign_embedded_attributes(attrs)
       attrs.each do |key, value|
-        embedded = self.class.embedded[key]
+        embedded = self.class.embedded[key.to_sym]
 
         if embedded[:type] == :one
           if value.is_a?(embedded[:class_name])
