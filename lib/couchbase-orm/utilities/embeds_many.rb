@@ -8,7 +8,7 @@ module CouchbaseOrm
       instance_var = "@__assoc_#{name}"
       class_name = (class_name || name.to_s.singularize.camelize).constantize
 
-      embedded[name.to_s] = {
+      embedded[name] = {
         type: :many,
         class_name: class_name,
         key: name,
