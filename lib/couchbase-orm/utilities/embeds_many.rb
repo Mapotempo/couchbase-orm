@@ -2,7 +2,7 @@
 
 module CouchbaseOrm
   module EmbedsMany
-    def embeds_many(name, class_name: nil, store_as: nil)
+    def embeds_many(name, class_name: nil, store_as: nil, validate: true)
       storage_key = (store_as || name).to_sym
       attribute storage_key, :array, type: :hash, default: []
 
@@ -16,6 +16,8 @@ module CouchbaseOrm
         name: name,
         instance_var: instance_var,
       })
+
+      validates_embedded(name) if validate
 
       define_method(name) do
         return self.instance_variable_get(instance_var) if instance_variable_defined?(instance_var)

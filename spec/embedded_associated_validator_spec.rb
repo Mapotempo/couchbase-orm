@@ -18,7 +18,8 @@ class User < CouchbaseOrm::Base
   embeds_one :profile, class_name: 'Profile'
   embeds_many :addresses, class_name: 'Address'
 
-  validates_embedded :profile, :addresses
+  embeds_one :old_profile, class_name: 'Profile', validate: false
+  embeds_many :old_addresses, class_name: 'Address', validate: false
 end
 
 describe CouchbaseOrm::EmbeddedAssociatedValidator do
@@ -36,6 +37,13 @@ describe CouchbaseOrm::EmbeddedAssociatedValidator do
 
       expect(user).to be_valid
     end
+
+    it 'passes validation when embedded object is invalid with validate deactivate' do
+      user = User.new(profile: Profile.new(bio: 'Engineer'), old_profile: Profile.new)
+
+      expect(user).to be_valid
+      expect(user.old_profile).not_to be_valid
+    end
   end
 
   context 'with embeds_many' do
@@ -52,6 +60,13 @@ describe CouchbaseOrm::EmbeddedAssociatedValidator do
       user = User.new(addresses: [Address.new(street: '123 Main St'), Address.new(street: '456 Elm St')])
 
       expect(user).to be_valid
+    end
+
+    it 'passes validation when embedded object is invalid with validate deactivate' do
+      user = User.new(addresses: [Address.new(street: '123 Main St'), Address.new(street: '456 Elm St')], old_addresses: [Address.new])
+
+      expect(user).to be_valid
+      expect(user.old_addresses.first).not_to be_valid
     end
   end
 end
