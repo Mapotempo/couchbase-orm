@@ -28,6 +28,8 @@ require 'couchbase-orm/utilities/ensure_unique'
 require 'couchbase-orm/utilities/query_helper'
 require 'couchbase-orm/utilities/ignored_properties'
 require 'couchbase-orm/json_transcoder'
+require 'couchbase-orm/utilities/validates_embedded'
+require 'couchbase-orm/utilities/attribute_processing'
 
 module CouchbaseOrm
   module ActiveRecordCompat
@@ -136,6 +138,7 @@ module CouchbaseOrm
 
     include ::ActiveRecord::Core
     include ActiveRecordCompat
+    include AttributeProcessing
     include Encrypt
 
     extend Enum
@@ -207,6 +210,26 @@ module CouchbaseOrm
         [k, self.class.attribute_types[k].serialize(v)]
       }.to_h
     end
+
+    private
+
+    # Reads a value from an attribute by name following aliases if necessary.
+    # Remove in ActiveModel 7.0
+    def read_attribute(attr_name)
+      name = attr_name.to_s
+      name = self.class.attribute_aliases[name] || name
+
+      @attributes.fetch_value(name)
+    end
+
+    # Writes a value to an attribute by name following aliases if necessary.
+    # Remove in ActiveModel 7.0
+    def write_attribute(attr_name, value)
+      name = attr_name.to_s
+      name = self.class.attribute_aliases[name] || name
+
+      @attributes.write_from_user(name, value)
+    end
   end
 
   class NestedDocument < Document
@@ -235,6 +258,7 @@ module CouchbaseOrm
     include QueryHelper
     include N1ql
     include Relation
+    include ValidatesEmbedded
 
     extend Join
     extend Enum
@@ -242,6 +266,8 @@ module CouchbaseOrm
     extend HasMany
     extend Index
     extend IgnoredProperties
+    extend EmbedsOne
+    extend EmbedsMany
 
     class << self
       def connect(**options)
