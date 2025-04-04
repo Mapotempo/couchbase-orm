@@ -37,7 +37,7 @@ module CouchbaseOrm
           obj = v.is_a?(class_name) ? v : class_name.new(v)
           obj.instance_variable_set(:@_embedded, true)
           embedded_objects << obj
-          serialized << obj.serialized_attributes.merge(type: self.class.design_document)
+          serialized << obj.serialized_attributes
         end
 
         write_attribute(storage_key, serialized)
