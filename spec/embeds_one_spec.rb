@@ -71,7 +71,8 @@ describe CouchbaseOrm::EmbedsOne do
   end
 
   it 'lazily loads the embedded object only on first access' do
-    user = User.new(profile: raw_data)
+    user = User.create!(profile: raw_data)
+    user = User.find(user.id)
 
     expect(user.instance_variable_defined?(:@__assoc_profile)).to be false
 

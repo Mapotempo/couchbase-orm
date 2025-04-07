@@ -56,7 +56,8 @@ describe CouchbaseOrm::EmbedsMany do
   end
 
   it 'lazily loads the embedded collection only on first access' do
-    person = Person.new(addresses: raw_data)
+    person = Person.create!(addresses: raw_data)
+    person = Person.find(person.id)
 
     expect(person.instance_variable_defined?(:@__assoc_addresses)).to be false
 
