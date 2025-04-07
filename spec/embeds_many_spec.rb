@@ -66,6 +66,11 @@ describe CouchbaseOrm::EmbedsMany do
     expect(person.instance_variable_defined?(:@__assoc_addresses)).to be true
   end
 
+  it 'does not include id if id is blank in embedded' do
+    person = Person.new(addresses: raw_data)
+    expect(person.send(:serialized_attributes)['addresses'].first).not_to include('id')
+  end
+
   describe 'with store_as / alias support' do
     it 'stores and retrieves using store_as alias' do
       person = AliasPerson.new(addresses: [{ street: '789 Oak St' }])

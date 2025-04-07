@@ -39,7 +39,9 @@ module CouchbaseOrm
 
         obj = val.is_a?(class_name) ? val : class_name.new(val)
         obj&.instance_variable_set(:@_embedded, true)
-        self.write_attribute(storage_key, obj.serialized_attributes)
+        raw = obj.serialized_attributes
+        raw.delete('id') if raw['id'].blank?
+        self.write_attribute(storage_key, raw)
         instance_variable_set(instance_var, obj)
       end
 

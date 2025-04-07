@@ -81,6 +81,11 @@ describe CouchbaseOrm::EmbedsOne do
     expect(user.instance_variable_defined?(:@__assoc_profile)).to be true
   end
 
+  it 'does not include id if id is blank in embedded' do
+    person = User.new(profile: raw_data)
+    expect(person.send(:serialized_attributes)['profile'].first).not_to include('id')
+  end
+
   describe 'with store_as / alias support' do
     it 'stores and retrieves using store_as alias' do
       person = AliasUser.new(profile: raw_data)
