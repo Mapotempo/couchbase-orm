@@ -6,6 +6,7 @@ require File.expand_path('support', __dir__)
 class BaseTest < CouchbaseOrm::Base
   attribute :name, :string
   attribute :job, :string
+  attribute :status, :string, default: 'active'
 end
 
 class CompareTest < CouchbaseOrm::Base
@@ -45,7 +46,7 @@ describe CouchbaseOrm::Base do
 
   it 'is inspectable' do
     base = BaseTest.create!(name: 'joe')
-    expect(base.inspect).to eq("#<BaseTest id: \"#{base.id}\", name: \"joe\", job: nil>")
+    expect(base.inspect).to eq("#<BaseTest id: \"#{base.id}\", name: \"joe\", job: nil, status: \"active\">")
   end
 
   it 'loads database responses' do
@@ -97,7 +98,7 @@ describe CouchbaseOrm::Base do
     base = BaseTest.create!(name: 'joe')
 
     base_id = base.id
-    expect(base.to_json).to eq({ id: base_id, name: 'joe', job: nil }.to_json)
+    expect(base.to_json).to eq({ id: base_id, name: 'joe', job: nil, status: 'active' }.to_json)
     expect(base.to_json(only: :name)).to eq({ name: 'joe' }.to_json)
 
     base.destroy
@@ -218,6 +219,23 @@ describe CouchbaseOrm::Base do
     expect(BaseTest.find_by_id(base.id).changes).to be_empty
 
     base.destroy
+  end
+
+  it 'sets default value for attribute on creation' do
+    base = BaseTest.create!(name: 'joe')
+    expect(base.status).to eq('active')
+  ensure
+    base.destroy if base.persisted?
+  end
+
+  it 'applies default value when loading a document missing the attribute' do
+    doc_id = 'test_doc_without_status'
+    BaseTest.bucket.default_collection.upsert(doc_id, { type: BaseTest.design_document, name: 'joe' })
+
+    loaded = BaseTest.find(doc_id)
+    expect(loaded.status).to eq('active')
+  ensure
+    loaded.destroy if loaded.persisted?
   end
 
   describe BaseTest do
