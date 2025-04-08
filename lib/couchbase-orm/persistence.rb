@@ -243,9 +243,9 @@ module CouchbaseOrm
                )
              else
                # Fallback to writing the whole document
-               CouchbaseOrm.logger.debug { "Data - Replace #{id} #{attributes.to_s.truncate(200)}" }
-               self.class.collection.replace(id, attributes.except('id').merge(type: self.class.design_document),
-                                             **options)
+               raw = serialized_attributes.except('id').merge(type: self.class.design_document)
+               CouchbaseOrm.logger.debug { "Data - Replace #{id} #{raw.to_s.truncate(200)}" }
+               self.class.collection.replace(id, raw, **options)
              end
 
       # Ensure the model is up to date
@@ -263,7 +263,7 @@ module CouchbaseOrm
 
       CouchbaseOrm.logger.debug "Data - Get #{id}"
       resp = self.class.collection.get!(id)
-      assign_attributes(decode_encrypted_attributes(resp.content.except('id'))) # API return a nil id
+      assign_attributes(resp.content.except('id')) # API return a nil id
       @__metadata__.cas = resp.cas
 
       reset_associations
@@ -292,9 +292,9 @@ module CouchbaseOrm
         run_callbacks :save do
           options = {}
           options[:cas] = @__metadata__.cas if @_with_cas
-          CouchbaseOrm.logger.debug { "_update_record - replace #{id} #{serialized_attributes.to_s.truncate(200)}" }
-          resp = self.class.collection.replace(id,
-                                               serialized_attributes.except('id').merge(type: self.class.design_document), Couchbase::Options::Replace.new(**options))
+          raw = serialized_attributes.except('id').merge(type: self.class.design_document)
+          CouchbaseOrm.logger.debug { "_update_record - replace #{id} #{raw.to_s.truncate(200)}" }
+          resp = self.class.collection.replace(id, raw, Couchbase::Options::Replace.new(**options))
 
           # Ensure the model is up to date
           @__metadata__.cas = resp.cas
@@ -309,9 +309,9 @@ module CouchbaseOrm
       run_callbacks :create do
         run_callbacks :save do
           assign_attributes(id: self.class.uuid_generator.next(self)) unless self.id
-          CouchbaseOrm.logger.debug { "_create_record - Upsert #{id} #{serialized_attributes.to_s.truncate(200)}" }
-          resp = self.class.collection.upsert(self.id,
-                                              serialized_attributes.except('id').merge(type: self.class.design_document), Couchbase::Options::Upsert.new)
+          raw = serialized_attributes.except('id').merge(type: self.class.design_document)
+          CouchbaseOrm.logger.debug { "_create_record - Upsert #{id} #{raw.to_s.truncate(200)}" }
+          resp = self.class.collection.upsert(self.id, raw, Couchbase::Options::Upsert.new)
 
           # Ensure the model is up to date
           @__metadata__.cas = resp.cas
