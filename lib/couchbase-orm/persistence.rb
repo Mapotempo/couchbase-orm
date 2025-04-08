@@ -80,9 +80,9 @@ module CouchbaseOrm
     end
 
     def init_with(coder)
-      CouchbaseOrm.logger.debug { "Initialize model #{model} with #{coder['attributes'].to_s.truncate(200)}" }
       @__metadata__ = Metadata.new
       @attributes = coder['attributes']
+      CouchbaseOrm.logger.debug { "Initialize model #{self.class} with #{@attributes&.to_s&.truncate(200)}" }
 
       init_internals
 
