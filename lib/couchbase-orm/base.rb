@@ -72,7 +72,7 @@ module CouchbaseOrm
 
       def attributes_builder # :nodoc:
         unless defined?(@attributes_builder) && @attributes_builder
-          defaults = _default_attributes.except(*(column_names - [primary_key]))
+          defaults = _default_attributes
           @attributes_builder = ActiveModel::AttributeSet::Builder.new(attribute_types, defaults)
         end
         @attributes_builder
