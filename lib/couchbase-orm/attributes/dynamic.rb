@@ -15,7 +15,7 @@ module CouchbaseOrm
       #
       # @return [ true | false ] True if it does, false if not.
     def respond_to?(name, include_private = false)
-      super || attributes&.key?(name.to_s.reader)
+      super || @attributes.key?(name.to_s.reader)
     end
 
     private
@@ -32,14 +32,8 @@ module CouchbaseOrm
       if responds
         public_send(name.writer, value)
       else
-        type = define_attribute_type(value)
-        type = if type == :array
-                 item_type = define_attribute_type(value.first)
-                 ActiveModel::Type.lookup(type, type: item_type)
-               else
-                 ActiveModel::Type.lookup(type)
-               end
-        @attributes[name] = ActiveModel::Attribute.from_database(name, value, type)
+        type = lookup_attribute_type(value)
+        @attributes[name] = ActiveModel::Attribute.from_user(name, value, type)
       end
     end
 
@@ -69,6 +63,17 @@ module CouchbaseOrm
       type
     end
 
+    def lookup_attribute_type(value)
+      type = define_attribute_type(value)
+
+      if type == :array
+        item_type = define_attribute_type(value.first)
+        ActiveModel::Type.lookup(:array, type: item_type)
+      else
+        ActiveModel::Type.lookup(type)
+      end
+    end
+
       # Define a reader method  for a dynamic attribute.
       #
       # @example Define a reader method.
@@ -80,7 +85,7 @@ module CouchbaseOrm
 
       instance_eval do
         define_singleton_method(name) do
-          @attributes[getter].value
+          @attributes[name].value
         end
       end
     end
@@ -123,8 +128,11 @@ module CouchbaseOrm
         @attributes.write_from_user(getter, args.first)
         args.first
       else
+        value = @attributes[getter].value
+        type = lookup_attribute_type(value)
+        @attributes[getter] = ActiveModel::Attribute.from_database(getter, value, type)
         define_dynamic_reader(getter)
-        @attributes[getter].value
+        send(getter)
       end
     end
   end

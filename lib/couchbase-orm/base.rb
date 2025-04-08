@@ -31,8 +31,8 @@ require 'couchbase-orm/json_transcoder'
 
 module CouchbaseOrm
   module ActiveRecordCompat
-      # try to avoid dependencies on too many active record classes
-      # by exemple we don't want to go down to the concept of tables
+    # try to avoid dependencies on too many active record classes
+    # by exemple we don't want to go down to the concept of tables
 
     extend ActiveSupport::Concern
 
@@ -68,6 +68,14 @@ module CouchbaseOrm
 
       def type_for_attribute(attribute)
         attribute_types[attribute]
+      end
+
+      def attributes_builder # :nodoc:
+        unless defined?(@attributes_builder) && @attributes_builder
+          defaults = _default_attributes.except(*(column_names - [primary_key]))
+          @attributes_builder = ActiveModel::AttributeSet::Builder.new(attribute_types, defaults)
+        end
+        @attributes_builder
       end
 
       if ActiveModel::VERSION::MAJOR < 6
@@ -140,52 +148,18 @@ module CouchbaseOrm
 
     extend Enum
 
-    define_model_callbacks :initialize, only: :after
+    define_model_callbacks :initialize, :find, only: :after
     define_model_callbacks :create, :destroy, :save, :update
 
     Metadata = Struct.new(:cas)
 
     class MismatchTypeError < RuntimeError; end
 
-    def initialize(model = nil, ignore_doc_type: false, **attributes)
+    def initialize(attributes = nil)
       CouchbaseOrm.logger.debug { "Initialize model #{model} with #{attributes.to_s.truncate(200)}" }
       @__metadata__ = Metadata.new
 
-      super()
-
-      if model
-        case model
-        when Couchbase::Collection::GetResult
-          doc = model.content || raise('empty response provided')
-          type = doc.delete('type')
-          doc.delete('id')
-
-          if type && !ignore_doc_type && type.to_s != self.class.design_document
-            raise CouchbaseOrm::Error::TypeMismatchError.new(
-              "document type mismatch, #{type} != #{self.class.design_document}", self
-            )
-          end
-
-          self.id = attributes[:id] if attributes[:id].present?
-          @__metadata__.cas = model.cas
-
-          assign_attributes(decode_encrypted_attributes(doc))
-          clear_changes_information
-        when CouchbaseOrm::Base
-          clear_changes_information
-          super(model.attributes.except(:id, 'type'))
-        else
-          clear_changes_information
-          super(decode_encrypted_attributes(**attributes.merge(Hash(model))))
-        end
-      else
-        clear_changes_information
-        super(attributes)
-      end
-
-      yield self if block_given?
-
-      run_callbacks :initialize
+      super(attributes)
     end
 
     def attributes
@@ -203,9 +177,15 @@ module CouchbaseOrm
     protected
 
     def serialized_attributes
-      encode_encrypted_attributes.map { |k, v|
-        [k, self.class.attribute_types[k].serialize(v)]
-      }.to_h
+      types = self.class.attribute_types
+      result = {}
+
+      attributes.each do |k, v|
+        type = types[k]
+        result[k] = type ? type.serialize(v) : v
+      end
+
+      result
     end
   end
 
@@ -221,6 +201,7 @@ module CouchbaseOrm
       other.instance_of?(self.class) &&
         ((respond_to?(:id) && !id.nil? && other.id == id) || other.serialized_attributes == serialized_attributes)
     end
+
     alias eql? ==
   end
 
@@ -293,12 +274,14 @@ module CouchbaseOrm
         options[:quiet] = true
         find(*ids, **options)
       end
+
       alias [] find_by_id
 
       def exists?(id)
         CouchbaseOrm.logger.debug { "Data - Exists? #{id}" }
         collection.exists(id).exists
       end
+
       alias has_key? exists?
 
       private
@@ -311,7 +294,8 @@ module CouchbaseOrm
                  collection.get_multi!(ids, transcoder: transcoder)
                end.to_a
         Array.wrap(data).zip(ids).each_with_object([]) do |pair, records|
-          records << self.new(pair[0], id: pair[1]) if pair[0]
+          doc, id = pair
+          records << self.instantiate(doc.content, id, doc.cas, self) if doc
         end
       end
     end
@@ -323,37 +307,37 @@ module CouchbaseOrm
       _write_attribute('id', value)
     end
 
-      # Public: Allows for access to ActiveModel functionality.
-      #
-      # Returns self.
+    # Public: Allows for access to ActiveModel functionality.
+    #
+    # Returns self.
     def to_model
       self
     end
 
-      # Public: Hashes identifying properties of the instance
-      #
-      # Ruby normally hashes an object to be used in comparisons.  In our case
-      # we may have two techincally different objects referencing the same entity id.
-      #
-      # Returns a string representing the unique key.
+    # Public: Hashes identifying properties of the instance
+    #
+    # Ruby normally hashes an object to be used in comparisons.  In our case
+    # we may have two techincally different objects referencing the same entity id.
+    #
+    # Returns a string representing the unique key.
     def hash
-      "#{self.class.name}-#{self.id}-#{@__metadata__.cas}-#{@__attributes__.hash}".hash
+      "#{self.class.name}-#{self.id}-#{@__metadata__.cas}-#{@attributes.hash}".hash
     end
 
-      # Public: Overrides eql? to use == in the comparison.
-      #
-      # other - Another object to compare to
-      #
-      # Returns a boolean.
+    # Public: Overrides eql? to use == in the comparison.
+    #
+    # other - Another object to compare to
+    #
+    # Returns a boolean.
     def eql?(other)
       self == other
     end
 
-      # Public: Overrides == to compare via class and entity id.
-      #
-      # other - Another object to compare to
-      #
-      # Returns a boolean.
+    # Public: Overrides == to compare via class and entity id.
+    #
+    # other - Another object to compare to
+    #
+    # Returns a boolean.
     def ==(other)
       super || other.instance_of?(self.class) && !id.nil? && other.id == id
     end

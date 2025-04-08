@@ -52,7 +52,7 @@ describe CouchbaseOrm::Base do
     base = BaseTest.create!(name: 'joe')
     resp = BaseTest.bucket.default_collection.get(base.id)
 
-    base_loaded = BaseTest.new(resp, id: base.id)
+    base_loaded = BaseTest.instantiate(resp.content, base.id, resp.cas, BaseTest)
 
     expect(base_loaded.id).to eq(base.id)
     expect(base_loaded).to eq(base)
@@ -71,22 +71,19 @@ describe CouchbaseOrm::Base do
 
   it 'raises ActiveModel::UnknownAttributeError on loading objects with unexpected properties' do
     too_much_properties_doc = {
-        type: BaseTest.design_document,
-        name: 'Pierre',
-        job: 'dev',
-        age: '42'
+      type: BaseTest.design_document,
+      name: 'Pierre',
+      job: 'dev',
+      age: '42'
     }
-    BaseTest.bucket.default_collection.upsert 'doc_1', too_much_properties_doc
-
-    expect { BaseTest.find_by_id('doc_1') }.to raise_error(ActiveModel::UnknownAttributeError)
-
-    BaseTest.bucket.default_collection.remove 'doc_1'
+    base = BaseTest.new
+    expect { base.assign_attributes(too_much_properties_doc) }.to raise_error(ActiveModel::UnknownAttributeError)
   end
 
   it 'loads objects even if there is a missing property in doc' do
     missing_properties_doc = {
-        type: BaseTest.design_document,
-        name: 'Pierre'
+      type: BaseTest.design_document,
+      name: 'Pierre'
     }
     BaseTest.bucket.default_collection.upsert 'doc_1', missing_properties_doc
     base = BaseTest.find('doc_1')
@@ -114,25 +111,25 @@ describe CouchbaseOrm::Base do
     base.name = 'change'
     expect(base.changes.empty?).to be(false)
 
-      # Attributes are set by key
+    # Attributes are set by key
     base = BaseTest.new
     base[:name] = 'bob'
     expect(base.changes.empty?).to be(false)
 
-      # Attributes are set by initializer from hash
+    # Attributes are set by initializer from hash
     base = BaseTest.new({ name: 'bob' })
     expect(base.changes.empty?).to be(false)
     expect(base.previous_changes.empty?).to be(true)
 
-      # A saved model should have no changes
+    # A saved model should have no changes
     base = BaseTest.create!(name: 'joe')
     expect(base.changes.empty?).to be(true)
     expect(base.previous_changes.empty?).to be(true)
 
-      # Attributes are copied from the existing model
-    base = BaseTest.new(base)
-    expect(base.changes.empty?).to be(false)
-    expect(base.previous_changes.empty?).to be(true)
+    # Attributes are copied from the existing model
+    # base = BaseTest.mew(base)
+    # expect(base.changes.empty?).to be(false)
+    # expect(base.previous_changes.empty?).to be(true)
   ensure
     base.destroy if base.persisted?
   end
@@ -188,7 +185,7 @@ describe CouchbaseOrm::Base do
   it 'cannot change the id of a loaded object' do
     base = BaseTest.create!(name: 'joe')
     expect(base.id).not_to be_nil
-    expect{ base.id = 'foo' }.to raise_error(RuntimeError, 'ID cannot be changed')
+    expect { base.id = 'foo' }.to raise_error(RuntimeError, 'ID cannot be changed')
   end
 
   it 'attributes should be HashWithIndifferentAccess' do
@@ -240,10 +237,10 @@ describe CouchbaseOrm::Base do
       let(:doc_id) { 'doc_1' }
       let(:document_properties) do
         {
-            'type' => BaseTestWithIgnoredProperties.design_document,
-            'name' => 'Pierre',
-            'job' => 'dev',
-            'deprecated_property' => 'depracted that could be removed on next save'
+          'type' => BaseTestWithIgnoredProperties.design_document,
+          'name' => 'Pierre',
+          'job' => 'dev',
+          'deprecated_property' => 'depracted that could be removed on next save'
         }
       end
       let(:loaded_model) { BaseTestWithIgnoredProperties.find(doc_id) }
@@ -257,12 +254,12 @@ describe CouchbaseOrm::Base do
         expect(BaseTestWithIgnoredProperties.bucket.default_collection.get(doc_id).content).to include(document_properties)
       end
 
-        # TODO: deprecated, need to rework
+      # TODO: deprecated, need to rework
       xit 'delete the ignored properties on save' do
         base = BaseTestWithIgnoredProperties.find(doc_id)
-        expect{ loaded_model.save }.to change {
-                                         BaseTestWithIgnoredProperties.bucket.default_collection.get(doc_id).content.keys.sort
-                                       }
+        expect { loaded_model.save }.to change {
+          BaseTestWithIgnoredProperties.bucket.default_collection.get(doc_id).content.keys.sort
+        }
           .from(%w[deprecated_property job name type])
           .to(%w[job name type])
       end

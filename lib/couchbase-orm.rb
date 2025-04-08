@@ -85,7 +85,7 @@ module CouchbaseOrm
 
     ::CouchbaseOrm::Base.descendants.each do |model|
       if model.design_document == ddoc
-        return model.new(result, id: id)
+        return model.instantiate(result.content, id, nil, model)
       end
     end
     nil
