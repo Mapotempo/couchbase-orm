@@ -156,7 +156,7 @@ module CouchbaseOrm
     class MismatchTypeError < RuntimeError; end
 
     def initialize(attributes = nil)
-      CouchbaseOrm.logger.debug { "Initialize model #{self.class} with #{attributes&.to_s.&truncate(200)}" }
+      CouchbaseOrm.logger.debug { "Initialize model #{self.class} with #{attributes&.to_s&.truncate(200)}" }
       @__metadata__ = Metadata.new
 
       super(attributes)
