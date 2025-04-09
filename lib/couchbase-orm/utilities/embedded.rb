@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module CouchbaseOrm
-  module AttributeProcessing
+  module Embedded
     extend ActiveSupport::Concern
 
     class_methods do
@@ -16,6 +16,12 @@ module CouchbaseOrm
 
       def key_to_embedded_name
         @key_to_embedded_name ||= embedded.map { |name, config| [config[:key], name] }.to_h
+      end
+    end
+
+    included do
+      def embedded?
+        !!@_embedded
       end
     end
   end

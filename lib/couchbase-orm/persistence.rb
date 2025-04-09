@@ -124,10 +124,6 @@ module CouchbaseOrm
 
     alias exists? persisted?
 
-    def embedded?
-      !!@_embedded
-    end
-
     # Saves the model.
     #
     # If the model is new, a record gets created in the database, otherwise
