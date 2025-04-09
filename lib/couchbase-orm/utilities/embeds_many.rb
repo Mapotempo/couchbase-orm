@@ -24,7 +24,7 @@ module CouchbaseOrm
 
         embedded_objects = self.read_attribute(storage_key).map do |raw|
           obj = class_name.new(raw)
-          obj.instance_variable_set(:@_embedded, true)
+          obj.embedded = true
           obj
         end
 
@@ -37,7 +37,7 @@ module CouchbaseOrm
 
         val.each do |v|
           obj = v.is_a?(class_name) ? v : class_name.new(v)
-          obj.instance_variable_set(:@_embedded, true)
+          obj.embedded = true
           embedded_objects << obj
           raw = obj.serialized_attributes
           raw.delete('id') if raw['id'].blank?

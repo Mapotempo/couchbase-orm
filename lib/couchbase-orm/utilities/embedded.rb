@@ -20,8 +20,15 @@ module CouchbaseOrm
     end
 
     included do
+
+      protected
+
       def embedded?
         !!@_embedded
+      end
+
+      def embedded=(value)
+        @_embedded = value
       end
     end
   end
