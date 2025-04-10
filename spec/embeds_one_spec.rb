@@ -40,6 +40,32 @@ end
 class ChildModel < ParentModel
 end
 
+class Company < CouchbaseOrm::Base
+  attribute :name, :string
+end
+
+class Contact < CouchbaseOrm::Base
+  attribute :name, :string
+  belongs_to :company
+end
+
+class Client < CouchbaseOrm::Base
+  embeds_one :contact, class_name: 'Contact'
+end
+
+class Comment < CouchbaseOrm::Base
+  attribute :content, :string
+  belongs_to :comments_container, class_name: 'CommentsContainer'
+end
+
+class CommentsContainer < CouchbaseOrm::Base
+  has_many :comments, type: :n1ql, class_name: 'Comment'
+end
+
+class Article < CouchbaseOrm::Base
+  embeds_one :comments_container, class_name: 'CommentsContainer'
+end
+
 describe CouchbaseOrm::EmbedsOne do
   let(:raw_data) { { bio: 'Software Engineer' } }
 
@@ -308,6 +334,34 @@ describe CouchbaseOrm::EmbedsOne do
         ChildModel.embedded[:profile][:class_name] = 'Overridden'
         expect(ParentModel.embedded[:profile][:class_name]).to eq(Profile)
       end
+    end
+  end
+
+  describe 'embeds_one with associations inside embedded object' do
+    it 'can access a belongs_to association from embedded object' do
+      company = Company.create!(name: 'Tech Corp')
+      contact = Contact.new(name: 'Alice', company: company)
+      client = Client.new(contact: contact)
+
+      expect(client.contact).to be_a(Contact)
+      expect(client.contact.company).to eq(company)
+      expect(client.contact.company.name).to eq('Tech Corp')
+    end
+
+    it 'can define has_many inside embedded object and access collection' do
+      comment_container = CommentsContainer.new
+      comment_container.id = CommentsContainer.uuid_generator.next(comment_container)
+      article = Article.create!(comments_container: comment_container)
+      comment1 = Comment.create!(content: 'First!', comments_container: article.comments_container)
+      comment2 = Comment.create!(content: 'Great article!', comments_container: article.comments_container)
+      article = Article.find(article.id)
+
+      expect(article.comments_container.comments).to all(be_a(Comment))
+      expect(article.comments_container.comments.map(&:content)).to include('First!', 'Great article!')
+    ensure
+      comment1.destroy! if comment1&.persisted?
+      comment2.destroy! if comment2&.persisted?
+      article.destroy! if article&.persisted?
     end
   end
 end

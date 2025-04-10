@@ -40,6 +40,33 @@ end
 class ChildPerson < BasePerson
 end
 
+class AddressBook < CouchbaseOrm::Base
+  attribute :label, :string
+  has_many :contacts, type: :n1ql, class_name: 'Contact'
+end
+
+class Contact < CouchbaseOrm::Base
+  attribute :name, :string
+  belongs_to :address_book
+end
+
+class PersonWithBook < CouchbaseOrm::Base
+  embeds_many :address_books, class_name: 'AddressBook'
+end
+
+class City < CouchbaseOrm::Base
+  attribute :name, :string
+end
+
+class AddressWithCity < CouchbaseOrm::Base
+  attribute :street, :string
+  belongs_to :city
+end
+
+class Citizen < CouchbaseOrm::Base
+  embeds_many :addresses, class_name: 'AddressWithCity'
+end
+
 describe CouchbaseOrm::EmbedsMany do
   let(:raw_data) { [{ street: '123 Main St' }, { street: '456 Elm St' }] }
 
@@ -282,6 +309,36 @@ describe CouchbaseOrm::EmbedsMany do
     it 'modifying child embedded does not affect parent' do
       ChildPerson.embedded[:addresses][:class_name] = 'Overridden'
       expect(BasePerson.embedded[:addresses][:class_name]).to eq(Address)
+    end
+  end
+
+  describe 'embeds_many with associations inside embedded object' do
+    it 'can access a belongs_to association from embedded object' do
+      city = City.create!(name: 'Paris')
+      address = AddressWithCity.new(street: '12 Rue de Python', city: city)
+      citizen = Citizen.new(addresses: [address])
+
+      expect(citizen.addresses.first).to be_a(AddressWithCity)
+      expect(citizen.addresses.first.city).to eq(city)
+      expect(citizen.addresses.first.city.name).to eq('Paris')
+    end
+
+    it 'can access a has_many association from embedded object' do
+      address_book = AddressBook.new(label: 'Work Contacts')
+      address_book.id = AddressBook.uuid_generator.next(address_book)
+
+      person = PersonWithBook.create!(address_books: [address_book])
+      contact1 = Contact.create!(name: 'Alice', address_book: person.address_books.first)
+      contact2 = Contact.create!(name: 'Bob', address_book: person.address_books.first)
+
+      person = PersonWithBook.find(person.id)
+
+      expect(person.address_books.first.contacts).to all(be_a(Contact))
+      expect(person.address_books.first.contacts.map(&:name)).to include('Alice', 'Bob')
+    ensure
+      contact1.destroy! if contact1&.persisted?
+      contact2.destroy! if contact2&.persisted?
+      person.destroy! if person&.persisted?
     end
   end
 end
