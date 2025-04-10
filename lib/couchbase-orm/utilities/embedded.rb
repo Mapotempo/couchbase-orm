@@ -20,6 +20,11 @@ module CouchbaseOrm
     end
 
     included do
+      def dup
+        copy = super
+        copy.cleanup_embedded_memoization!
+        copy
+      end
 
       protected
 
@@ -29,6 +34,13 @@ module CouchbaseOrm
 
       def embedded=(value)
         @_embedded = value
+      end
+
+      def cleanup_embedded_memoization!
+        self.class.embedded.each_value do |value|
+          ivar = value[:instance_var]
+          remove_instance_variable(ivar) if instance_variable_defined?(ivar)
+        end
       end
     end
   end

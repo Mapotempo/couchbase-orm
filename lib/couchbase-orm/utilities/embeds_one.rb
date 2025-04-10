@@ -4,7 +4,7 @@ module CouchbaseOrm
   module EmbedsOne
     def embeds_one(name, class_name: nil, store_as: nil, validate: true)
       storage_key = (store_as || name).to_sym
-      attribute storage_key, :hash, default: {}
+      attribute storage_key, :hash, default: nil
 
       instance_var = "@__assoc_#{name}"
       class_name = (class_name || name.to_s.camelize).constantize
@@ -32,7 +32,7 @@ module CouchbaseOrm
 
       define_method("#{name}=") do |val|
         if val.nil?
-          self.write_attribute(storage_key, {})
+          self.write_attribute(storage_key, nil)
           instance_variable_set(instance_var, nil)
           next
         end

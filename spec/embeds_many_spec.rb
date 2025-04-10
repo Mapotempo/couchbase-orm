@@ -160,4 +160,62 @@ describe CouchbaseOrm::EmbedsMany do
       expect(root.subcategories.first.subcategories.first.subcategories.first.name).to eq('Level 3')
     end
   end
+
+  it 'reflects embedded assign in serialized attributes' do
+    person = Person.new(addresses: [{ street: 'Old St' }])
+    person.addresses = [Address.new(street: 'New St')]
+
+    serialized = person.send(:serialized_attributes)
+    expect(serialized['addresses'].first['street']).to eq('New St')
+  end
+
+  it 'does not reflect embedded changes in serialized attributes' do
+    person = Person.new(addresses: [{ street: 'Old St' }])
+    person.addresses.first.street = 'New St'
+
+    serialized = person.send(:serialized_attributes)
+    expect(serialized['addresses'].first['street']).not_to eq('New St')
+  end
+
+  it 'does not mark parent as changed when only embedded is modified (unless tracked)' do
+    person = Person.create!(addresses: [{ street: 'Old St' }])
+    person.reload
+
+    expect(person.changed?).to be false
+
+    person.addresses.first.street = 'New St'
+    expect(person.changed?).to be false
+  end
+
+  it 'updates embedded attributes without replacing instances' do
+    person = Person.new(addresses: [{ street: 'Initial' }])
+    original = person.addresses.first
+    person.addresses = [{ street: 'Updated' }]
+
+    expect(person.addresses).not_to be_empty
+    expect(person.addresses.first.street).to eq('Updated')
+    expect(person.addresses.first).not_to equal(original)
+  end
+
+  it 'sets the embedded documents to empty when assigned nil' do
+    person = Person.new(addresses: [{ street: 'Something' }])
+    person.addresses = nil
+
+    expect(person.addresses).to eq([])
+    expect(person.attributes['addresses']).to eq([])
+  end
+
+  it 'returns readable inspect for embedded objects' do
+    person = Person.new(addresses: [{ street: 'Visible' }])
+    expect(person.addresses.first.inspect).to include('street')
+  end
+
+  it 'duplicates the embedded objects when parent is duped' do
+    person = Person.new(addresses: [{ street: 'original' }])
+    copy = person.dup
+
+    expect(copy.addresses).not_to be_empty
+    expect(copy.addresses.first.street).to eq('original')
+    expect(copy.addresses.first).not_to equal(person.addresses.first)
+  end
 end

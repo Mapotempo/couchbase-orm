@@ -35,7 +35,7 @@ module CouchbaseOrm
         embedded_objects = []
         serialized = []
 
-        val.each do |v|
+        Array(val).each do |v|
           obj = v.is_a?(class_name) ? v : class_name.new(v)
           obj.embedded = true
           embedded_objects << obj

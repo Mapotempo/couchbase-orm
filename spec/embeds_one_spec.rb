@@ -4,6 +4,7 @@ require File.expand_path('support', __dir__)
 
 class Profile < CouchbaseOrm::Base
   attribute :bio, :string
+  validates :bio, presence: true
 end
 
 class User < CouchbaseOrm::Base
@@ -22,9 +23,9 @@ end
 describe CouchbaseOrm::EmbedsOne do
   let(:raw_data) { { bio: 'Software Engineer' } }
 
-  it 'defines an attribute with default empty hash' do
+  it 'defines an attribute with default nil' do
     user = User.new
-    expect(user.attributes['profile']).to eq({})
+    expect(user.attributes['profile']).to eq(nil)
   end
 
   it 'returns nil if raw data is not present' do
@@ -56,7 +57,6 @@ describe CouchbaseOrm::EmbedsOne do
     original = user.profile
     user.profile_reset
 
-    # force re-read
     new_instance = user.profile
     expect(new_instance).to be_a(Profile)
     expect(new_instance).not_to equal(original)
@@ -91,11 +91,9 @@ describe CouchbaseOrm::EmbedsOne do
       person = AliasUser.new(profile: raw_data)
       person.save!
 
-      # Re-fetch to ensure correct storage and retrieval
       loaded = AliasUser.find(person.id)
       expect(loaded.profile.bio).to eq('Software Engineer')
 
-      # Check raw attribute storage (simulate serialized JSON)
       raw = person.send(:serialized_attributes)
       expect(raw['p']).to be_an(Hash)
       expect(raw['p']['bio']).to eq('Software Engineer')
@@ -181,5 +179,69 @@ describe CouchbaseOrm::EmbedsOne do
         node.send(:serialized_attributes)
       }.not_to raise_error
     end
+  end
+
+  it 'reflects embedded assign in serialized attributes' do
+    user = User.new(profile: { bio: 'Old Bio' })
+    user.profile = Profile.new(bio: 'New Bio')
+
+    serialized = user.send(:serialized_attributes)
+    expect(serialized['profile']['bio']).to eq('New Bio')
+  end
+
+  it 'does not reflects embedded changes in serialized attributes' do
+    user = User.new(profile: { bio: 'Old Bio' })
+    user.profile.bio = 'New Bio'
+
+    serialized = user.send(:serialized_attributes)
+    expect(serialized['profile']['bio']).not_to eq('New Bio')
+  end
+
+  it 'does not mark parent as changed when only embedded is modified (unless tracked)' do
+    user = User.create!(profile: { bio: 'Old Bio' })
+    user.reload
+
+    expect(user.changed?).to be false
+
+    user.profile.bio = 'New Bio'
+    expect(user.changed?).to be false
+  end
+
+  it 'invalidates the parent if the embedded is invalid' do
+    user = User.new(profile: { bio: nil })
+    expect(user.valid?).to be false
+    expect(user.errors[:profile]).not_to be_empty
+  end
+
+  it 'updates embedded attributes without replacing instance' do
+    user = User.new(profile: { bio: 'Initial' })
+    original = user.profile
+    user.profile = { bio: 'Updated' }
+
+    expect(user.profile).not_to be_nil
+    expect(user.profile.bio).to eq('Updated')
+    expect(user.profile).not_to equal(original)
+  end
+
+  it 'sets the embedded document to nil' do
+    user = User.new(profile: { bio: 'Something' })
+    user.profile = nil
+
+    expect(user.profile).to be_nil
+    expect(user.attributes['profile']).to be_nil
+  end
+
+  it 'returns readable inspect for embedded objects' do
+    user = User.new(profile: { bio: 'Visible' })
+    expect(user.profile.inspect).to include('bio')
+  end
+
+  it 'duplicates the embedded object when parent is duped' do
+    user = User.new(profile: { bio: 'original' })
+    copy = user.dup
+
+    expect(copy.profile).not_to be_nil
+    expect(copy.profile.bio).to eq('original')
+    expect(copy.profile).not_to equal(user.profile)
   end
 end
