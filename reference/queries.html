@@ -1,0 +1,791 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Queries &#8212; CouchbaseOrm  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'reference/queries';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Callbacks" href="callbacks.html" />
+    <link rel="prev" title="CRUD Operations" href="crud.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">CouchbaseOrm  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation-configuration.html">Installation &amp; Configuration</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installations.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compatibility.html">Compatibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rails-integration.html">Rails Integration</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../schema-configuration.html">Schema Configuration</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="attributes.html">Attribute Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="associations.html">Associations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="validations.html">Validation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../working-with-data.html">Working With Data</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="crud.html">CRUD Operations</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Queries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callbacks.html">Callbacks</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference external" href="https://mapotempo.github.io/couchbase-orm/api/">API</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/reference/queries.txt" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.txt</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Queries</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#condition-syntax">Condition Syntax</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-syntax">Attribute Syntax</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sql-syntax">SQL Syntax</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#logical-operations">Logical Operations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#not-behavior"><code class="docutils literal notranslate"><span class="pre">not</span></code> Behavior</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ordering">Ordering</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#finding-by-id">Finding By <code class="docutils literal notranslate"><span class="pre">_id</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-query-methods">Additional Query Methods</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#class-methods">Class Methods</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="queries">
+<span id="id1"></span><h1>Queries<a class="headerlink" href="#queries" title="Link to this heading">#</a></h1>
+<nav class="contents singlecol local" id="on-this-page">
+<p class="topic-title">On this page</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#condition-syntax" id="id5">Condition Syntax</a></p>
+<ul>
+<li><p><a class="reference internal" href="#attribute-syntax" id="id6">Attribute Syntax</a></p></li>
+<li><p><a class="reference internal" href="#sql-syntax" id="id7">SQL Syntax</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#logical-operations" id="id8">Logical Operations</a></p>
+<ul>
+<li><p><a class="reference internal" href="#not-behavior" id="id9"><code class="docutils literal notranslate"><span class="pre">not</span></code> Behavior</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#ordering" id="id10">Ordering</a></p></li>
+<li><p><a class="reference internal" href="#finding-by-id" id="id11">Finding By <code class="docutils literal notranslate"><span class="pre">_id</span></code></a></p></li>
+<li><p><a class="reference internal" href="#additional-query-methods" id="id12">Additional Query Methods</a></p>
+<ul>
+<li><p><a class="reference internal" href="#class-methods" id="id13">Class Methods</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<p>CouchbaseOrm provides a rich query DSL inspired by ActiveRecord. A trivial query
+looks as follows:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Depeche Mode&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A more complex query utilizing various CouchbaseOrm features could be as follows:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Band</span><span class="o">.</span>
+<span class="w">  </span><span class="n">where</span><span class="p">(</span><span class="ss">:founded</span><span class="o">.</span><span class="n">gte</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s2">&quot;1980-01-01&quot;</span><span class="p">)</span><span class="o">.</span>
+<span class="w">  </span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;Tool&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Deftones&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">)</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>The query methods return <code class="docutils literal notranslate"><span class="pre">CouchbaseOrm::Relation::CouchbaseOrm_Relation</span></code> objects, which are chainable
+and lazily evaluated wrappers for Couchbase query language (SQL).
+The queries are executed when their result sets are iterated. For example:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="c1"># Construct a CouchbaseOrm_Relation object:</span>
+
+<span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Deftones&#39;</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;CouchbaseOrm::Relation::CouchbaseOrm_Relation</span>
+<span class="c1">#   where: [{&quot;name&quot;=&gt;&quot;Deftones&quot;}]</span>
+<span class="c1">#   model:    Band&gt;</span>
+
+<span class="c1"># Evaluate the query and get matching documents:</span>
+
+<span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Deftones&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_a</span>
+<span class="c1"># =&gt; [#&lt;Band _id: 5ebdeddfe1b83265a376a760, name: &quot;Deftones&quot;, description: nil&gt;]</span>
+</pre></div>
+</div>
+<p>Methods like <code class="docutils literal notranslate"><span class="pre">first</span></code> and <code class="docutils literal notranslate"><span class="pre">last</span></code> return the individual documents immediately.
+Otherwise, iterating a CouchbaseOrm_Relation object with methods like <code class="docutils literal notranslate"><span class="pre">each</span></code> or <code class="docutils literal notranslate"><span class="pre">map</span></code>
+retrieves the documents from the server. <code class="docutils literal notranslate"><span class="pre">to_a</span></code> can be used to force
+execution of a query that returns an array of documents, literally converting
+a CouchbaseOrm_Relation object to an Array.</p>
+<p>When a query method is called on a CouchbaseOrm_Relation instance, the method returns a new
+CouchbaseOrm_Relation instance with the new conditions added to the existing conditions:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">scope</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:founded</span><span class="o">.</span><span class="n">gte</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s2">&quot;1980-01-01&quot;</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;CouchbaseOrm::Relation::CouchbaseOrm_Relation</span>
+<span class="c1">#   where: [{&quot;founded&quot;=&gt;{&quot;$gte&quot;=&gt;&quot;1980-01-01&quot;}}]</span>
+<span class="c1">#   model:    Band&gt;</span>
+
+<span class="n">scope</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:founded</span><span class="o">.</span><span class="n">lte</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s2">&quot;2020-01-01&quot;</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;CouchbaseOrm::Relation::CouchbaseOrm_Relation</span>
+<span class="c1">#   where: [{&quot;founded&quot;=&gt;{&quot;$gte&quot;=&gt;&quot;1980-01-01&quot;, &quot;$lte&quot;=&gt;&quot;2020-01-01&quot;}}]</span>
+<span class="c1">#   model:    Band&gt;</span>
+
+<span class="n">scope</span>
+<span class="c1"># =&gt; #&lt;CouchbaseOrm::Relation::CouchbaseOrm_Relation</span>
+<span class="c1">#   where: [{&quot;founded&quot;=&gt;{&quot;$gte&quot;=&gt;&quot;1980-01-01&quot;}}]</span>
+<span class="c1">#   class:    Band&gt;</span>
+</pre></div>
+</div>
+<section id="condition-syntax">
+<h2>Condition Syntax<a class="headerlink" href="#condition-syntax" title="Link to this heading">#</a></h2>
+<p>CouchbaseOrm supports three ways of specifying individual conditions:</p>
+<ol class="arabic simple">
+<li><p>Attribute syntax.</p></li>
+<li><p>SQL syntax.</p></li>
+<li><p>Symbol operator syntax.</p></li>
+</ol>
+<p>All syntaxes support querying embedded documents using the dot notation.
+All syntaxes respect attribute types, if the attribute being queried is defined in the
+model class, and attribute aliases.</p>
+<p>The examples in this section use the following model definition:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Band</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:name</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:founded</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">Integer</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:m</span><span class="p">,</span><span class="w"> </span><span class="ss">as</span><span class="p">:</span><span class="w"> </span><span class="ss">:member_count</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">Integer</span>
+
+<span class="w">  </span><span class="n">belongs_to</span><span class="w"> </span><span class="ss">:manager</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Manager</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+
+<span class="w">  </span><span class="n">has_many</span><span class="w"> </span><span class="ss">:band</span>
+
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:name</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<section id="attribute-syntax">
+<h3>Attribute Syntax<a class="headerlink" href="#attribute-syntax" title="Link to this heading">#</a></h3>
+<p>The simplest querying syntax utilizes the basic Ruby hashes. Keys can be
+symbols or strings, and correspond to attribute names in Couchbase documents:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Depeche Mode&quot;</span><span class="p">)</span>
+<span class="c1">#   =&gt; #&lt;CouchbaseOrm::Relation::CouchbaseOrm_Relation</span>
+<span class="c1">#   where: [{&quot;name&quot;=&gt;&quot;Depeche Mode&quot;}]</span>
+<span class="c1">#   model:    Band&gt;</span>
+
+<span class="c1"># Equivalent to:</span>
+
+<span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s2">&quot;Depeche Mode&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="sql-syntax">
+<h3>SQL Syntax<a class="headerlink" href="#sql-syntax" title="Link to this heading">#</a></h3>
+<p>An SQL operator may be specified on any attribute using the string syntax:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">founded</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s1">&#39;$gt&#39;</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mi">1980</span><span class="p">})</span>
+<span class="c1"># =&gt; #&lt;CouchbaseOrm::Relation::CouchbaseOrm_Relation</span>
+<span class="c1">#   where: [{&quot;founded&quot;=&gt;{&quot;$gt&quot;=&gt;1980}}]</span>
+<span class="c1">#   model:  Band&gt;</span>
+
+<span class="c1"># Equivalent to:</span>
+
+<span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;founded &gt; 1980&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="logical-operations">
+<span id="id2"></span><h2>Logical Operations<a class="headerlink" href="#logical-operations" title="Link to this heading">#</a></h2>
+<p>CouchbaseOrm supports <code class="docutils literal notranslate"><span class="pre">where</span></code> and <code class="docutils literal notranslate"><span class="pre">not</span></code> logical operations on
+<code class="docutils literal notranslate"><span class="pre">CouchbaseOrm_Relation</span></code> objects. These methods take one hash of conditions.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="c1"># and with conditions</span>
+<span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">label</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Trust in Trance&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Astral Projection&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="not-behavior">
+<h3><code class="docutils literal notranslate"><span class="pre">not</span></code> Behavior<a class="headerlink" href="#not-behavior" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">not</span></code> method can be called without arguments, in which case it will negate
+the next condition that is specified. <code class="docutils literal notranslate"><span class="pre">not</span></code> can also be called with one
+or more hash conditions or <code class="docutils literal notranslate"><span class="pre">CouchbaseOrm_Relation</span></code> objects, which will all be negated and
+added to the criteria.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="c1"># not negates subsequent where</span>
+<span class="no">Band</span><span class="o">.</span><span class="n">not</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Best&#39;</span><span class="p">)</span>
+<span class="c1"># =&gt; {&quot;name&quot;=&gt;{&quot;$ne&quot;=&gt;&quot;Best&quot;}}</span>
+
+<span class="c1"># not negates its argument</span>
+<span class="no">Band</span><span class="o">.</span><span class="n">not</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Best&#39;</span><span class="p">)</span>
+<span class="c1"># =&gt; {&quot;name&quot;=&gt;{&quot;$ne&quot;=&gt;&quot;Best&quot;}}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="ordering">
+<span id="id3"></span><h2>Ordering<a class="headerlink" href="#ordering" title="Link to this heading">#</a></h2>
+<p>CouchbaseOrm provides the <code class="docutils literal notranslate"><span class="pre">order</span></code> method on <code class="docutils literal notranslate"><span class="pre">CouchbaseOrm_Relation</span></code> objects and its alias,
+<code class="docutils literal notranslate"><span class="pre">order_by</span></code>, to specify the ordering of documents. These methods take a
+hash indicating which attributes to order the documents by, and whether to use
+ascending or descending order for each attribute.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Band</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="n">asc</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;CouchbaseOrm::Relation::CouchbaseOrm_Relation</span>
+<span class="c1">#   where: []</span>
+<span class="c1">#   order:  [{&quot;name&quot;=&gt;asc}]</span>
+<span class="c1">#   model:    Band&gt;</span>
+
+<span class="no">Band</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="ss">:desc</span><span class="p">,</span><span class="w"> </span><span class="ss">description</span><span class="p">:</span><span class="w"> </span><span class="ss">:asc</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;CouchbaseOrm::Relation::CouchbaseOrm_Relation</span>
+<span class="c1">#   where: []</span>
+<span class="c1">#   order:  [{&quot;name&quot;=&gt;:desc}, {&quot;description&quot;=&gt;:asc}]</span>
+<span class="c1">#   class:    Band</span>
+<span class="c1">#   embedded: false&gt;</span>
+</pre></div>
+</div>
+<p>The direction may be specified with Symbol <code class="docutils literal notranslate"><span class="pre">:asc</span></code> and <code class="docutils literal notranslate"><span class="pre">:desc</span></code> for ascending
+and descending, respectively</p>
+</section>
+<section id="finding-by-id">
+<h2>Finding By <code class="docutils literal notranslate"><span class="pre">_id</span></code><a class="headerlink" href="#finding-by-id" title="Link to this heading">#</a></h2>
+<p>CouchbaseOrm provides the <code class="docutils literal notranslate"><span class="pre">find</span></code> method on <code class="docutils literal notranslate"><span class="pre">CouchbaseOrm_Relation</span></code> objects to find documents
+by their <code class="docutils literal notranslate"><span class="pre">_id</span></code> values:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Band</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;5f0e41d92c97a64a26aabd10&#39;</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;Band _id: 5f0e41d92c97a64a26aabd10, name: &quot;Juno Reactor&quot;&gt;</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">find</span></code> method can accept an array of arguments.
+In either case each of the arguments or array elements is taken to be an <code class="docutils literal notranslate"><span class="pre">_id</span></code>
+value, and documents with all of the specified <code class="docutils literal notranslate"><span class="pre">_id</span></code> values are returned in
+an array:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Band</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;5f0e41d92c97a64a26aabd10&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;5f0e41b02c97a64a26aabd0e&#39;</span><span class="p">)</span>
+<span class="c1"># =&gt; [#&lt;Band _id: 5f0e41b02c97a64a26aabd0e, name: &quot;SUN Project&quot;, description: nil, likes: nil&gt;,</span>
+<span class="w">  </span><span class="c1">#&lt;Band _id: 5f0e41d92c97a64a26aabd10, name: &quot;Juno Reactor&quot;, description: nil, likes: nil&gt;]</span>
+
+<span class="no">Band</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="o">[</span><span class="s1">&#39;5f0e41d92c97a64a26aabd10&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;5f0e41b02c97a64a26aabd0e&#39;</span><span class="o">]</span><span class="p">)</span>
+<span class="c1"># =&gt; [#&lt;Band _id: 5f0e41b02c97a64a26aabd0e, name: &quot;SUN Project&quot;, description: nil, likes: nil&gt;,</span>
+<span class="w">  </span><span class="c1">#&lt;Band _id: 5f0e41d92c97a64a26aabd10, name: &quot;Juno Reactor&quot;, description: nil, likes: nil&gt;]</span>
+</pre></div>
+</div>
+<p>If any of the <code class="docutils literal notranslate"><span class="pre">_id</span></code> values are not found in the database, the behavior of
+<code class="docutils literal notranslate"><span class="pre">find</span></code> depends on the value of the <code class="docutils literal notranslate"><span class="pre">quiet</span></code> configuration
+option. If the option is set to <code class="docutils literal notranslate"><span class="pre">false</span></code>, <code class="docutils literal notranslate"><span class="pre">find</span></code> raises
+<code class="docutils literal notranslate"><span class="pre">CouchbaseOrm::Errors::DocumentNotFound</span></code> if any of the <code class="docutils literal notranslate"><span class="pre">_id</span></code>s are not found.
+If the option is set to <code class="docutils literal notranslate"><span class="pre">true</span></code> and <code class="docutils literal notranslate"><span class="pre">find</span></code> is given a single <code class="docutils literal notranslate"><span class="pre">_id</span></code> to
+find and there is no matching document, <code class="docutils literal notranslate"><span class="pre">find</span></code> returns <code class="docutils literal notranslate"><span class="pre">nil</span></code>. If the
+option is set to <code class="docutils literal notranslate"><span class="pre">false</span></code> and <code class="docutils literal notranslate"><span class="pre">find</span></code> is given an array of ids to find
+and some are not found, the return value is an array of documents that were
+found (which could be empty if no documents were found at all).</p>
+</section>
+<section id="additional-query-methods">
+<span id="id4"></span><h2>Additional Query Methods<a class="headerlink" href="#additional-query-methods" title="Link to this heading">#</a></h2>
+<p>CouchbaseOrm also has some helpful methods on criteria.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 33.3%" />
+<col style="width: 66.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Operation</p></th>
+<th class="head"><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CouchbaseOrm_Relation#count</span></code></p>
+<p><em>Get the total number of documents matching a filter, or the total
+number of documents in a collection. Note this will always hit
+the database for the count.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Band</span><span class="o">.</span><span class="n">count</span>
+<span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Photek&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CouchbaseOrm_Relation#each</span></code></p>
+<p><em>Iterate over all matching documents in the criteria.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">members</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">each</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="o">|</span><span class="n">band</span><span class="o">|</span>
+<span class="w">  </span><span class="nb">p</span><span class="w"> </span><span class="n">band</span><span class="o">.</span><span class="n">name</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CouchbaseOrm_Relation#find_by</span></code></p>
+<p><em>Find a document by the provided attributes. If not found,
+raise an error or return nil depending on the value of the</em>
+<code class="docutils literal notranslate"><span class="pre">raise_not_found_error</span></code> <em>configuration option.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Band</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Photek&quot;</span><span class="p">)</span>
+
+<span class="no">Band</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tool&quot;</span><span class="p">)</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="o">|</span><span class="n">band</span><span class="o">|</span>
+<span class="w">  </span><span class="n">band</span><span class="o">.</span><span class="n">impressions</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CouchbaseOrm_Relation#first|last</span></code></p>
+<p><em>Finds a single document given the provided criteria. Get a list of
+documents by passing in a limit argument. This method automatically adds
+a sort on _id. This can cause performance issues, so if the sort is
+undesirable, CouchbaseOrm_Relation#take can be used instead.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Band</span><span class="o">.</span><span class="n">first</span>
+<span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:members</span><span class="o">.</span><span class="n">with_size</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
+<span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:members</span><span class="o">.</span><span class="n">with_size</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">last</span>
+<span class="no">Band</span><span class="o">.</span><span class="n">first</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CouchbaseOrm_Relation#length|size</span></code></p>
+<p><em>Same as count but caches subsequent calls to the database</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Band</span><span class="o">.</span><span class="n">length</span>
+<span class="no">Band</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FKA Twigs&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">size</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CouchbaseOrm_Relation#pluck</span></code></p>
+<p><em>Get all the values for the provided attribute.
+Returns nil for unset attributes and for non-existent attributes.</em></p>
+</td>
+<td><div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Band</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span>
+<span class="w">  </span><span class="c1">#=&gt; [&quot;Daft Punk&quot;, &quot;Aphex Twin&quot;, &quot;Ween&quot;]</span>
+
+<span class="no">Band</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="s1">&#39;address.city&#39;</span><span class="p">)</span>
+<span class="w">  </span><span class="c1">#=&gt; [&quot;Paris&quot;, &quot;Limerick&quot;, &quot;New Hope&quot;]</span>
+
+<span class="c1"># Using the earlier definition of Manager,</span>
+<span class="c1"># expands out to &quot;managers.name&quot; in the query:</span>
+<span class="no">Band</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="s1">&#39;managers.n&#39;</span><span class="p">)</span>
+<span class="w">  </span><span class="c1">#=&gt; [ [&quot;Berry Gordy&quot;, &quot;Tommy Mottola&quot;], [], [&quot;Quincy Jones&quot;] ]</span>
+
+<span class="c1"># Accepts multiple attribute arguments, in which case</span>
+<span class="c1"># the result will be returned as an Array of Arrays.</span>
+<span class="no">Band</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span><span class="w"> </span><span class="ss">:likes</span><span class="p">)</span>
+<span class="w">  </span><span class="c1">#=&gt; [ [&quot;Daft Punk&quot;, 342], [&quot;Aphex Twin&quot;, 98], [&quot;Ween&quot;, 227] ]</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="class-methods">
+<h3>Class Methods<a class="headerlink" href="#class-methods" title="Link to this heading">#</a></h3>
+<p>Class methods on models that return criteria objects are also
+treated like scopes, and can be chained as well.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Band</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:name</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:active</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="no">Boolean</span><span class="p">,</span><span class="w"> </span><span class="ss">default</span><span class="p">:</span><span class="w"> </span><span class="kp">true</span>
+
+<span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nc">self</span><span class="o">.</span><span class="nf">active</span>
+<span class="w">    </span><span class="n">where</span><span class="p">(</span><span class="ss">active</span><span class="p">:</span><span class="w"> </span><span class="kp">true</span><span class="p">)</span>
+<span class="w">  </span><span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">Band</span><span class="o">.</span><span class="n">active</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="crud.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">CRUD Operations</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="callbacks.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Callbacks</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#condition-syntax">Condition Syntax</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-syntax">Attribute Syntax</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sql-syntax">SQL Syntax</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#logical-operations">Logical Operations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#not-behavior"><code class="docutils literal notranslate"><span class="pre">not</span></code> Behavior</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ordering">Ordering</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#finding-by-id">Finding By <code class="docutils literal notranslate"><span class="pre">_id</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-query-methods">Additional Query Methods</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#class-methods">Class Methods</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Woop.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
