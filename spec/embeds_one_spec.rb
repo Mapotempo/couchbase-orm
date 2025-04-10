@@ -45,7 +45,7 @@ describe CouchbaseOrm::EmbedsOne do
 
   it 'defines an attribute with default nil' do
     user = User.new
-    expect(user.attributes['profile']).to eq(nil)
+    expect(user.attributes['profile']).to be_nil
   end
 
   it 'returns nil if raw data is not present' do
