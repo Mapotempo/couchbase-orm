@@ -20,6 +20,26 @@ class AliasPerson < CouchbaseOrm::Base
   embeds_many :addresses, store_as: 'a'
 end
 
+class BaseAddress < CouchbaseOrm::Base
+  attribute :street, :string
+  validates :street, presence: true
+end
+
+class ExtendedAddress < BaseAddress
+  attribute :city, :string
+end
+
+class InheritedPerson < CouchbaseOrm::Base
+  embeds_many :addresses, class_name: 'ExtendedAddress'
+end
+
+class BasePerson < CouchbaseOrm::Base
+  embeds_many :addresses, class_name: 'Address'
+end
+
+class ChildPerson < BasePerson
+end
+
 describe CouchbaseOrm::EmbedsMany do
   let(:raw_data) { [{ street: '123 Main St' }, { street: '456 Elm St' }] }
 
@@ -217,5 +237,51 @@ describe CouchbaseOrm::EmbedsMany do
     expect(copy.addresses).not_to be_empty
     expect(copy.addresses.first.street).to eq('original')
     expect(copy.addresses.first).not_to equal(person.addresses.first)
+  end
+
+  describe 'embeds_many with inheritance' do
+    let(:raw_data) { [{ street: 'Inherited St', city: 'Paris' }] }
+
+    it 'instantiates the correct subclass in embedded field' do
+      person = InheritedPerson.new(addresses: raw_data)
+
+      expect(person.addresses.first).to be_a(ExtendedAddress)
+      expect(person.addresses.first.street).to eq('Inherited St')
+      expect(person.addresses.first.city).to eq('Paris')
+    end
+
+    it 'serializes the inherited fields correctly' do
+      person = InheritedPerson.new(addresses: raw_data)
+      serialized = person.send(:serialized_attributes)
+
+      expect(serialized['addresses'].first['street']).to eq('Inherited St')
+      expect(serialized['addresses'].first['city']).to eq('Paris')
+    end
+
+    it 'validates inherited embedded object' do
+      person = InheritedPerson.new(addresses: [{ city: 'No Street' }]) # street is required
+
+      expect(person.valid?).to be false
+      expect(person.errors[:addresses]).not_to be_empty
+    end
+
+    it 'raises when trying to save inherited embedded document directly' do
+      embedded = ExtendedAddress.new(street: 'Oops', city: 'Lyon')
+      embedded.instance_variable_set(:@_embedded, true)
+
+      expect { embedded.save }.to raise_error('Cannot save an embedded document!')
+    end
+  end
+
+  describe 'embedded registry inheritance with deep duplication' do
+    it 'inherits embedded config from parent' do
+      expect(ChildPerson.embedded.keys).to include(:addresses)
+      expect(ChildPerson.embedded[:addresses][:class_name]).to eq(Address)
+    end
+
+    it 'modifying child embedded does not affect parent' do
+      ChildPerson.embedded[:addresses][:class_name] = 'Overridden'
+      expect(BasePerson.embedded[:addresses][:class_name]).to eq(Address)
+    end
   end
 end

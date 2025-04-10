@@ -20,6 +20,26 @@ class AliasUser < CouchbaseOrm::Base
   embeds_one :profile, store_as: 'p'
 end
 
+class BaseProfile < CouchbaseOrm::Base
+  attribute :bio, :string
+  validates :bio, presence: true
+end
+
+class ExtendedProfile < BaseProfile
+  attribute :title, :string
+end
+
+class InheritedUser < CouchbaseOrm::Base
+  embeds_one :profile, class_name: 'ExtendedProfile'
+end
+
+class ParentModel < CouchbaseOrm::Base
+  embeds_one :profile, class_name: 'Profile'
+end
+
+class ChildModel < ParentModel
+end
+
 describe CouchbaseOrm::EmbedsOne do
   let(:raw_data) { { bio: 'Software Engineer' } }
 
@@ -243,5 +263,51 @@ describe CouchbaseOrm::EmbedsOne do
     expect(copy.profile).not_to be_nil
     expect(copy.profile.bio).to eq('original')
     expect(copy.profile).not_to equal(user.profile)
+  end
+
+  describe 'embeds_one with inheritance' do
+    let(:raw_data) { { bio: 'Inherited', title: 'Lead Dev' } }
+
+    it 'instantiates the correct subclass in embedded field' do
+      user = InheritedUser.new(profile: raw_data)
+
+      expect(user.profile).to be_a(ExtendedProfile)
+      expect(user.profile.bio).to eq('Inherited')
+      expect(user.profile.title).to eq('Lead Dev')
+    end
+
+    it 'serializes the inherited fields correctly' do
+      user = InheritedUser.new(profile: raw_data)
+      serialized = user.send(:serialized_attributes)
+
+      expect(serialized['profile']['bio']).to eq('Inherited')
+      expect(serialized['profile']['title']).to eq('Lead Dev')
+    end
+
+    it 'validates inherited embedded object' do
+      user = InheritedUser.new(profile: { title: 'No Bio' }) # bio is required
+
+      expect(user.valid?).to be false
+      expect(user.errors[:profile]).not_to be_empty
+    end
+
+    it 'raises when trying to save inherited embedded document directly' do
+      embedded = ExtendedProfile.new(bio: 'Oops', title: 'CTO')
+      embedded.instance_variable_set(:@_embedded, true)
+
+      expect { embedded.save }.to raise_error('Cannot save an embedded document!')
+    end
+
+    describe 'embedded registry inheritance with deep duplication' do
+      it 'inherits embedded config from parent' do
+        expect(ChildModel.embedded.keys).to include(:profile)
+        expect(ChildModel.embedded[:profile][:class_name]).to eq(Profile)
+      end
+
+      it 'modifying child embedded does not affect parent' do
+        ChildModel.embedded[:profile][:class_name] = 'Overridden'
+        expect(ParentModel.embedded[:profile][:class_name]).to eq(Profile)
+      end
+    end
   end
 end
