@@ -7,11 +7,11 @@ module CouchbaseOrm
       attribute storage_key, :array, type: :hash, default: []
 
       instance_var = "@__assoc_#{name}"
-      class_name = (class_name || name.to_s.singularize.camelize).constantize
+      klass_name = (class_name || name.to_s.singularize.camelize)
 
       set_embedded(name, {
         type: :many,
-        class_name: class_name,
+        class_name: klass_name, # store as string, resolve later
         key: storage_key,
         name: name,
         instance_var: instance_var,
@@ -19,28 +19,42 @@ module CouchbaseOrm
 
       validates_embedded(name) if validate
 
-      define_method(name) do
-        return self.instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
+      # Lazy class resolution method
+      define_method("_resolve_embedded_class_for_#{name}") do
+        @__resolved_classes ||= {}
+        @__resolved_classes[name] ||= begin
+          klass_name.constantize
+        rescue NameError => e
+          warn "WARNING: #{klass_name} could not be resolved in #{self.class.name}: #{e.message}"
+          raise
+        end
+      end
 
-        embedded_objects = self.read_attribute(storage_key).map do |raw|
-          obj = class_name.new(raw)
+      define_method(name) do
+        return instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
+
+        klass = send("_resolve_embedded_class_for_#{name}")
+        embedded_objects = read_attribute(storage_key).map do |raw|
+          obj = klass.new(raw)
           obj.embedded = true
           obj
         end
 
-        self.instance_variable_set(instance_var, embedded_objects)
+        instance_variable_set(instance_var, embedded_objects)
       end
 
       define_method("#{name}=") do |val|
+        klass = send("_resolve_embedded_class_for_#{name}")
+
         embedded_objects = []
         serialized = []
 
         Array(val).each do |v|
-          obj = v.is_a?(class_name) ? v : class_name.new(v)
+          obj = v.is_a?(klass) ? v : klass.new(v)
           obj.embedded = true
-          embedded_objects << obj
           raw = obj.serialized_attributes
           raw.delete('id') if raw['id'].blank?
+          embedded_objects << obj
           serialized << raw
         end
 
