@@ -7,11 +7,11 @@ module CouchbaseOrm
       attribute storage_key, :hash, default: nil
 
       instance_var = "@__assoc_#{name}"
-      class_name = (class_name || name.to_s.camelize).constantize
+      klass_name = (class_name || name.to_s.camelize)
 
       set_embedded(name, {
         type: :one,
-        class_name: class_name,
+        class_name: klass_name, # keep as string to delay resolution
         key: storage_key,
         name: name,
         instance_var: instance_var,
@@ -19,29 +19,44 @@ module CouchbaseOrm
 
       validates_embedded(name) if validate
 
+      # Helper to lazy-resolve class when needed
+      define_method("_resolve_embedded_class_for_#{name}") do
+        @__resolved_classes ||= {}
+        @__resolved_classes[name] ||= begin
+          klass_name.constantize
+        rescue NameError => e
+          warn "WARNING: #{klass_name} could not be resolved in #{self.class.name}: #{e.message}"
+          raise
+        end
+      end
+
       define_method(name) do
-        return self.instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
+        return instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
 
-        raw = self.read_attribute(storage_key)
-        return self.instance_variable_set(instance_var, nil) unless raw.present?
+        raw = read_attribute(storage_key)
+        return instance_variable_set(instance_var, nil) unless raw.present?
 
-        obj = class_name.new(raw)
+        klass = send("_resolve_embedded_class_for_#{name}")
+        obj = klass.new(raw)
         obj.embedded = true
-        self.instance_variable_set(instance_var, obj)
+        instance_variable_set(instance_var, obj)
       end
 
       define_method("#{name}=") do |val|
         if val.nil?
-          self.write_attribute(storage_key, nil)
+          write_attribute(storage_key, nil)
           instance_variable_set(instance_var, nil)
           next
         end
 
-        obj = val.is_a?(class_name) ? val : class_name.new(val)
+        klass = send("_resolve_embedded_class_for_#{name}")
+        obj = val.is_a?(klass) ? val : klass.new(val)
         obj.embedded = true
+
         raw = obj.serialized_attributes
         raw.delete('id') if raw['id'].blank?
-        self.write_attribute(storage_key, raw)
+
+        write_attribute(storage_key, raw)
         instance_variable_set(instance_var, obj)
       end
 

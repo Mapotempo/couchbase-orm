@@ -303,12 +303,12 @@ describe CouchbaseOrm::EmbedsMany do
   describe 'embedded registry inheritance with deep duplication' do
     it 'inherits embedded config from parent' do
       expect(ChildPerson.embedded.keys).to include(:addresses)
-      expect(ChildPerson.embedded[:addresses][:class_name]).to eq(Address)
+      expect(ChildPerson.embedded[:addresses][:class_name]).to eq(Address.to_s)
     end
 
     it 'modifying child embedded does not affect parent' do
       ChildPerson.embedded[:addresses][:class_name] = 'Overridden'
-      expect(BasePerson.embedded[:addresses][:class_name]).to eq(Address)
+      expect(BasePerson.embedded[:addresses][:class_name]).to eq(Address.to_s)
     end
   end
 

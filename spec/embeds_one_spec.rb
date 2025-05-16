@@ -327,12 +327,12 @@ describe CouchbaseOrm::EmbedsOne do
     describe 'embedded registry inheritance with deep duplication' do
       it 'inherits embedded config from parent' do
         expect(ChildModel.embedded.keys).to include(:profile)
-        expect(ChildModel.embedded[:profile][:class_name]).to eq(Profile)
+        expect(ChildModel.embedded[:profile][:class_name]).to eq(Profile.to_s)
       end
 
       it 'modifying child embedded does not affect parent' do
         ChildModel.embedded[:profile][:class_name] = 'Overridden'
-        expect(ParentModel.embedded[:profile][:class_name]).to eq(Profile)
+        expect(ParentModel.embedded[:profile][:class_name]).to eq(Profile.to_s)
       end
     end
   end
