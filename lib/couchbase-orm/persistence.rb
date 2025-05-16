@@ -60,21 +60,19 @@ module CouchbaseOrm
       end
 
       def instantiate(attributes, id, cas, klass)
-        # attributes = decode_encrypted_attributes(attributes)
         type = attributes.delete('type')
         if type && type.to_s != klass.design_document
           raise CouchbaseOrm::Error::TypeMismatchError.new(
-            "document type mismatch, #{type} != #{klass.design_document}", self
+        "document type mismatch, #{type} != #{klass.design_document}", self
           )
         end
 
-        # Use ActiveModel::AttributeSet::Builder to build attributes
-        builder = attributes_builder
-        attribute_set = builder.build_from_database(attributes)
-
-        # Allocate and initialize the object
-        instance = klass.allocate
-        instance.init_with('attributes' => attribute_set, 'id' => id, 'cas' => cas, 'new_record' => false) # Custom initialization method
+        instance = klass.new
+        instance.assign_attributes(attributes)
+        instance.id = id
+        instance.instance_variable_set(:@__metadata__, Metadata.new(cas))
+        instance.instance_variable_set(:@new_record, false)
+        instance.clear_changes_information
         instance
       end
     end
