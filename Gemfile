@@ -6,3 +6,5 @@ git_source(:github) do |repo_name|
 end
 source 'https://rubygems.org'
 gemspec
+
+gem 'benchmark-ips', '~> 2.14'
