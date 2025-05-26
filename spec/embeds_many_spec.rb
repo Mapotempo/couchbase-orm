@@ -118,6 +118,19 @@ describe CouchbaseOrm::EmbedsMany do
     expect(person.send(:serialized_attributes)['addresses'].first).not_to include('id')
   end
 
+  it 'saves changes in embedded collection when parent is saved and reloads correctly' do
+    person = Person.create!(addresses: [{ street: 'Initial St' }])
+
+    person2 = Person.find(person.id)
+    person2.addresses.first.street = 'Updated St'
+    person2.addresses = person2.addresses
+    person2.save!
+
+    person.reload
+
+    expect(person.addresses.first.street).to eq('Updated St')
+  end
+
   describe 'with store_as / alias support' do
     it 'stores and retrieves using store_as alias' do
       person = AliasPerson.new(addresses: [{ street: '789 Oak St' }])
