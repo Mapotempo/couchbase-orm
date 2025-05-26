@@ -8,9 +8,9 @@ end
 
 def create_partial_index(index_name:, bucket_name:, fields:, where:, defer_build: true)
   fields_array = Array(fields)
-  field_list = fields_array.map { |f| "`#{f}`" }.join(", ")
-  defer_clause = defer_build ? "WITH {\"defer_build\": true}" : ""
-  
+  field_list = fields_array.map { |f| "`#{f}`" }.join(', ')
+  defer_clause = defer_build ? 'WITH {"defer_build": true}' : ''
+
   drop_index(bucket_name, index_name)
 
   CouchbaseOrm::Connection.cluster.query(<<~N1QL)
@@ -29,47 +29,46 @@ def build_and_watch_deferred_indexes(bucket:, timeout: 60)
 
   # Filtre les index différés (non ONLINE)
   index_names = all_indexes
-    .select { |idx| idx.state.downcase != "online" && idx.name != "#primary" }
-    .map(&:name)
+                .select { |idx| idx.state.downcase != 'online' && idx.name != '#primary' }
+                .map(&:name)
 
-  if index_names.any?
+  return unless index_names.any?
+
     # Build tous les indexes différés
-    cluster.query_indexes.build_deferred_indexes(bucket)
+  cluster.query_indexes.build_deferred_indexes(bucket)
 
     # Watch jusqu'à ce qu'ils soient en ligne
-    options = Couchbase::Management::Options::Query::WatchIndexes.new
-    cluster.query_indexes.watch_indexes(bucket, index_names, timeout, options)
-  end
+  options = Couchbase::Management::Options::Query::WatchIndexes.new
+  cluster.query_indexes.watch_indexes(bucket, index_names, timeout, options)
 end
-
 
 def create_indexes
   create_partial_index(
-  index_name: 'default_person_preference_ids_1',
-  bucket_name: 'default',
-  fields: 'preference_ids',
-  where: "type = 'person'"
+    index_name: 'default_person_preference_ids_1',
+    bucket_name: 'default',
+    fields: 'preference_ids',
+    where: "type = 'person'"
   )
 
   create_partial_index(
-  index_name: 'default_post_person_id_1',
-  bucket_name: 'default',
-  fields: 'person_id',
-  where: "type = 'post'"
+    index_name: 'default_post_person_id_1',
+    bucket_name: 'default',
+    fields: 'person_id',
+    where: "type = 'post'"
   )
 
   create_partial_index(
-  index_name: 'default_game_person_id_1',
-  bucket_name: 'default',
-  fields: 'person_id',
-  where: "type = 'game'"
+    index_name: 'default_game_person_id_1',
+    bucket_name: 'default',
+    fields: 'person_id',
+    where: "type = 'game'"
   )
 
   create_partial_index(
-  index_name: 'default_preference_person_ids_1',
-  bucket_name: 'default',
-  fields: 'person_ids',
-  where: "type = 'preference'"
+    index_name: 'default_preference_person_ids_1',
+    bucket_name: 'default',
+    fields: 'person_ids',
+    where: "type = 'preference'"
   )
 
   build_and_watch_deferred_indexes(bucket: 'default')
