@@ -36,6 +36,10 @@ Benchmark.ips do |bm|
     Person.all.each(&:birth_date)
   end
 
+  bm.report("#attributes") do
+    Person.all.each(&:attributes)
+  end
+
   bm.report("#find") do
     Person.find(seed_person.id)
   end

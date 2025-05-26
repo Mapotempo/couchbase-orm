@@ -32,6 +32,10 @@ Benchmark.bm do |bm|
       Person.all.each { |person| person.birth_date }
     end
 
+    bm.report("#attributes") do
+      Person.all.each(&:attributes)
+    end
+
     first_id = Person.all.first.id
     bm.report("#find             ") do
       Person.find(first_id)
