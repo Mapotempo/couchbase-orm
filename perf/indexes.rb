@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'couchbase-orm'
 
 def drop_index(bucket_name, index_name)
