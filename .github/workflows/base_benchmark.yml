@@ -69,9 +69,9 @@ jobs:
         --testbed ubuntu-22.04 \
         --adapter ruby_benchmark \
         --github-actions '${{ secrets.GITHUB_TOKEN }}' \
-        --ruby-version ${{ RUBY_VERSION }} \
-        --gemfile ${{ ACTIVE_MODEL_VERSION }} \
-        --couchbase-version ${{ COUCHBASE_VERSION }} \
+        --ruby-version $RUBY_VERSION \
+        --gemfile $ACTIVE_MODEL_VERSION \
+        --couchbase-version $COUCHBASE_VERSION \
         bundle exec ruby benchmark.rb
     env:
         ACTIVE_MODEL_VERSION: ${{ matrix.gemfile }}
