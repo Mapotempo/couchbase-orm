@@ -6,7 +6,6 @@ on:
 
 jobs:
   benchmark_base_branch:
-    name: Continuous Benchmarking with Bencher
     permissions:
       checks: write
     strategy:
@@ -42,7 +41,7 @@ jobs:
             couchbase: '7.6.3'
       fail-fast: false
     runs-on: ubuntu-22.04
-    name: ${{ matrix.ruby }} rails-${{ matrix.gemfile }}  couchbase-${{ matrix.couchbase }}
+    name: Base Benchmark ${{ matrix.ruby }} rails-${{ matrix.gemfile }}  couchbase-${{ matrix.couchbase }}
     steps:
     - uses: actions/checkout@v4
     - uses: bencherdev/bencher@main
