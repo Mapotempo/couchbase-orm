@@ -67,8 +67,8 @@ jobs:
         --branch master \
         --testbed 'ubuntu-22.04-${{ matrix.ruby }}-rails-${{ matrix.gemfile }}-couchbase-${{ matrix.couchbase }}' \
         --github-actions '${{ secrets.GITHUB_TOKEN }}' \
-        --adapter json \
-        bencher mock
+        --adapter ruby_benchmark \
+        bundle exec ruby benchmark.rb
     env:
         ACTIVE_MODEL_VERSION: ${{ matrix.gemfile }}
         BUNDLE_JOBS: 4
