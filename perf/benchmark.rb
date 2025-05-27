@@ -8,15 +8,9 @@ require './indexes'
 CouchbaseOrm::Connection.cluster.buckets.flush_bucket(CouchbaseOrm::Connection.bucket.name)
 create_indexes
 
-puts 'Starting benchmark for Couchbase ORM'
-
 # rubocop:disable Metrics/BlockLength
 Benchmark.bm do |bm|
-  puts "\n[ Root Document Benchmark ]"
-
   [100000].each do |i|
-    puts " [ #{i} ]"
-
     bm.report('#new              ') do
       i.times do
         Person.new
@@ -71,25 +65,19 @@ Benchmark.bm do |bm|
       end
     end
 
-    puts "\n[ Referenced 1-n Benchmarks ]"
-
-    bm.report('#each [ normal ] ') do
+    bm.report('#belong_to [ normal ] ') do
       Post.all.each do |post|
         post.person.title
       end
     end
 
-    puts "\n[ Query N1QL 1-n Benchmarks ]"
-
-    bm.report('#each [ normal ] ') do
+    bm.report('#has_many [ normal ] ') do
       Person.all.each do |person|
         person.posts.each(&:title)
       end
     end
 
-    puts "\n[ Referenced n-n Benchmarks ]"
-
-    bm.report('#each [ normal ] ') do
+    bm.report('#has_and_belong_to [ normal ] ') do
       Person.all.each do |person|
         person.preferences.each(&:name)
       end
