@@ -1,6 +1,7 @@
+name: base benchmark
 on:
   push:
-    branches: main
+    branches: master
 
 jobs:
   benchmark_base_branch:
