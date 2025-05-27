@@ -132,6 +132,19 @@ describe CouchbaseOrm::EmbedsOne do
     expect(person.send(:serialized_attributes)['profile'].first).not_to include('id')
   end
 
+  it 'saves changes in embedded document when parent is saved and reloads correctly' do
+    user = User.create!(profile: { bio: 'Initial bio' })
+
+    user2 = User.find(user.id)
+    user2.profile.bio = 'Updated bio'
+    user2.profile = user2.profile
+    user2.save!
+
+    user.reload
+
+    expect(user.profile.bio).to eq('Updated bio')
+  end
+
   describe 'with store_as / alias support' do
     it 'stores and retrieves using store_as alias' do
       person = AliasUser.new(profile: raw_data)

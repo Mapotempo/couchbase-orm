@@ -276,10 +276,20 @@ module CouchbaseOrm
 
       CouchbaseOrm.logger.debug "Data - Get #{id}"
       resp = self.class.collection.get!(id)
-      assign_attributes(resp.content.except('id')) # API return a nil id
+      new_attributes = resp.content
+      new_attributes.delete('type')
+
+      builder = self.class.attributes_builder
+      attribute_set = builder.build_from_database(new_attributes)
+
+      keep_id = self.id
+      @attributes = attribute_set
+      @attributes.write_from_database('id', keep_id)
       @__metadata__.cas = resp.cas
+      CouchbaseOrm.logger.debug { "reload model #{self.class} with #{@attributes&.to_s&.truncate(200)}" }
 
       reset_associations
+      cleanup_embedded_memoization!
       clear_changes_information
       self
     end
