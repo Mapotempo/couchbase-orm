@@ -65,7 +65,7 @@ jobs:
         --project mapotempo-couchbase-orm \
         --token '${{ secrets.BENCHER_API_TOKEN }}' \
         --branch master \
-        --testbed 'ubuntu-22.04-${{ RUBY_VERSION }}-rails-${{ ACTIVE_MODEL_VERSION }}-couchbase-${{ COUCHBASE_VERSION }}' \
+        --testbed 'ubuntu-22.04-${{ matrix.ruby }}-rails-${{ matrix.gemfile }}-couchbase-${{ matrix.couchbase }}' \
         --github-actions '${{ secrets.GITHUB_TOKEN }}' \
         --adapter json \
         bencher mock
