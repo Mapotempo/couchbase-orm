@@ -65,12 +65,9 @@ jobs:
         --project mapotempo-couchbase-orm \
         --token '${{ secrets.BENCHER_API_TOKEN }}' \
         --branch master \
-        --testbed ubuntu-22.04 \
-        --adapter ruby_benchmark \
+        --testbed 'ubuntu-22.04 $RUBY_VERSION rails-$ACTIVE_MODEL_VERSION  couchbase-$COUCHBASE_VERSION \
         --github-actions '${{ secrets.GITHUB_TOKEN }}' \
-        --ruby-version '$RUBY_VERSION' \
-        --gemfile '$ACTIVE_MODEL_VERSION' \
-        --couchbase-version '$COUCHBASE_VERSION' \
+        --adapter ruby_benchmark \
         bundle exec ruby benchmark.rb
     env:
         ACTIVE_MODEL_VERSION: ${{ matrix.gemfile }}
