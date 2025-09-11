@@ -1,24 +1,32 @@
-# frozen_string_literal: true, encoding: ASCII-8BIT
 # frozen_string_literal: true
 
+require "delegate"
+
 module CouchbaseOrm
-  class ResultsProxy
-    def initialize(proxyfied)
-      @proxyfied = proxyfied
-
-      raise ArgumentError.new('Proxyfied object must respond to :to_a') unless @proxyfied.respond_to?(:to_a)
-
-      proxyfied.public_methods.each do |method|
-        next if self.public_methods.include?(method)
-
-        self.class.define_method(method) do |*params, &block|
-          @proxyfied.send(method, *params, &block)
-        end
+  # Lazily materializes to Array once, then delegates all calls to that Array.
+  class ResultsProxy < SimpleDelegator
+    def initialize(source)
+      # Contract: source must at least respond_to?(:to_a)
+      unless source.respond_to?(:to_a)
+        raise ArgumentError, "Proxyfied object must respond to :to_a"
       end
+      @source = source
+      @array  = nil
+      # SimpleDelegator needs an initial obj; we’ll supply it lazily via __getobj__
+      super(nil)
     end
 
-    def method_missing(m, *args, &block)
-      @proxyfied.to_a.send(m, *args, &block)
+    # Ensure callers that explicitly want an Array get the materialized one.
+    def to_a
+      __getobj__
+    end
+
+    private
+
+    # SimpleDelegator hook: return the underlying object to delegate to.
+    # We memoize the array so `to_a` is computed only once.
+    def __getobj__
+      @array ||= @source.to_a
     end
   end
 end
