@@ -326,6 +326,20 @@ describe CouchbaseOrm::Persistence do
     expect(model.persisted?).to be(false)
   end
 
+  it 'calls valid? only once on save' do
+    model = ModelWithValidations.new(name: 'bob', age: 23)
+
+    expect(model).to receive(:valid?).once.and_call_original
+    expect(model.save).to be(true)
+  end
+
+  it 'calls valid? only once on save!' do
+    model = ModelWithValidations.new(name: 'bob', age: 23)
+
+    expect(model).to receive(:valid?).once.and_call_original
+    expect(model.save!).to be(model)
+  end
+
   describe BasicModel do
     it_behaves_like 'ActiveModel'
   end

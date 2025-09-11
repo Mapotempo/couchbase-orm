@@ -145,8 +145,11 @@ module CouchbaseOrm
     # CouchbaseOrm::Error::RecordInvalid gets raised, and the record won't be saved.
     def save!(**options)
       raise 'Cannot save! an embedded document!' if embedded?
+      raise 'Cannot save a destroyed document!' if destroyed?
 
-      self.class.fail_validate!(self) unless self.save(**options)
+      @_with_cas = options[:with_cas]
+
+      self.class.fail_validate!(self) unless create_or_update
       self
     end
 
