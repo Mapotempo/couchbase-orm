@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "couchbase-orm/proxies/results_proxy"
-require "monitor"
+require 'couchbase-orm/proxies/results_proxy'
+require 'monitor'
 
 module CouchbaseOrm
   class N1qlProxy
@@ -16,7 +16,7 @@ module CouchbaseOrm
     # Return cached results unless the underlying query changed.
     # Yields each row through the optional block (mapping lazily when possible).
     def results(&block)
-      # Fast-path read without locking if not dirty and results already cached
+      # Fast-path read without locking if is not dirty and results already cached
       cached = @results
       return cached if !@dirty && cached
 
@@ -27,10 +27,9 @@ module CouchbaseOrm
         CouchbaseOrm.logger.debug { "Query - #{query_str}" }
 
         rows = @proxyfied.rows
-        rows = rows.lazy.map { |r| block.call(r) } if block # lazy map avoids intermediate array
-
+        rows = rows.lazy.map { |r| yield(r) } if block # lazy map avoids intermediate array
         # ResultsProxy historically takes an Array; if yours accepts any Enumerable,
-        # drop the `.to_a` to stream. Otherwise keep `.to_a`:
+        # drop the `.to_a` to stream. Otherwise, keep `.to_a`:
         @results = ResultsProxy.new(rows.respond_to?(:to_a) ? rows.to_a : rows)
         @dirty   = false
         @results
@@ -73,7 +72,7 @@ module CouchbaseOrm
         @mon.synchronize do
           if @dirty || @query_str.nil?
             # Avoid building new strings repeatedly; `tr` returns a new string once.
-            @query_str = @proxyfied.to_s.tr("\n", " ")
+            @query_str = @proxyfied.to_s.tr("\n", ' ')
           end
         end
       end
