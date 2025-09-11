@@ -27,7 +27,7 @@ module CouchbaseOrm
         CouchbaseOrm.logger.debug { "Query - #{query_str}" }
 
         rows = @proxyfied.rows
-        rows = rows.lazy.map { |r| yield(r) } if block # lazy map avoids intermediate array
+        rows = rows.lazy.map(&block) if block # lazy map avoids intermediate array
         # ResultsProxy historically takes an Array; if yours accepts any Enumerable,
         # drop the `.to_a` to stream. Otherwise, keep `.to_a`:
         @results = ResultsProxy.new(rows.respond_to?(:to_a) ? rows.to_a : rows)
