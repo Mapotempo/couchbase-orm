@@ -447,4 +447,56 @@ NestedRelationModel.new(age: 10, name: 'Tom'), NestedRelationModel.new(age: 20, 
       end
     end
   end
+
+  describe 'memoization' do
+    it 'memoizes records across multiple enumerable calls on the same relation' do
+      RelationModel.create!(active: true, age: 10, name: 'a')
+      RelationModel.create!(active: true, age: 20, name: 'b')
+
+      rel = RelationModel.where(active: true).order(:age)
+
+      expect(RelationModel).to receive(:find).once.and_call_original
+
+      # First materialization
+      ages1 = rel.to_a.map(&:age)
+      # Subsequent enumerable calls should NOT trigger another find
+      ages2 = rel.map(&:age)
+      ages3 = []
+      rel.each { |m| ages3 << m.age }
+
+      expect(ages1).to eq([10, 20])
+      expect(ages2).to eq([10, 20])
+      expect(ages3).to eq([10, 20])
+    end
+
+    it 'memoizes when using array indexing after first materialization' do
+      RelationModel.create!(active: true, age: 10, name: 'a')
+      RelationModel.create!(active: true, age: 20, name: 'b')
+
+      rel = RelationModel.where(active: true).order(:age)
+
+      expect(RelationModel).to receive(:find).once.and_call_original
+
+      first = rel[0]
+      second = rel[1]
+      again_first = rel[0]
+
+      expect([first.age, second.age, again_first.age]).to eq([10, 20, 10])
+    end
+
+    it 'memoizes even if the first call is not to_a (e.g. map first, then each)' do
+      RelationModel.create!(active: true, age: 10)
+      RelationModel.create!(active: true, age: 20)
+
+      rel = RelationModel.where(active: true).order(:age)
+
+      expect(RelationModel).to receive(:find).once.and_call_original
+
+      # First load via map
+      rel.map(&:age)
+      # Follow-ups reuse cached array
+      rel.each { |_| }
+      rel.to_a
+    end
+  end
 end
