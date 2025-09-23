@@ -248,10 +248,12 @@ module CouchbaseOrm
       #   # This will construct and execute the N1QL query to retrieve the IDs of all active users,
       #   # fetch the corresponding documents, and return them as an array of user instances.
       def to_ary
-        ids = query.results
-        return [] if ids.empty?
+        @to_ary ||= begin
+          ids = query.results
+          return [] if ids.empty?
 
-        Array(ids && @model.find(ids))
+          Array(@model.find(ids))
+        end
       end
 
       alias to_a to_ary
@@ -281,7 +283,7 @@ module CouchbaseOrm
       #   # This will construct and execute the N1QL query to retrieve the IDs of all inactive users
       #   # and delete the corresponding documents.
       def delete_all
-        CouchbaseOrm.logger.debug{ "Delete all: #{self}" }
+        CouchbaseOrm.logger.debug { "Delete all: #{self}" }
         ids = query.to_a
         @model.collection.remove_multi(ids) unless ids.empty?
       end
@@ -464,21 +466,21 @@ module CouchbaseOrm
 
       def merge_order(*lorder, **horder)
         raise ArgumentError.new("invalid order passed by list: #{lorder.inspect}, must be symbols") unless lorder.all? { |o|
-                                                                                                             o.is_a? Symbol
-                                                                                                           }
+          o.is_a? Symbol
+        }
         raise ArgumentError.new("Invalid order passed by hash: #{horder.inspect}, must be symbol -> :asc|:desc") unless horder.all? { |k, v|
-                                                                                                                          k.is_a?(Symbol) && [
-:asc, :desc
-].include?(v)
-                                                                                                                        }
+          k.is_a?(Symbol) && [
+            :asc, :desc
+          ].include?(v)
+        }
 
         @order
-          .merge(Array.wrap(lorder).map{ |o| [o, :asc] }.to_h)
+          .merge(Array.wrap(lorder).map { |o| [o, :asc] }.to_h)
           .merge(horder)
       end
 
       def merge_where(conds, _not = false)
-        @where + (_not ? conds.to_a.map{ |k, v| [k, v, :not] } : conds.to_a)
+        @where + (_not ? conds.to_a.map { |k, v| [k, v, :not] } : conds.to_a)
       end
 
       def string_where(string_cond, _not = false)
@@ -503,8 +505,8 @@ module CouchbaseOrm
         conds.map do |key, value, opt|
           if key
             opt == :not ?
-                @model.build_not_match(key, value) :
-                @model.build_match(key, value)
+              @model.build_not_match(key, value) :
+              @model.build_match(key, value)
           else
             value
           end
