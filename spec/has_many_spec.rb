@@ -127,8 +127,8 @@ describe CouchbaseOrm::HasMany do
     include_examples('has_many example', context: :n1ql)
   end
 
-  describe "dependent: :nullify on has_many" do
-    context "with view" do
+  describe 'dependent: :nullify on has_many' do
+    context 'with view' do
       class RatingNullifyViewTest < CouchbaseOrm::Base
         enum rating: [:awesome, :good, :okay, :bad], default: :okay
         belongs_to :object_nullify_view_test
@@ -153,12 +153,12 @@ describe CouchbaseOrm::HasMany do
         ObjectNullifyViewTest.delete_all
       end
 
-      it "nullifies the foreign key and does not delete/destroy children" do
+      it 'nullifies the foreign key and does not delete/destroy children' do
         obj = ObjectNullifyViewTest.create! name: :bob
         r1  = RatingNullifyViewTest.create! rating: :good,    object_nullify_view_test: obj
         r2  = RatingNullifyViewTest.create! rating: :awesome, object_nullify_view_test: obj
 
-        expect { obj.destroy }.to change { ObjectNullifyViewTest.count }.by(-1)
+        expect { obj.destroy }.to change(ObjectNullifyViewTest, :count).by(-1)
 
         # children still exist
         reloaded_r1 = RatingNullifyViewTest.find(r1.id)
@@ -168,7 +168,7 @@ describe CouchbaseOrm::HasMany do
       end
     end
 
-    context "with n1ql" do
+    context 'with n1ql' do
       class RatingNullifyN1qlTest < CouchbaseOrm::Base
         enum rating: [:awesome, :good, :okay, :bad], default: :okay
         belongs_to :object_nullify_n1ql_test
@@ -193,12 +193,12 @@ describe CouchbaseOrm::HasMany do
         ObjectNullifyN1qlTest.delete_all
       end
 
-      it "nullifies the foreign key and does not delete/destroy children" do
+      it 'nullifies the foreign key and does not delete/destroy children' do
         obj = ObjectNullifyN1qlTest.create! name: :jane
         r1  = RatingNullifyN1qlTest.create! rating: :good,    object_nullify_n1ql_test: obj
         r2  = RatingNullifyN1qlTest.create! rating: :awesome, object_nullify_n1ql_test: obj
 
-        expect { obj.destroy }.to change { ObjectNullifyN1qlTest.count }.by(-1)
+        expect { obj.destroy }.to change(ObjectNullifyN1qlTest, :count).by(-1)
 
         # children still exist
         reloaded_r1 = RatingNullifyN1qlTest.find(r1.id)
