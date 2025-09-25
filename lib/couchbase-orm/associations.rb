@@ -192,6 +192,7 @@ module CouchbaseOrm
       assoc = self.class.associations
       assoc.each do |name, dependent|
         next unless dependent
+        next if dependent == :nullify
 
         model = self.__send__(name)
         next unless model.present?

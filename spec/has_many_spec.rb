@@ -126,4 +126,86 @@ describe CouchbaseOrm::HasMany do
 
     include_examples('has_many example', context: :n1ql)
   end
+
+  describe "dependent: :nullify on has_many" do
+    context "with view" do
+      class RatingNullifyViewTest < CouchbaseOrm::Base
+        enum rating: [:awesome, :good, :okay, :bad], default: :okay
+        belongs_to :object_nullify_view_test
+        view :view_all
+      end
+
+      class ObjectNullifyViewTest < CouchbaseOrm::Base
+        attribute :name, type: String
+        has_many :rating_nullify_view_tests, dependent: :nullify
+        view :view_all
+      end
+
+      before :all do
+        RatingNullifyViewTest.ensure_design_document!
+        ObjectNullifyViewTest.ensure_design_document!
+        RatingNullifyViewTest.delete_all
+        ObjectNullifyViewTest.delete_all
+      end
+
+      after do
+        RatingNullifyViewTest.delete_all
+        ObjectNullifyViewTest.delete_all
+      end
+
+      it "nullifies the foreign key and does not delete/destroy children" do
+        obj = ObjectNullifyViewTest.create! name: :bob
+        r1  = RatingNullifyViewTest.create! rating: :good,    object_nullify_view_test: obj
+        r2  = RatingNullifyViewTest.create! rating: :awesome, object_nullify_view_test: obj
+
+        expect { obj.destroy }.to change { ObjectNullifyViewTest.count }.by(-1)
+
+        # children still exist
+        reloaded_r1 = RatingNullifyViewTest.find(r1.id)
+        reloaded_r2 = RatingNullifyViewTest.find(r2.id)
+        expect(reloaded_r1).to be_present
+        expect(reloaded_r2).to be_present
+      end
+    end
+
+    context "with n1ql" do
+      class RatingNullifyN1qlTest < CouchbaseOrm::Base
+        enum rating: [:awesome, :good, :okay, :bad], default: :okay
+        belongs_to :object_nullify_n1ql_test
+        n1ql :n1ql_all
+      end
+
+      class ObjectNullifyN1qlTest < CouchbaseOrm::Base
+        attribute :name, type: String
+        has_many :rating_nullify_n1ql_tests, dependent: :nullify, type: :n1ql
+        n1ql :n1ql_all
+      end
+
+      before :all do
+        RatingNullifyN1qlTest.ensure_design_document!
+        ObjectNullifyN1qlTest.ensure_design_document!
+        RatingNullifyN1qlTest.delete_all
+        ObjectNullifyN1qlTest.delete_all
+      end
+
+      after do
+        RatingNullifyN1qlTest.delete_all
+        ObjectNullifyN1qlTest.delete_all
+      end
+
+      it "nullifies the foreign key and does not delete/destroy children" do
+        obj = ObjectNullifyN1qlTest.create! name: :jane
+        r1  = RatingNullifyN1qlTest.create! rating: :good,    object_nullify_n1ql_test: obj
+        r2  = RatingNullifyN1qlTest.create! rating: :awesome, object_nullify_n1ql_test: obj
+
+        expect { obj.destroy }.to change { ObjectNullifyN1qlTest.count }.by(-1)
+
+        # children still exist
+        reloaded_r1 = RatingNullifyN1qlTest.find(r1.id)
+        reloaded_r2 = RatingNullifyN1qlTest.find(r2.id)
+        expect(reloaded_r1).to be_present
+        expect(reloaded_r2).to be_present
+      end
+    end
+  end
 end
