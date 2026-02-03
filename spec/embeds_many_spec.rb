@@ -82,8 +82,17 @@ class DocumentAttachment < CouchbaseOrm::Base
   attribute :size, :integer
 end
 
+class AudioAttachment < CouchbaseOrm::Base
+  attribute :url, :string
+  attribute :bitrate, :integer
+end
+
 class Article < CouchbaseOrm::Base
   embeds_many :attachments, polymorphic: true
+end
+
+class RestrictedArticle < CouchbaseOrm::Base
+  embeds_many :attachments, polymorphic: ['ImageAttachment', 'VideoAttachment']
 end
 
 describe CouchbaseOrm::EmbedsMany do
@@ -387,7 +396,8 @@ describe CouchbaseOrm::EmbedsMany do
       expect(article.attachments.last).to be_a(VideoAttachment)
       expect(article.attachments.last.url).to eq('https://example.com/video.mp4')
       expect(article.attachments.last.duration).to eq(120)
-      expect(article.attributes['attachments_types']).to eq(['ImageAttachment', 'VideoAttachment'])
+      expect(article.attributes['attachments'].first['type']).to eq('ImageAttachment')
+      expect(article.attributes['attachments'].last['type']).to eq('VideoAttachment')
     end
 
     it 'can embed multiple items of the same polymorphic type' do
@@ -399,7 +409,7 @@ describe CouchbaseOrm::EmbedsMany do
       expect(article.attachments).to all(be_a(ImageAttachment))
       expect(article.attachments.first.caption).to eq('First')
       expect(article.attachments.last.caption).to eq('Second')
-      expect(article.attributes['attachments_types']).to eq(['ImageAttachment', 'ImageAttachment'])
+      expect(article.attributes['attachments'].map { |a| a['type'] }).to eq(['ImageAttachment', 'ImageAttachment'])
     end
 
     it 'can embed mixed polymorphic types' do
@@ -480,7 +490,6 @@ describe CouchbaseOrm::EmbedsMany do
       article.attachments = []
       expect(article.attachments).to eq([])
       expect(article.attributes['attachments']).to eq([])
-      expect(article.attributes['attachments_types']).to eq([])
     end
 
     it 'can set polymorphic embedded collection to nil' do
@@ -490,7 +499,6 @@ describe CouchbaseOrm::EmbedsMany do
       article.attachments = nil
       expect(article.attachments).to eq([])
       expect(article.attributes['attachments']).to eq([])
-      expect(article.attributes['attachments_types']).to eq([])
     end
 
     it 'raises error when trying to assign Hash to polymorphic embeds_many' do
@@ -587,7 +595,7 @@ describe CouchbaseOrm::EmbedsMany do
       expect(article.attachments[1]).to be_a(VideoAttachment)
       expect(article.attachments[1].url).to eq('https://example.com/hash2.mp4')
       expect(article.attachments[1].duration).to eq(45)
-      expect(article.attributes['attachments_types']).to eq(['ImageAttachment', 'VideoAttachment'])
+      expect(article.attributes['attachments'].map { |a| a['type'] }).to eq(['ImageAttachment', 'VideoAttachment'])
     end
 
     it 'accepts hashes with string type key for polymorphic embeds_many' do
@@ -643,14 +651,14 @@ describe CouchbaseOrm::EmbedsMany do
       article.destroy! if article&.persisted?
     end
 
-    it 'does not include type in serialized attributes' do
+    it 'includes type in serialized attributes' do
       article = Article.new(
         attachments: [{ type: 'image_attachment', url: 'https://example.com/test.jpg', caption: 'Test' }]
       )
       
       serialized = article.send(:serialized_attributes)
-      expect(serialized['attachments'].first).not_to have_key('type')
-      expect(serialized['attachments'].first).not_to have_key(:type)
+      expect(serialized['attachments'].first).to have_key('type')
+      expect(serialized['attachments'].first['type']).to eq('ImageAttachment')
     end
 
     it 'handles mixed valid and nil values with hashes' do

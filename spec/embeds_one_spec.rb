@@ -83,8 +83,17 @@ class Video < CouchbaseOrm::Base
   attribute :duration, :integer
 end
 
+class Audio < CouchbaseOrm::Base
+  attribute :url, :string
+  attribute :bitrate, :integer
+end
+
 class Post < CouchbaseOrm::Base
   embeds_one :media, polymorphic: true
+end
+
+class RestrictedPost < CouchbaseOrm::Base
+  embeds_one :media, polymorphic: ['Image', 'Video']
 end
 
 describe CouchbaseOrm::EmbedsOne do
@@ -407,7 +416,7 @@ describe CouchbaseOrm::EmbedsOne do
       expect(post.media).to be_a(Image)
       expect(post.media.url).to eq('https://example.com/image.jpg')
       expect(post.media.caption).to eq('A beautiful sunset')
-      expect(post.attributes['media_type']).to eq('Image')
+      expect(post.attributes['media']['type']).to eq('Image')
     end
 
     it 'can embed a different polymorphic type' do
@@ -417,7 +426,7 @@ describe CouchbaseOrm::EmbedsOne do
       expect(post.media).to be_a(Video)
       expect(post.media.url).to eq('https://example.com/video.mp4')
       expect(post.media.duration).to eq(120)
-      expect(post.attributes['media_type']).to eq('Video')
+      expect(post.attributes['media']['type']).to eq('Video')
     end
 
     it 'persists and retrieves polymorphic embedded objects correctly' do
@@ -479,7 +488,7 @@ describe CouchbaseOrm::EmbedsOne do
       expect(post.media).to be_a(Image)
       expect(post.media.url).to eq('https://example.com/hash.jpg')
       expect(post.media.caption).to eq('From Hash')
-      expect(post.attributes['media_type']).to eq('Image')
+      expect(post.attributes['media']['type']).to eq('Image')
     end
 
     it 'accepts hash with string type key for polymorphic embeds_one' do
@@ -488,7 +497,7 @@ describe CouchbaseOrm::EmbedsOne do
       expect(post.media).to be_a(Video)
       expect(post.media.url).to eq('https://example.com/hash.mp4')
       expect(post.media.duration).to eq(75)
-      expect(post.attributes['media_type']).to eq('Video')
+      expect(post.attributes['media']['type']).to eq('Video')
     end
 
     it 'raises error when hash is missing type key for polymorphic embeds_one' do
@@ -508,12 +517,53 @@ describe CouchbaseOrm::EmbedsOne do
       post.destroy! if post&.persisted?
     end
 
-    it 'does not include type in serialized attributes' do
+    it 'includes type in serialized attributes' do
       post = Post.new(media: { type: 'video', url: 'https://example.com/test.mp4', duration: 100 })
       
       serialized = post.send(:serialized_attributes)
-      expect(serialized['media']).not_to have_key('type')
-      expect(serialized['media']).not_to have_key(:type)
+      expect(serialized['media']).to have_key('type')
+      expect(serialized['media']['type']).to eq('Video')
+    end
+  end
+
+  describe 'polymorphic embeds_one with types restriction' do
+    it 'accepts allowed types with objects' do
+      image = Image.new(url: 'https://example.com/allowed.jpg', caption: 'Allowed')
+      post = RestrictedPost.new(media: image)
+
+      expect(post.media).to be_a(Image)
+      expect(post.media.url).to eq('https://example.com/allowed.jpg')
+    end
+
+    it 'accepts allowed types with hashes' do
+      post = RestrictedPost.new(media: { type: 'video', url: 'https://example.com/allowed.mp4', duration: 60 })
+
+      expect(post.media).to be_a(Video)
+      expect(post.media.url).to eq('https://example.com/allowed.mp4')
+    end
+
+    it 'rejects disallowed types with objects' do
+      audio = Audio.new(url: 'https://example.com/denied.mp3', bitrate: 128)
+
+      expect {
+        RestrictedPost.new(media: audio)
+      }.to raise_error(ArgumentError, 'Audio is not an allowed type for media. Allowed types: Image, Video')
+    end
+
+    it 'rejects disallowed types with hashes' do
+      expect {
+        RestrictedPost.new(media: { type: 'audio', url: 'https://example.com/denied.mp3', bitrate: 128 })
+      }.to raise_error(ArgumentError, 'Audio is not an allowed type for media. Allowed types: Image, Video')
+    end
+
+    it 'persists and retrieves with type restrictions' do
+      post = RestrictedPost.create!(media: { type: 'image', url: 'https://example.com/restricted.jpg', caption: 'Restricted' })
+
+      loaded = RestrictedPost.find(post.id)
+      expect(loaded.media).to be_a(Image)
+      expect(loaded.media.url).to eq('https://example.com/restricted.jpg')
+    ensure
+      post.destroy! if post&.persisted?
     end
   end
 end

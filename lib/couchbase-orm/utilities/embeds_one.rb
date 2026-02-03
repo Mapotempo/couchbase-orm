@@ -9,32 +9,43 @@ module CouchbaseOrm
       instance_var = "@__assoc_#{name}"
       klass_name = (class_name || name.to_s.camelize)
 
+      # Handle polymorphic parameter: can be true, false, or array of allowed types
+      is_polymorphic = polymorphic.is_a?(Array) || polymorphic == true
+      allowed_types = if polymorphic.is_a?(Array)
+        polymorphic.map { |t| t.to_s.camelize }
+      else
+        nil
+      end
+
       set_embedded(name, {
         type: :one,
         class_name: klass_name, # keep as string to delay resolution
         key: storage_key,
         name: name,
         instance_var: instance_var,
-        polymorphic: polymorphic,
+        polymorphic: is_polymorphic,
+        allowed_types: allowed_types,
       })
 
       validates_embedded(name) if validate
 
-      if polymorphic
-        # Add type attribute for polymorphic associations
-        type_key = :"#{name}_type"
-        attribute type_key, :string, default: nil
-
+      if is_polymorphic
         # Polymorphic reader
         define_method(name) do
           return instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
 
           raw = read_attribute(storage_key)
-          type = read_attribute(type_key)
-          return instance_variable_set(instance_var, nil) unless raw.present? && type.present?
+          return instance_variable_set(instance_var, nil) unless raw.present?
+          
+          type = raw['type'] || raw[:type]
+          return instance_variable_set(instance_var, nil) unless type.present?
 
           klass = type.constantize
-          obj = klass.new(raw)
+          # Remove type from attributes before creating object
+          attrs = raw.dup
+          attrs.delete('type')
+          attrs.delete(:type)
+          obj = klass.new(attrs)
           obj.embedded = true
           instance_variable_set(instance_var, obj)
         end
@@ -43,7 +54,6 @@ module CouchbaseOrm
         define_method("#{name}=") do |val|
           if val.nil?
             write_attribute(storage_key, nil)
-            write_attribute(type_key, nil)
             instance_variable_set(instance_var, nil)
             next
           end
@@ -63,13 +73,19 @@ module CouchbaseOrm
             obj = val
           end
           
+          # Validate against allowed types if specified
+          if allowed_types.present? && !allowed_types.include?(obj.class.name)
+            raise ArgumentError, "#{obj.class.name} is not an allowed type for #{name}. Allowed types: #{allowed_types.join(', ')}"
+          end
+          
           obj.embedded = true
 
           raw = obj.serialized_attributes
           raw.delete('id') if raw['id'].blank?
+          # Store type inside the object
+          raw['type'] = obj.class.name
 
           write_attribute(storage_key, raw)
-          write_attribute(type_key, obj.class.name)
           instance_variable_set(instance_var, obj)
         end
       else

@@ -167,14 +167,58 @@ For ``embeds_many`` with polymorphism:
   # => [#<Image ...>, #<Video ...>]
 
 When using polymorphic embedded associations, the type information is stored
-in a separate attribute (``<name>_type`` for ``embeds_one`` and
-``<name>_types`` for ``embeds_many``).
+inside each embedded document as a ``type`` field. For example:
+
+.. code-block:: json
+
+  {
+    "_id": "post::123",
+    "media": {
+      "type": "Image",
+      "url": "photo.jpg",
+      "caption": "Sunset"
+    }
+  }
 
 **Note**: When using hashes with polymorphic associations, you must include
 the ``type`` key (either as a symbol ``:type`` or string ``'type'``) with
 the snake_case version of the class name. For example, use ``'image'`` for
 the ``Image`` class or ``'video_attachment'`` for the ``VideoAttachment`` class.
 Without it, an ``ArgumentError`` will be raised.
+
+Restricting Polymorphic Types
+------------------------------
+
+You can restrict which types are allowed in a polymorphic association by
+passing an array of allowed class names to the ``polymorphic`` parameter:
+
+.. code-block:: ruby
+
+  class Post < CouchbaseOrm::Base
+    # Only Image and Video are allowed
+    embeds_one :media, polymorphic: ['Image', 'Video']
+  end
+
+  class Article < CouchbaseOrm::Base
+    # Only specific attachment types allowed
+    embeds_many :attachments, polymorphic: ['ImageAttachment', 'VideoAttachment']
+  end
+
+  # This works
+  post = Post.new(media: Image.new(url: 'photo.jpg'))
+
+  # This raises an error
+  post = Post.new(media: Audio.new(url: 'song.mp3'))
+  # => ArgumentError: Audio is not an allowed type for media. Allowed types: Image, Video
+
+You can use snake_case names in the array, which will be automatically
+converted to CamelCase class names:
+
+.. code-block:: ruby
+
+  class Post < CouchbaseOrm::Base
+    embeds_one :media, polymorphic: [:image, 'video']  # Same as ['Image', 'Video']
+  end
 
 Custom Storage Keys
 -------------------
