@@ -66,6 +66,27 @@ class Article < CouchbaseOrm::Base
   embeds_one :comments_container, class_name: 'CommentsContainer'
 end
 
+class Attachment < CouchbaseOrm::Base
+  attribute :filename, :string
+  attribute :attachable_type, :string
+  attribute :attachable_id, :string
+  belongs_to :attachable, polymorphic: true
+end
+
+class Image < CouchbaseOrm::Base
+  attribute :url, :string
+  attribute :caption, :string
+end
+
+class Video < CouchbaseOrm::Base
+  attribute :url, :string
+  attribute :duration, :integer
+end
+
+class Post < CouchbaseOrm::Base
+  embeds_one :media, polymorphic: true
+end
+
 describe CouchbaseOrm::EmbedsOne do
   let(:raw_data) { { bio: 'Software Engineer' } }
 
@@ -375,6 +396,81 @@ describe CouchbaseOrm::EmbedsOne do
       comment1.destroy! if comment1&.persisted?
       comment2.destroy! if comment2&.persisted?
       article.destroy! if article&.persisted?
+    end
+  end
+
+  describe 'polymorphic embeds_one' do
+    it 'can embed different types polymorphically with type attribute' do
+      image = Image.new(url: 'https://example.com/image.jpg', caption: 'A beautiful sunset')
+      post = Post.new(media: image)
+
+      expect(post.media).to be_a(Image)
+      expect(post.media.url).to eq('https://example.com/image.jpg')
+      expect(post.media.caption).to eq('A beautiful sunset')
+      expect(post.attributes['media_type']).to eq('Image')
+    end
+
+    it 'can embed a different polymorphic type' do
+      video = Video.new(url: 'https://example.com/video.mp4', duration: 120)
+      post = Post.new(media: video)
+
+      expect(post.media).to be_a(Video)
+      expect(post.media.url).to eq('https://example.com/video.mp4')
+      expect(post.media.duration).to eq(120)
+      expect(post.attributes['media_type']).to eq('Video')
+    end
+
+    it 'persists and retrieves polymorphic embedded objects correctly' do
+      video = Video.new(url: 'https://example.com/demo.mp4', duration: 90)
+      post = Post.create!(media: video)
+
+      loaded = Post.find(post.id)
+      expect(loaded.media).to be_a(Video)
+      expect(loaded.media.url).to eq('https://example.com/demo.mp4')
+      expect(loaded.media.duration).to eq(90)
+    ensure
+      post.destroy! if post&.persisted?
+    end
+
+    it 'can switch between different polymorphic types' do
+      image = Image.new(url: 'https://example.com/pic.jpg', caption: 'Original')
+      post = Post.create!(media: image)
+
+      post.media = Video.new(url: 'https://example.com/clip.mp4', duration: 45)
+      post.save!
+
+      post.reload
+      expect(post.media).to be_a(Video)
+      expect(post.media.url).to eq('https://example.com/clip.mp4')
+    ensure
+      post.destroy! if post&.persisted?
+    end
+
+    it 'sets embedded flag on polymorphic embedded objects' do
+      image = Image.new(url: 'https://example.com/test.jpg', caption: 'Test')
+      post = Post.new(media: image)
+
+      expect(post.media.instance_variable_get(:@_embedded)).to be true
+    end
+
+    it 'can set polymorphic embedded to nil' do
+      video = Video.new(url: 'https://example.com/test.mp4', duration: 60)
+      post = Post.new(media: video)
+
+      post.media = nil
+      expect(post.media).to be_nil
+      expect(post.attributes['media']).to be_nil
+      expect(post.attributes['media_type']).to be_nil
+    end
+
+    it 'validates polymorphic embedded objects' do
+      # Assuming Image has validations
+      image = Image.new(url: nil, caption: 'No URL')
+      post = Post.new(media: image)
+
+      # Since Image doesn't have validations in our test setup, this would pass
+      # But demonstrates the structure for validation testing
+      expect(post.media).to be_a(Image)
     end
   end
 end

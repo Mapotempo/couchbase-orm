@@ -2,7 +2,7 @@
 
 module CouchbaseOrm
   module EmbedsOne
-    def embeds_one(name, class_name: nil, store_as: nil, validate: true)
+    def embeds_one(name, class_name: nil, store_as: nil, validate: true, polymorphic: false)
       storage_key = (store_as || name).to_sym
       attribute storage_key, :hash, default: nil
 
@@ -15,49 +15,90 @@ module CouchbaseOrm
         key: storage_key,
         name: name,
         instance_var: instance_var,
+        polymorphic: polymorphic,
       })
 
       validates_embedded(name) if validate
 
-      # Helper to lazy-resolve class when needed
-      define_method("_resolve_embedded_class_for_#{name}") do
-        @__resolved_classes ||= {}
-        @__resolved_classes[name] ||= begin
-          klass_name.constantize
-        rescue NameError => e
-          warn "WARNING: #{klass_name} could not be resolved in #{self.class.name}: #{e.message}"
-          raise
-        end
-      end
+      if polymorphic
+        # Add type attribute for polymorphic associations
+        type_key = :"#{name}_type"
+        attribute type_key, :string, default: nil
 
-      define_method(name) do
-        return instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
+        # Polymorphic reader
+        define_method(name) do
+          return instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
 
-        raw = read_attribute(storage_key)
-        return instance_variable_set(instance_var, nil) unless raw.present?
+          raw = read_attribute(storage_key)
+          type = read_attribute(type_key)
+          return instance_variable_set(instance_var, nil) unless raw.present? && type.present?
 
-        klass = send("_resolve_embedded_class_for_#{name}")
-        obj = klass.new(raw)
-        obj.embedded = true
-        instance_variable_set(instance_var, obj)
-      end
-
-      define_method("#{name}=") do |val|
-        if val.nil?
-          write_attribute(storage_key, nil)
-          instance_variable_set(instance_var, nil)
-          next
+          klass = type.constantize
+          obj = klass.new(raw)
+          obj.embedded = true
+          instance_variable_set(instance_var, obj)
         end
 
-        klass = send("_resolve_embedded_class_for_#{name}")
-        obj = val.is_a?(klass) ? val : klass.new(val)
-        obj.embedded = true
+        # Polymorphic writer
+        define_method("#{name}=") do |val|
+          if val.nil?
+            write_attribute(storage_key, nil)
+            write_attribute(type_key, nil)
+            instance_variable_set(instance_var, nil)
+            next
+          end
 
-        raw = obj.serialized_attributes
-        raw.delete('id') if raw['id'].blank?
+          obj = val.is_a?(Hash) ? raise(ArgumentError, "Cannot infer type from Hash for polymorphic embeds_one") : val
+          obj.embedded = true
 
-        write_attribute(storage_key, raw)
-        instance_variable_set(instance_var, obj)
+          raw = obj.serialized_attributes
+          raw.delete('id') if raw['id'].blank?
+
+          write_attribute(storage_key, raw)
+          write_attribute(type_key, obj.class.name)
+          instance_variable_set(instance_var, obj)
+        end
+      else
+        # Helper to lazy-resolve class when needed
+        define_method("_resolve_embedded_class_for_#{name}") do
+          @__resolved_classes ||= {}
+          @__resolved_classes[name] ||= begin
+            klass_name.constantize
+          rescue NameError => e
+            warn "WARNING: #{klass_name} could not be resolved in #{self.class.name}: #{e.message}"
+            raise
+          end
+        end
+
+        define_method(name) do
+          return instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
+
+          raw = read_attribute(storage_key)
+          return instance_variable_set(instance_var, nil) unless raw.present?
+
+          klass = send("_resolve_embedded_class_for_#{name}")
+          obj = klass.new(raw)
+          obj.embedded = true
+          instance_variable_set(instance_var, obj)
+        end
+
+        define_method("#{name}=") do |val|
+          if val.nil?
+            write_attribute(storage_key, nil)
+            instance_variable_set(instance_var, nil)
+            next
+          end
+
+          klass = send("_resolve_embedded_class_for_#{name}")
+          obj = val.is_a?(klass) ? val : klass.new(val)
+          obj.embedded = true
+
+          raw = obj.serialized_attributes
+          raw.delete('id') if raw['id'].blank?
+
+          write_attribute(storage_key, raw)
+          instance_variable_set(instance_var, obj)
+        end
       end
 
       define_method(:"#{name}_reset") do
