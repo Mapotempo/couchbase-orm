@@ -127,10 +127,13 @@ allowing you to embed different types of documents in the same association:
     embeds_one :media, polymorphic: true
   end
 
-  # Embed an image
+  # Embed an image using an object
   post = Post.create!(media: Image.new(url: 'photo.jpg', caption: 'Sunset'))
   post.media
   # => #<Image url: "photo.jpg", caption: "Sunset">
+
+  # Or use a hash with type key (snake_case class name)
+  post = Post.create!(media: { type: 'image', url: 'photo.jpg', caption: 'Sunset' })
 
   # Switch to a video
   post.media = Video.new(url: 'clip.mp4', duration: 120)
@@ -144,10 +147,19 @@ For ``embeds_many`` with polymorphism:
     embeds_many :attachments, polymorphic: true
   end
 
+  # Using objects
   article = Article.create!(
     attachments: [
       Image.new(url: 'diagram.png', caption: 'Architecture'),
       Video.new(url: 'demo.mp4', duration: 90)
+    ]
+  )
+
+  # Or using hashes with type key (snake_case class names)
+  article = Article.create!(
+    attachments: [
+      { type: 'image', url: 'diagram.png', caption: 'Architecture' },
+      { type: 'video', url: 'demo.mp4', duration: 90 }
     ]
   )
 
@@ -157,6 +169,12 @@ For ``embeds_many`` with polymorphism:
 When using polymorphic embedded associations, the type information is stored
 in a separate attribute (``<name>_type`` for ``embeds_one`` and
 ``<name>_types`` for ``embeds_many``).
+
+**Note**: When using hashes with polymorphic associations, you must include
+the ``type`` key (either as a symbol ``:type`` or string ``'type'``) with
+the snake_case version of the class name. For example, use ``'image'`` for
+the ``Image`` class or ``'video_attachment'`` for the ``VideoAttachment`` class.
+Without it, an ``ArgumentError`` will be raised.
 
 Custom Storage Keys
 -------------------

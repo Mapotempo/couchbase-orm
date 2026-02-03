@@ -472,5 +472,48 @@ describe CouchbaseOrm::EmbedsOne do
       # But demonstrates the structure for validation testing
       expect(post.media).to be_a(Image)
     end
+
+    it 'accepts hash with type key for polymorphic embeds_one' do
+      post = Post.new(media: { type: 'image', url: 'https://example.com/hash.jpg', caption: 'From Hash' })
+
+      expect(post.media).to be_a(Image)
+      expect(post.media.url).to eq('https://example.com/hash.jpg')
+      expect(post.media.caption).to eq('From Hash')
+      expect(post.attributes['media_type']).to eq('Image')
+    end
+
+    it 'accepts hash with string type key for polymorphic embeds_one' do
+      post = Post.new(media: { 'type' => 'video', 'url' => 'https://example.com/hash.mp4', 'duration' => 75 })
+
+      expect(post.media).to be_a(Video)
+      expect(post.media.url).to eq('https://example.com/hash.mp4')
+      expect(post.media.duration).to eq(75)
+      expect(post.attributes['media_type']).to eq('Video')
+    end
+
+    it 'raises error when hash is missing type key for polymorphic embeds_one' do
+      expect {
+        Post.new(media: { url: 'https://example.com/no-type.jpg', caption: 'Missing Type' })
+      }.to raise_error(ArgumentError, "Cannot infer type from Hash for polymorphic embeds_one. Include 'type' key with class name.")
+    end
+
+    it 'persists and retrieves polymorphic embedded from hash' do
+      post = Post.create!(media: { type: 'image', url: 'https://example.com/persist.jpg', caption: 'Persisted' })
+
+      loaded = Post.find(post.id)
+      expect(loaded.media).to be_a(Image)
+      expect(loaded.media.url).to eq('https://example.com/persist.jpg')
+      expect(loaded.media.caption).to eq('Persisted')
+    ensure
+      post.destroy! if post&.persisted?
+    end
+
+    it 'does not include type in serialized attributes' do
+      post = Post.new(media: { type: 'video', url: 'https://example.com/test.mp4', duration: 100 })
+      
+      serialized = post.send(:serialized_attributes)
+      expect(serialized['media']).not_to have_key('type')
+      expect(serialized['media']).not_to have_key(:type)
+    end
   end
 end

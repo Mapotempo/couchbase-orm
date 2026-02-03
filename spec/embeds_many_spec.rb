@@ -40,14 +40,14 @@ end
 class ChildPerson < BasePerson
 end
 
-class AddressBook < CouchbaseOrm::Base
-  attribute :label, :string
-  has_many :contacts, type: :n1ql, class_name: 'Contact'
-end
-
 class Contact < CouchbaseOrm::Base
   attribute :name, :string
   belongs_to :address_book
+end
+
+class AddressBook < CouchbaseOrm::Base
+  attribute :label, :string
+  has_many :contacts, type: :n1ql, class_name: 'Contact'
 end
 
 class PersonWithBook < CouchbaseOrm::Base
@@ -498,7 +498,7 @@ describe CouchbaseOrm::EmbedsMany do
 
       expect {
         article.attachments = [{ url: 'https://example.com/test.jpg', caption: 'Test' }]
-      }.to raise_error(ArgumentError, 'Cannot infer type from Hash for polymorphic embeds_many')
+      }.to raise_error(ArgumentError, "Cannot infer type from Hash for polymorphic embeds_many. Include 'type' key with class name.")
     end
 
     it 'skips nil values in polymorphic embedded collection' do
@@ -570,6 +570,101 @@ describe CouchbaseOrm::EmbedsMany do
       expect(article.attachments[2]).to be_a(DocumentAttachment)
     ensure
       article.destroy! if article&.persisted?
+    end
+
+    it 'accepts hashes with type key for polymorphic embeds_many' do
+      article = Article.new(
+        attachments: [
+          { type: 'image_attachment', url: 'https://example.com/hash1.jpg', caption: 'First' },
+          { type: 'video_attachment', url: 'https://example.com/hash2.mp4', duration: 45 }
+        ]
+      )
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments[0]).to be_a(ImageAttachment)
+      expect(article.attachments[0].url).to eq('https://example.com/hash1.jpg')
+      expect(article.attachments[0].caption).to eq('First')
+      expect(article.attachments[1]).to be_a(VideoAttachment)
+      expect(article.attachments[1].url).to eq('https://example.com/hash2.mp4')
+      expect(article.attachments[1].duration).to eq(45)
+      expect(article.attributes['attachments_types']).to eq(['ImageAttachment', 'VideoAttachment'])
+    end
+
+    it 'accepts hashes with string type key for polymorphic embeds_many' do
+      article = Article.new(
+        attachments: [
+          { 'type' => 'document_attachment', 'filename' => 'doc.pdf', 'size' => 1024 }
+        ]
+      )
+
+      expect(article.attachments.size).to eq(1)
+      expect(article.attachments.first).to be_a(DocumentAttachment)
+      expect(article.attachments.first.filename).to eq('doc.pdf')
+      expect(article.attachments.first.size).to eq(1024)
+    end
+
+    it 'raises error when hash is missing type key for polymorphic embeds_many' do
+      expect {
+        Article.new(attachments: [{ url: 'https://example.com/no-type.jpg', caption: 'Missing Type' }])
+      }.to raise_error(ArgumentError, "Cannot infer type from Hash for polymorphic embeds_many. Include 'type' key with class name.")
+    end
+
+    it 'can mix objects and hashes with type key' do
+      image_obj = ImageAttachment.new(url: 'https://example.com/obj.jpg', caption: 'Object')
+      article = Article.new(
+        attachments: [
+          image_obj,
+          { type: 'video_attachment', url: 'https://example.com/hash.mp4', duration: 60 }
+        ]
+      )
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments[0]).to be_a(ImageAttachment)
+      expect(article.attachments[0].url).to eq('https://example.com/obj.jpg')
+      expect(article.attachments[1]).to be_a(VideoAttachment)
+      expect(article.attachments[1].duration).to eq(60)
+    end
+
+    it 'persists and retrieves polymorphic embedded from hashes' do
+      article = Article.create!(
+        attachments: [
+          { type: 'image_attachment', url: 'https://example.com/persist.jpg', caption: 'Persisted' },
+          { type: 'video_attachment', url: 'https://example.com/persist.mp4', duration: 90 }
+        ]
+      )
+
+      loaded = Article.find(article.id)
+      expect(loaded.attachments.size).to eq(2)
+      expect(loaded.attachments[0]).to be_a(ImageAttachment)
+      expect(loaded.attachments[0].url).to eq('https://example.com/persist.jpg')
+      expect(loaded.attachments[1]).to be_a(VideoAttachment)
+      expect(loaded.attachments[1].duration).to eq(90)
+    ensure
+      article.destroy! if article&.persisted?
+    end
+
+    it 'does not include type in serialized attributes' do
+      article = Article.new(
+        attachments: [{ type: 'image_attachment', url: 'https://example.com/test.jpg', caption: 'Test' }]
+      )
+      
+      serialized = article.send(:serialized_attributes)
+      expect(serialized['attachments'].first).not_to have_key('type')
+      expect(serialized['attachments'].first).not_to have_key(:type)
+    end
+
+    it 'handles mixed valid and nil values with hashes' do
+      article = Article.new(
+        attachments: [
+          { type: 'image_attachment', url: 'https://example.com/test.jpg', caption: 'Test' },
+          nil,
+          { type: 'video_attachment', url: 'https://example.com/test.mp4', duration: 30 }
+        ]
+      )
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments[0]).to be_a(ImageAttachment)
+      expect(article.attachments[1]).to be_a(VideoAttachment)
     end
   end
 end

@@ -48,7 +48,21 @@ module CouchbaseOrm
             next
           end
 
-          obj = val.is_a?(Hash) ? raise(ArgumentError, "Cannot infer type from Hash for polymorphic embeds_one") : val
+          if val.is_a?(Hash)
+            # Extract type from hash
+            type_name = val[:type] || val['type']
+            raise ArgumentError, "Cannot infer type from Hash for polymorphic embeds_one. Include 'type' key with class name." unless type_name.present?
+            
+            klass = type_name.to_s.camelize.constantize
+            # Remove type from attributes before creating object
+            attrs = val.dup
+            attrs.delete(:type)
+            attrs.delete('type')
+            obj = klass.new(attrs)
+          else
+            obj = val
+          end
+          
           obj.embedded = true
 
           raw = obj.serialized_attributes
