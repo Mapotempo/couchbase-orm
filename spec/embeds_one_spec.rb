@@ -519,7 +519,7 @@ describe CouchbaseOrm::EmbedsOne do
 
     it 'includes type in serialized attributes' do
       post = Post.new(media: { type: 'video', url: 'https://example.com/test.mp4', duration: 100 })
-      
+
       serialized = post.send(:serialized_attributes)
       expect(serialized['media']).to have_key('type')
       expect(serialized['media']['type']).to eq('Video')

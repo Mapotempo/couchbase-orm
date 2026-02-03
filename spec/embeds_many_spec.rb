@@ -520,7 +520,7 @@ describe CouchbaseOrm::EmbedsMany do
     it 'memoizes polymorphic embedded collection after first access' do
       image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
       article = Article.new(attachments: [image])
-      
+
       first_call = article.attachments
       second_call = article.attachments
 
@@ -544,7 +544,7 @@ describe CouchbaseOrm::EmbedsMany do
     it 'supports reset for polymorphic embedded collection' do
       image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
       article = Article.new(attachments: [image])
-      
+
       original = article.attachments
       article.attachments_reset
 
@@ -569,7 +569,7 @@ describe CouchbaseOrm::EmbedsMany do
       video = VideoAttachment.new(url: 'https://example.com/first.mp4', duration: 30)
       image = ImageAttachment.new(url: 'https://example.com/second.jpg', caption: 'Second')
       doc = DocumentAttachment.new(filename: 'third.pdf', size: 2048)
-      
+
       article = Article.create!(attachments: [video, image, doc])
       article.reload
 
@@ -655,7 +655,7 @@ describe CouchbaseOrm::EmbedsMany do
       article = Article.new(
         attachments: [{ type: 'image_attachment', url: 'https://example.com/test.jpg', caption: 'Test' }]
       )
-      
+
       serialized = article.send(:serialized_attributes)
       expect(serialized['attachments'].first).to have_key('type')
       expect(serialized['attachments'].first['type']).to eq('ImageAttachment')

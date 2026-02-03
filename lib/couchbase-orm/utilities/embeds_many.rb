@@ -12,10 +12,8 @@ module CouchbaseOrm
       # Handle polymorphic parameter: can be true, false, or array of allowed types
       is_polymorphic = polymorphic.is_a?(Array) || polymorphic == true
       allowed_types = if polymorphic.is_a?(Array)
-        polymorphic.map { |t| t.to_s.camelize }
-      else
-        nil
-      end
+                        polymorphic.map { |t| t.to_s.camelize }
+                      end
 
       set_embedded(name, {
         type: :many,
@@ -39,7 +37,7 @@ module CouchbaseOrm
           embedded_objects = []
           raw_array.each do |raw|
             next unless raw.present?
-            
+
             type = raw['type'] || raw[:type]
             next unless type.present?
 
@@ -67,8 +65,8 @@ module CouchbaseOrm
             elsif v.is_a?(Hash)
               # Extract type from hash
               type_name = v[:type] || v['type']
-              raise ArgumentError, "Cannot infer type from Hash for polymorphic embeds_many. Include 'type' key with class name." unless type_name.present?
-              
+              raise ArgumentError.new("Cannot infer type from Hash for polymorphic embeds_many. Include 'type' key with class name.") unless type_name.present?
+
               klass = type_name.to_s.camelize.constantize
               # Remove type from attributes before creating object
               attrs = v.dup
@@ -78,12 +76,12 @@ module CouchbaseOrm
             else
               obj = v
             end
-            
+
             # Validate against allowed types if specified
             if allowed_types.present? && !allowed_types.include?(obj.class.name)
-              raise ArgumentError, "#{obj.class.name} is not an allowed type for #{name}. Allowed types: #{allowed_types.join(', ')}"
+              raise ArgumentError.new("#{obj.class.name} is not an allowed type for #{name}. Allowed types: #{allowed_types.join(', ')}")
             end
-            
+
             obj.embedded = true
 
             raw = obj.serialized_attributes
