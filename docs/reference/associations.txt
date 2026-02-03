@@ -12,6 +12,232 @@ Associations
    :depth: 2
    :class: singlecol
 
+Embedded Associations
+=====================
+
+CouchbaseOrm supports embedding documents within a parent document using
+``embeds_one`` and ``embeds_many``. Unlike referenced associations, embedded
+documents are stored directly within the parent document and do not have their
+own separate document ID in the database. This is useful for modeling
+has-one and has-many relationships where the child documents don't need to exist
+independently.
+
+Embeds One
+----------
+
+Use the ``embeds_one`` association to declare that the parent embeds a single
+child document:
+
+.. code-block:: ruby
+
+  class Profile < CouchbaseOrm::Base
+    attribute :bio, :string
+    attribute :website, :string
+  end
+
+  class User < CouchbaseOrm::Base
+    attribute :name, :string
+    embeds_one :profile
+  end
+
+  user = User.create!(name: 'Alice', profile: { bio: 'Software Engineer' })
+  # => #<User _id: "user::123", name: "Alice", profile: {...}>
+
+  user.profile
+  # => #<Profile bio: "Software Engineer", website: nil>
+
+  user.profile.bio = 'Senior Software Engineer'
+  user.profile = user.profile  # Reassign to track changes
+  user.save!
+
+The embedded document is stored as a hash within the parent:
+
+.. code-block:: ruby
+
+  # In the database, the document looks like:
+  {
+    "_id": "user::123",
+    "name": "Alice",
+    "profile": {
+      "bio": "Software Engineer",
+      "website": null
+    }
+  }
+
+Embedded documents cannot be saved, destroyed, or reloaded independently:
+
+.. code-block:: ruby
+
+  user.profile.save
+  # => raises "Cannot save an embedded document!"
+
+Embeds Many
+-----------
+
+Use the ``embeds_many`` association to declare that the parent embeds multiple
+child documents:
+
+.. code-block:: ruby
+
+  class Address < CouchbaseOrm::Base
+    attribute :street, :string
+    attribute :city, :string
+  end
+
+  class Person < CouchbaseOrm::Base
+    attribute :name, :string
+    embeds_many :addresses
+  end
+
+  person = Person.create!(
+    name: 'Bob',
+    addresses: [
+      { street: '123 Main St', city: 'New York' },
+      { street: '456 Elm St', city: 'Boston' }
+    ]
+  )
+
+  person.addresses
+  # => [#<Address street: "123 Main St", city: "New York">,
+  #     #<Address street: "456 Elm St", city: "Boston">]
+
+  person.addresses << Address.new(street: '789 Oak Ave', city: 'Chicago')
+  person.addresses = person.addresses  # Reassign to track changes
+  person.save!
+
+Polymorphic Embedded Associations
+----------------------------------
+
+Both ``embeds_one`` and ``embeds_many`` support polymorphic associations,
+allowing you to embed different types of documents in the same association:
+
+.. code-block:: ruby
+
+  class Image < CouchbaseOrm::Base
+    attribute :url, :string
+    attribute :caption, :string
+  end
+
+  class Video < CouchbaseOrm::Base
+    attribute :url, :string
+    attribute :duration, :integer
+  end
+
+  class Post < CouchbaseOrm::Base
+    embeds_one :media, polymorphic: true
+  end
+
+  # Embed an image
+  post = Post.create!(media: Image.new(url: 'photo.jpg', caption: 'Sunset'))
+  post.media
+  # => #<Image url: "photo.jpg", caption: "Sunset">
+
+  # Switch to a video
+  post.media = Video.new(url: 'clip.mp4', duration: 120)
+  post.save!
+
+For ``embeds_many`` with polymorphism:
+
+.. code-block:: ruby
+
+  class Article < CouchbaseOrm::Base
+    embeds_many :attachments, polymorphic: true
+  end
+
+  article = Article.create!(
+    attachments: [
+      Image.new(url: 'diagram.png', caption: 'Architecture'),
+      Video.new(url: 'demo.mp4', duration: 90)
+    ]
+  )
+
+  article.attachments
+  # => [#<Image ...>, #<Video ...>]
+
+When using polymorphic embedded associations, the type information is stored
+in a separate attribute (``<name>_type`` for ``embeds_one`` and
+``<name>_types`` for ``embeds_many``).
+
+Custom Storage Keys
+-------------------
+
+Use the ``store_as`` option to specify a different attribute name for storage:
+
+.. code-block:: ruby
+
+  class User < CouchbaseOrm::Base
+    embeds_one :profile, store_as: 'p'
+    embeds_many :addresses, store_as: 'addrs'
+  end
+
+  # In the database:
+  {
+    "_id": "user::123",
+    "p": { "bio": "..." },
+    "addrs": [{ "street": "..." }]
+  }
+
+Embedded Association Validation
+--------------------------------
+
+By default, embedded associations are validated when the parent is validated.
+You can disable this with ``validate: false``:
+
+.. code-block:: ruby
+
+  class Profile < CouchbaseOrm::Base
+    attribute :bio, :string
+    validates :bio, presence: true
+  end
+
+  class User < CouchbaseOrm::Base
+    embeds_one :profile
+  end
+
+  user = User.new(profile: { bio: nil })
+  user.valid?
+  # => false
+  user.errors[:profile]
+  # => ["is invalid"]
+
+  # To disable validation:
+  class User < CouchbaseOrm::Base
+    embeds_one :profile, validate: false
+  end
+
+Custom Class Names
+------------------
+
+Specify a different class name for embedded associations when the class cannot
+be inferred from the association name:
+
+.. code-block:: ruby
+
+  class User < CouchbaseOrm::Base
+    embeds_one :bio, class_name: 'Profile'
+    embeds_many :locations, class_name: 'Address'
+  end
+
+Key Differences from Referenced Associations
+---------------------------------------------
+
+Embedded associations differ from referenced associations in several ways:
+
+- **Storage**: Embedded documents are stored within the parent document, not as
+  separate documents in the database.
+
+- **Lifecycle**: Embedded documents cannot be saved, updated, or destroyed
+  independently. They are always saved as part of the parent document.
+
+- **Performance**: Reading a parent document also loads all embedded documents
+  in a single operation, which can be more efficient than separate queries.
+
+- **Querying**: Embedded documents cannot be queried independently. You must
+  query the parent document and then access the embedded documents.
+
+- **Identity**: Embedded documents do not have their own document ID by default
+  (the ``id`` field is removed when embedding).
+
 Referenced Associations
 =======================
 
