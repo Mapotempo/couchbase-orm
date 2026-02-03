@@ -67,6 +67,25 @@ class Citizen < CouchbaseOrm::Base
   embeds_many :addresses, class_name: 'AddressWithCity'
 end
 
+class ImageAttachment < CouchbaseOrm::Base
+  attribute :url, :string
+  attribute :caption, :string
+end
+
+class VideoAttachment < CouchbaseOrm::Base
+  attribute :url, :string
+  attribute :duration, :integer
+end
+
+class DocumentAttachment < CouchbaseOrm::Base
+  attribute :filename, :string
+  attribute :size, :integer
+end
+
+class Article < CouchbaseOrm::Base
+  embeds_many :attachments, polymorphic: true
+end
+
 describe CouchbaseOrm::EmbedsMany do
   let(:raw_data) { [{ street: '123 Main St' }, { street: '456 Elm St' }] }
 
@@ -352,6 +371,205 @@ describe CouchbaseOrm::EmbedsMany do
       contact1.destroy! if contact1&.persisted?
       contact2.destroy! if contact2&.persisted?
       person.destroy! if person&.persisted?
+    end
+  end
+
+  describe 'polymorphic embeds_many' do
+    it 'can embed different types polymorphically with types attribute' do
+      image = ImageAttachment.new(url: 'https://example.com/image.jpg', caption: 'A beautiful sunset')
+      video = VideoAttachment.new(url: 'https://example.com/video.mp4', duration: 120)
+      article = Article.new(attachments: [image, video])
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments.first).to be_a(ImageAttachment)
+      expect(article.attachments.first.url).to eq('https://example.com/image.jpg')
+      expect(article.attachments.first.caption).to eq('A beautiful sunset')
+      expect(article.attachments.last).to be_a(VideoAttachment)
+      expect(article.attachments.last.url).to eq('https://example.com/video.mp4')
+      expect(article.attachments.last.duration).to eq(120)
+      expect(article.attributes['attachments_types']).to eq(['ImageAttachment', 'VideoAttachment'])
+    end
+
+    it 'can embed multiple items of the same polymorphic type' do
+      image1 = ImageAttachment.new(url: 'https://example.com/image1.jpg', caption: 'First')
+      image2 = ImageAttachment.new(url: 'https://example.com/image2.jpg', caption: 'Second')
+      article = Article.new(attachments: [image1, image2])
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments).to all(be_a(ImageAttachment))
+      expect(article.attachments.first.caption).to eq('First')
+      expect(article.attachments.last.caption).to eq('Second')
+      expect(article.attributes['attachments_types']).to eq(['ImageAttachment', 'ImageAttachment'])
+    end
+
+    it 'can embed mixed polymorphic types' do
+      image = ImageAttachment.new(url: 'https://example.com/pic.jpg', caption: 'Photo')
+      video = VideoAttachment.new(url: 'https://example.com/clip.mp4', duration: 90)
+      doc = DocumentAttachment.new(filename: 'report.pdf', size: 1024)
+      article = Article.new(attachments: [image, video, doc])
+
+      expect(article.attachments.size).to eq(3)
+      expect(article.attachments[0]).to be_a(ImageAttachment)
+      expect(article.attachments[1]).to be_a(VideoAttachment)
+      expect(article.attachments[2]).to be_a(DocumentAttachment)
+      expect(article.attachments[2].filename).to eq('report.pdf')
+      expect(article.attachments[2].size).to eq(1024)
+    end
+
+    it 'persists and retrieves polymorphic embedded collections correctly' do
+      image = ImageAttachment.new(url: 'https://example.com/demo.jpg', caption: 'Demo')
+      video = VideoAttachment.new(url: 'https://example.com/demo.mp4', duration: 60)
+      article = Article.create!(attachments: [image, video])
+
+      loaded = Article.find(article.id)
+      expect(loaded.attachments.size).to eq(2)
+      expect(loaded.attachments.first).to be_a(ImageAttachment)
+      expect(loaded.attachments.first.url).to eq('https://example.com/demo.jpg')
+      expect(loaded.attachments.last).to be_a(VideoAttachment)
+      expect(loaded.attachments.last.duration).to eq(60)
+    ensure
+      article.destroy! if article&.persisted?
+    end
+
+    it 'can update polymorphic embedded collections' do
+      image = ImageAttachment.new(url: 'https://example.com/original.jpg', caption: 'Original')
+      article = Article.create!(attachments: [image])
+
+      video = VideoAttachment.new(url: 'https://example.com/new.mp4', duration: 45)
+      article.attachments = [video]
+      article.save!
+
+      article.reload
+      expect(article.attachments.size).to eq(1)
+      expect(article.attachments.first).to be_a(VideoAttachment)
+      expect(article.attachments.first.url).to eq('https://example.com/new.mp4')
+    ensure
+      article.destroy! if article&.persisted?
+    end
+
+    it 'can add to polymorphic embedded collection' do
+      image = ImageAttachment.new(url: 'https://example.com/first.jpg', caption: 'First')
+      article = Article.create!(attachments: [image])
+
+      video = VideoAttachment.new(url: 'https://example.com/second.mp4', duration: 30)
+      article.attachments = article.attachments + [video]
+      article.save!
+
+      article.reload
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments.first).to be_a(ImageAttachment)
+      expect(article.attachments.last).to be_a(VideoAttachment)
+    ensure
+      article.destroy! if article&.persisted?
+    end
+
+    it 'sets embedded flag on polymorphic embedded objects' do
+      image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
+      video = VideoAttachment.new(url: 'https://example.com/test.mp4', duration: 60)
+      article = Article.new(attachments: [image, video])
+
+      article.attachments.each do |attachment|
+        expect(attachment.instance_variable_get(:@_embedded)).to be true
+      end
+    end
+
+    it 'can set polymorphic embedded collection to empty array' do
+      video = VideoAttachment.new(url: 'https://example.com/test.mp4', duration: 60)
+      article = Article.new(attachments: [video])
+
+      article.attachments = []
+      expect(article.attachments).to eq([])
+      expect(article.attributes['attachments']).to eq([])
+      expect(article.attributes['attachments_types']).to eq([])
+    end
+
+    it 'can set polymorphic embedded collection to nil' do
+      image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
+      article = Article.new(attachments: [image])
+
+      article.attachments = nil
+      expect(article.attachments).to eq([])
+      expect(article.attributes['attachments']).to eq([])
+      expect(article.attributes['attachments_types']).to eq([])
+    end
+
+    it 'raises error when trying to assign Hash to polymorphic embeds_many' do
+      article = Article.new
+
+      expect {
+        article.attachments = [{ url: 'https://example.com/test.jpg', caption: 'Test' }]
+      }.to raise_error(ArgumentError, 'Cannot infer type from Hash for polymorphic embeds_many')
+    end
+
+    it 'skips nil values in polymorphic embedded collection' do
+      image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
+      article = Article.new(attachments: [image, nil])
+
+      expect(article.attachments.size).to eq(1)
+      expect(article.attachments.first).to be_a(ImageAttachment)
+    end
+
+    it 'memoizes polymorphic embedded collection after first access' do
+      image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
+      article = Article.new(attachments: [image])
+      
+      first_call = article.attachments
+      second_call = article.attachments
+
+      expect(first_call).to equal(second_call)
+    end
+
+    it 'lazily loads polymorphic embedded collection' do
+      image = ImageAttachment.new(url: 'https://example.com/lazy.jpg', caption: 'Lazy')
+      article = Article.create!(attachments: [image])
+      article = Article.find(article.id)
+
+      expect(article.instance_variable_defined?(:@__assoc_attachments)).to be false
+
+      _ = article.attachments
+
+      expect(article.instance_variable_defined?(:@__assoc_attachments)).to be true
+    ensure
+      article.destroy! if article&.persisted?
+    end
+
+    it 'supports reset for polymorphic embedded collection' do
+      image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
+      article = Article.new(attachments: [image])
+      
+      original = article.attachments
+      article.attachments_reset
+
+      new_instance = article.attachments
+      expect(new_instance).to be_an(Array)
+      expect(new_instance).not_to equal(original)
+    end
+
+    it 'does not include id in polymorphic embedded objects if blank' do
+      image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
+      article = Article.new(attachments: [image])
+
+      expect(article.send(:serialized_attributes)['attachments'].first).not_to include('id')
+    end
+
+    it 'handles empty polymorphic embedded collection on read' do
+      article = Article.new
+      expect(article.attachments).to eq([])
+    end
+
+    it 'preserves order of polymorphic embedded objects' do
+      video = VideoAttachment.new(url: 'https://example.com/first.mp4', duration: 30)
+      image = ImageAttachment.new(url: 'https://example.com/second.jpg', caption: 'Second')
+      doc = DocumentAttachment.new(filename: 'third.pdf', size: 2048)
+      
+      article = Article.create!(attachments: [video, image, doc])
+      article.reload
+
+      expect(article.attachments[0]).to be_a(VideoAttachment)
+      expect(article.attachments[1]).to be_a(ImageAttachment)
+      expect(article.attachments[2]).to be_a(DocumentAttachment)
+    ensure
+      article.destroy! if article&.persisted?
     end
   end
 end
