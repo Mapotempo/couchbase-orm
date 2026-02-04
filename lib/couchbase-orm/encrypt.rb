@@ -31,19 +31,17 @@ module CouchbaseOrm
       end.to_h
     end
 
-    def to_json(*args, **kwargs)
-      as_json.to_json(*args, **kwargs)
-    end
-
-    def as_json(*args, **kwargs)
-      super(*args, **kwargs).map do |key, value|
-        type = self.class.attribute_types[key.to_s]
-        if type.is_a?(CouchbaseOrm::Types::Encrypted) && value && !value.is_a?(String)
-          raise "Can not serialize value #{value} of type '#{value.class}' for encrypted attribute"
-        end
-
-        [key, value]
-      end.to_h.with_indifferent_access
-    end
+    # @deprecated This validation is now handled in the base serialization flow.
+    #   Overriding as_json in the Encrypt module is deprecated and may be removed in future versions.
+    # def as_json(*args, **kwargs)
+    #  super(*args, **kwargs).tap do |result|
+    #    result.each do |key, value|
+    #      type = self.class.attribute_types[key.to_s]
+    #      if type.is_a?(CouchbaseOrm::Types::Encrypted) && value && !value.is_a?(String)
+    #        raise "Can not serialize value #{value} of type '#{value.class}' for encrypted attribute"
+    #      end
+    #    end
+    #  end
+    # end
   end
 end
