@@ -206,10 +206,15 @@ passing an array of allowed class names to the ``polymorphic`` parameter:
 
   # This works
   post = Post.new(media: Image.new(url: 'photo.jpg'))
+  post.valid?
+  # => true
 
-  # This raises an error
+  # This raises a validation error
   post = Post.new(media: Audio.new(url: 'song.mp3'))
-  # => ArgumentError: Audio is not an allowed type for media. Allowed types: Image, Video
+  post.valid?
+  # => false
+  post.errors[:media]
+  # => ["Audio is not an allowed type. Allowed types: Image, Video"]
 
 You can use snake_case names in the array, which will be automatically
 converted to CamelCase class names:
@@ -219,6 +224,36 @@ converted to CamelCase class names:
   class Post < CouchbaseOrm::Base
     embeds_one :media, polymorphic: [:image, 'video']  # Same as ['Image', 'Video']
   end
+
+**Polymorphic Type Validator**: When type restrictions are specified, CouchbaseOrm
+automatically adds a ``PolymorphicTypeValidator`` to ensure that only allowed types
+can be assigned to the association. The validator:
+
+- Validates both single objects (``embeds_one``) and arrays (``embeds_many``)
+- Provides clear error messages listing the allowed types
+- Skips validation when no type restrictions are set or the value is nil
+- Runs during normal model validation (``valid?``, ``save``, ``create``, etc.)
+
+For ``embeds_many`` associations with type restrictions, each item in the array
+is validated individually:
+
+.. code-block:: ruby
+
+  class Article < CouchbaseOrm::Base
+    embeds_many :attachments, polymorphic: ['Image', 'Video']
+  end
+
+  article = Article.new(
+    attachments: [
+      Image.new(url: 'photo.jpg'),
+      Audio.new(url: 'song.mp3')  # Not allowed!
+    ]
+  )
+  
+  article.valid?
+  # => false
+  article.errors[:attachments]
+  # => ["item #1 (Audio) is not an allowed type. Allowed types: Image, Video"]
 
 Custom Storage Keys
 -------------------
