@@ -40,14 +40,14 @@ end
 class ChildPerson < BasePerson
 end
 
-class AddressBook < CouchbaseOrm::Base
-  attribute :label, :string
-  has_many :contacts, type: :n1ql, class_name: 'Contact'
-end
-
 class Contact < CouchbaseOrm::Base
   attribute :name, :string
   belongs_to :address_book
+end
+
+class AddressBook < CouchbaseOrm::Base
+  attribute :label, :string
+  has_many :contacts, type: :n1ql, class_name: 'Contact'
 end
 
 class PersonWithBook < CouchbaseOrm::Base
@@ -65,6 +65,34 @@ end
 
 class Citizen < CouchbaseOrm::Base
   embeds_many :addresses, class_name: 'AddressWithCity'
+end
+
+class ImageAttachment < CouchbaseOrm::Base
+  attribute :url, :string
+  attribute :caption, :string
+end
+
+class VideoAttachment < CouchbaseOrm::Base
+  attribute :url, :string
+  attribute :duration, :integer
+end
+
+class DocumentAttachment < CouchbaseOrm::Base
+  attribute :filename, :string
+  attribute :size, :integer
+end
+
+class AudioAttachment < CouchbaseOrm::Base
+  attribute :url, :string
+  attribute :bitrate, :integer
+end
+
+class Article < CouchbaseOrm::Base
+  embeds_many :attachments, polymorphic: true
+end
+
+class RestrictedArticle < CouchbaseOrm::Base
+  embeds_many :attachments, polymorphic: ['ImageAttachment', 'VideoAttachment']
 end
 
 describe CouchbaseOrm::EmbedsMany do
@@ -352,6 +380,372 @@ describe CouchbaseOrm::EmbedsMany do
       contact1.destroy! if contact1&.persisted?
       contact2.destroy! if contact2&.persisted?
       person.destroy! if person&.persisted?
+    end
+  end
+
+  describe 'polymorphic embeds_many' do
+    it 'can embed different types polymorphically with types attribute' do
+      image = ImageAttachment.new(url: 'https://example.com/image.jpg', caption: 'A beautiful sunset')
+      video = VideoAttachment.new(url: 'https://example.com/video.mp4', duration: 120)
+      article = Article.new(attachments: [image, video])
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments.first).to be_a(ImageAttachment)
+      expect(article.attachments.first.url).to eq('https://example.com/image.jpg')
+      expect(article.attachments.first.caption).to eq('A beautiful sunset')
+      expect(article.attachments.last).to be_a(VideoAttachment)
+      expect(article.attachments.last.url).to eq('https://example.com/video.mp4')
+      expect(article.attachments.last.duration).to eq(120)
+      expect(article.attributes['attachments'].first['type']).to eq('ImageAttachment')
+      expect(article.attributes['attachments'].last['type']).to eq('VideoAttachment')
+    end
+
+    it 'can embed multiple items of the same polymorphic type' do
+      image1 = ImageAttachment.new(url: 'https://example.com/image1.jpg', caption: 'First')
+      image2 = ImageAttachment.new(url: 'https://example.com/image2.jpg', caption: 'Second')
+      article = Article.new(attachments: [image1, image2])
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments).to all(be_a(ImageAttachment))
+      expect(article.attachments.first.caption).to eq('First')
+      expect(article.attachments.last.caption).to eq('Second')
+      expect(article.attributes['attachments'].map { |a| a['type'] }).to eq(['ImageAttachment', 'ImageAttachment'])
+    end
+
+    it 'can embed mixed polymorphic types' do
+      image = ImageAttachment.new(url: 'https://example.com/pic.jpg', caption: 'Photo')
+      video = VideoAttachment.new(url: 'https://example.com/clip.mp4', duration: 90)
+      doc = DocumentAttachment.new(filename: 'report.pdf', size: 1024)
+      article = Article.new(attachments: [image, video, doc])
+
+      expect(article.attachments.size).to eq(3)
+      expect(article.attachments[0]).to be_a(ImageAttachment)
+      expect(article.attachments[1]).to be_a(VideoAttachment)
+      expect(article.attachments[2]).to be_a(DocumentAttachment)
+      expect(article.attachments[2].filename).to eq('report.pdf')
+      expect(article.attachments[2].size).to eq(1024)
+    end
+
+    it 'persists and retrieves polymorphic embedded collections correctly' do
+      image = ImageAttachment.new(url: 'https://example.com/demo.jpg', caption: 'Demo')
+      video = VideoAttachment.new(url: 'https://example.com/demo.mp4', duration: 60)
+      article = Article.create!(attachments: [image, video])
+
+      loaded = Article.find(article.id)
+      expect(loaded.attachments.size).to eq(2)
+      expect(loaded.attachments.first).to be_a(ImageAttachment)
+      expect(loaded.attachments.first.url).to eq('https://example.com/demo.jpg')
+      expect(loaded.attachments.last).to be_a(VideoAttachment)
+      expect(loaded.attachments.last.duration).to eq(60)
+    ensure
+      article.destroy! if article&.persisted?
+    end
+
+    it 'can update polymorphic embedded collections' do
+      image = ImageAttachment.new(url: 'https://example.com/original.jpg', caption: 'Original')
+      article = Article.create!(attachments: [image])
+
+      video = VideoAttachment.new(url: 'https://example.com/new.mp4', duration: 45)
+      article.attachments = [video]
+      article.save!
+
+      article.reload
+      expect(article.attachments.size).to eq(1)
+      expect(article.attachments.first).to be_a(VideoAttachment)
+      expect(article.attachments.first.url).to eq('https://example.com/new.mp4')
+    ensure
+      article.destroy! if article&.persisted?
+    end
+
+    it 'can add to polymorphic embedded collection' do
+      image = ImageAttachment.new(url: 'https://example.com/first.jpg', caption: 'First')
+      article = Article.create!(attachments: [image])
+
+      video = VideoAttachment.new(url: 'https://example.com/second.mp4', duration: 30)
+      article.attachments = article.attachments + [video]
+      article.save!
+
+      article.reload
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments.first).to be_a(ImageAttachment)
+      expect(article.attachments.last).to be_a(VideoAttachment)
+    ensure
+      article.destroy! if article&.persisted?
+    end
+
+    it 'sets embedded flag on polymorphic embedded objects' do
+      image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
+      video = VideoAttachment.new(url: 'https://example.com/test.mp4', duration: 60)
+      article = Article.new(attachments: [image, video])
+
+      article.attachments.each do |attachment|
+        expect(attachment.instance_variable_get(:@_embedded)).to be true
+      end
+    end
+
+    it 'can set polymorphic embedded collection to empty array' do
+      video = VideoAttachment.new(url: 'https://example.com/test.mp4', duration: 60)
+      article = Article.new(attachments: [video])
+
+      article.attachments = []
+      expect(article.attachments).to eq([])
+      expect(article.attributes['attachments']).to eq([])
+    end
+
+    it 'can set polymorphic embedded collection to nil' do
+      image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
+      article = Article.new(attachments: [image])
+
+      article.attachments = nil
+      expect(article.attachments).to eq([])
+      expect(article.attributes['attachments']).to eq([])
+    end
+
+    it 'raises error when trying to assign Hash to polymorphic embeds_many' do
+      article = Article.new
+
+      expect {
+        article.attachments = [{ url: 'https://example.com/test.jpg', caption: 'Test' }]
+      }.to raise_error(ArgumentError, "Cannot infer type from Hash for polymorphic embeds_many. Include 'type' key with class name.")
+    end
+
+    it 'skips nil values in polymorphic embedded collection' do
+      image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
+      article = Article.new(attachments: [image, nil])
+
+      expect(article.attachments.size).to eq(1)
+      expect(article.attachments.first).to be_a(ImageAttachment)
+    end
+
+    it 'memoizes polymorphic embedded collection after first access' do
+      image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
+      article = Article.new(attachments: [image])
+
+      first_call = article.attachments
+      second_call = article.attachments
+
+      expect(first_call).to equal(second_call)
+    end
+
+    it 'lazily loads polymorphic embedded collection' do
+      image = ImageAttachment.new(url: 'https://example.com/lazy.jpg', caption: 'Lazy')
+      article = Article.create!(attachments: [image])
+      article = Article.find(article.id)
+
+      expect(article.instance_variable_defined?(:@__assoc_attachments)).to be false
+
+      _ = article.attachments
+
+      expect(article.instance_variable_defined?(:@__assoc_attachments)).to be true
+    ensure
+      article.destroy! if article&.persisted?
+    end
+
+    it 'supports reset for polymorphic embedded collection' do
+      image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
+      article = Article.new(attachments: [image])
+
+      original = article.attachments
+      article.attachments_reset
+
+      new_instance = article.attachments
+      expect(new_instance).to be_an(Array)
+      expect(new_instance).not_to equal(original)
+    end
+
+    it 'does not include id in polymorphic embedded objects if blank' do
+      image = ImageAttachment.new(url: 'https://example.com/test.jpg', caption: 'Test')
+      article = Article.new(attachments: [image])
+
+      expect(article.send(:serialized_attributes)['attachments'].first).not_to include('id')
+    end
+
+    it 'handles empty polymorphic embedded collection on read' do
+      article = Article.new
+      expect(article.attachments).to eq([])
+    end
+
+    it 'preserves order of polymorphic embedded objects' do
+      video = VideoAttachment.new(url: 'https://example.com/first.mp4', duration: 30)
+      image = ImageAttachment.new(url: 'https://example.com/second.jpg', caption: 'Second')
+      doc = DocumentAttachment.new(filename: 'third.pdf', size: 2048)
+
+      article = Article.create!(attachments: [video, image, doc])
+      article.reload
+
+      expect(article.attachments[0]).to be_a(VideoAttachment)
+      expect(article.attachments[1]).to be_a(ImageAttachment)
+      expect(article.attachments[2]).to be_a(DocumentAttachment)
+    ensure
+      article.destroy! if article&.persisted?
+    end
+
+    it 'accepts hashes with type key for polymorphic embeds_many' do
+      article = Article.new(
+        attachments: [
+          { type: 'image_attachment', url: 'https://example.com/hash1.jpg', caption: 'First' },
+          { type: 'video_attachment', url: 'https://example.com/hash2.mp4', duration: 45 }
+        ]
+      )
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments[0]).to be_a(ImageAttachment)
+      expect(article.attachments[0].url).to eq('https://example.com/hash1.jpg')
+      expect(article.attachments[0].caption).to eq('First')
+      expect(article.attachments[1]).to be_a(VideoAttachment)
+      expect(article.attachments[1].url).to eq('https://example.com/hash2.mp4')
+      expect(article.attachments[1].duration).to eq(45)
+      expect(article.attributes['attachments'].map { |a| a['type'] }).to eq(['ImageAttachment', 'VideoAttachment'])
+    end
+
+    it 'accepts hashes with string type key for polymorphic embeds_many' do
+      article = Article.new(
+        attachments: [
+          { 'type' => 'document_attachment', 'filename' => 'doc.pdf', 'size' => 1024 }
+        ]
+      )
+
+      expect(article.attachments.size).to eq(1)
+      expect(article.attachments.first).to be_a(DocumentAttachment)
+      expect(article.attachments.first.filename).to eq('doc.pdf')
+      expect(article.attachments.first.size).to eq(1024)
+    end
+
+    it 'raises error when hash is missing type key for polymorphic embeds_many' do
+      expect {
+        Article.new(attachments: [{ url: 'https://example.com/no-type.jpg', caption: 'Missing Type' }])
+      }.to raise_error(ArgumentError, "Cannot infer type from Hash for polymorphic embeds_many. Include 'type' key with class name.")
+    end
+
+    it 'can mix objects and hashes with type key' do
+      image_obj = ImageAttachment.new(url: 'https://example.com/obj.jpg', caption: 'Object')
+      article = Article.new(
+        attachments: [
+          image_obj,
+          { type: 'video_attachment', url: 'https://example.com/hash.mp4', duration: 60 }
+        ]
+      )
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments[0]).to be_a(ImageAttachment)
+      expect(article.attachments[0].url).to eq('https://example.com/obj.jpg')
+      expect(article.attachments[1]).to be_a(VideoAttachment)
+      expect(article.attachments[1].duration).to eq(60)
+    end
+
+    it 'persists and retrieves polymorphic embedded from hashes' do
+      article = Article.create!(
+        attachments: [
+          { type: 'image_attachment', url: 'https://example.com/persist.jpg', caption: 'Persisted' },
+          { type: 'video_attachment', url: 'https://example.com/persist.mp4', duration: 90 }
+        ]
+      )
+
+      loaded = Article.find(article.id)
+      expect(loaded.attachments.size).to eq(2)
+      expect(loaded.attachments[0]).to be_a(ImageAttachment)
+      expect(loaded.attachments[0].url).to eq('https://example.com/persist.jpg')
+      expect(loaded.attachments[1]).to be_a(VideoAttachment)
+      expect(loaded.attachments[1].duration).to eq(90)
+    ensure
+      article.destroy! if article&.persisted?
+    end
+
+    it 'includes type in serialized attributes' do
+      article = Article.new(
+        attachments: [{ type: 'image_attachment', url: 'https://example.com/test.jpg', caption: 'Test' }]
+      )
+
+      serialized = article.send(:serialized_attributes)
+      expect(serialized['attachments'].first).to have_key('type')
+      expect(serialized['attachments'].first['type']).to eq('ImageAttachment')
+    end
+
+    it 'handles mixed valid and nil values with hashes' do
+      article = Article.new(
+        attachments: [
+          { type: 'image_attachment', url: 'https://example.com/test.jpg', caption: 'Test' },
+          nil,
+          { type: 'video_attachment', url: 'https://example.com/test.mp4', duration: 30 }
+        ]
+      )
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments[0]).to be_a(ImageAttachment)
+      expect(article.attachments[1]).to be_a(VideoAttachment)
+    end
+  end
+
+  describe 'polymorphic embeds_many with types restriction' do
+    it 'accepts allowed types with objects' do
+      image = ImageAttachment.new(url: 'https://example.com/allowed.jpg', caption: 'Allowed')
+      video = VideoAttachment.new(url: 'https://example.com/allowed.mp4', duration: 60)
+      article = RestrictedArticle.new(attachments: [image, video])
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments[0]).to be_a(ImageAttachment)
+      expect(article.attachments[0].url).to eq('https://example.com/allowed.jpg')
+      expect(article.attachments[1]).to be_a(VideoAttachment)
+      expect(article.attachments[1].url).to eq('https://example.com/allowed.mp4')
+    end
+
+    it 'accepts allowed types with hashes' do
+      article = RestrictedArticle.new(
+        attachments: [
+          { type: 'image_attachment', url: 'https://example.com/hash.jpg', caption: 'Hash' },
+          { type: 'video_attachment', url: 'https://example.com/hash.mp4', duration: 90 }
+        ]
+      )
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments[0]).to be_a(ImageAttachment)
+      expect(article.attachments[0].url).to eq('https://example.com/hash.jpg')
+      expect(article.attachments[1]).to be_a(VideoAttachment)
+      expect(article.attachments[1].duration).to eq(90)
+    end
+
+    it 'rejects disallowed types with objects' do
+      audio = AudioAttachment.new(url: 'https://example.com/denied.mp3', bitrate: 128)
+      article = RestrictedArticle.new(attachments: [audio])
+
+      expect(article).not_to be_valid
+      expect(article.errors[:attachments]).to include('item #0 (AudioAttachment) is not an allowed type. Allowed types: ImageAttachment, VideoAttachment')
+    end
+
+    it 'rejects disallowed types with hashes' do
+      article = RestrictedArticle.new(
+        attachments: [{ type: 'audio_attachment', url: 'https://example.com/denied.mp3', bitrate: 128 }]
+      )
+
+      expect(article).not_to be_valid
+      expect(article.errors[:attachments]).to include('item #0 (AudioAttachment) is not an allowed type. Allowed types: ImageAttachment, VideoAttachment')
+    end
+
+    it 'rejects disallowed types mixed with allowed types' do
+      image = ImageAttachment.new(url: 'https://example.com/allowed.jpg', caption: 'Allowed')
+      audio = AudioAttachment.new(url: 'https://example.com/denied.mp3', bitrate: 128)
+      article = RestrictedArticle.new(attachments: [image, audio])
+
+      expect(article).not_to be_valid
+      expect(article.errors[:attachments]).to include('item #1 (AudioAttachment) is not an allowed type. Allowed types: ImageAttachment, VideoAttachment')
+    end
+
+    it 'persists and retrieves with type restrictions' do
+      article = RestrictedArticle.create!(
+        attachments: [
+          { type: 'image_attachment', url: 'https://example.com/restricted.jpg', caption: 'Restricted' },
+          { type: 'video_attachment', url: 'https://example.com/restricted.mp4', duration: 120 }
+        ]
+      )
+
+      loaded = RestrictedArticle.find(article.id)
+      expect(loaded.attachments.size).to eq(2)
+      expect(loaded.attachments[0]).to be_a(ImageAttachment)
+      expect(loaded.attachments[0].url).to eq('https://example.com/restricted.jpg')
+      expect(loaded.attachments[1]).to be_a(VideoAttachment)
+      expect(loaded.attachments[1].duration).to eq(120)
+    ensure
+      article.destroy! if article&.persisted?
     end
   end
 end
