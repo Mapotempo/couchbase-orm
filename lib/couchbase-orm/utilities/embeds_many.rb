@@ -23,12 +23,14 @@ module CouchbaseOrm
         allowed_types: allowed_types,
       })
 
-      validates_embedded(name) if validate
-      validates_with CouchbaseOrm::PolymorphicTypeValidator, attributes: [name], allowed_types: allowed_types if allowed_types.present?
+      if validate
+        validates_embedded(name)
+        validates_with CouchbaseOrm::PolymorphicTypeValidator, attributes: [name], allowed_types: allowed_types if allowed_types.present?
+      end
 
       if is_polymorphic
         define_polymorphic_embeds_many_reader(name, storage_key, instance_var)
-        define_polymorphic_embeds_many_writer(name, storage_key, instance_var, allowed_types)
+        define_polymorphic_embeds_many_writer(name, storage_key, instance_var)
       else
         define_standard_embeds_many_reader(name, storage_key, instance_var, klass_name)
         define_standard_embeds_many_writer(name, storage_key, instance_var, klass_name)
@@ -65,7 +67,7 @@ module CouchbaseOrm
       end
     end
 
-    def define_polymorphic_embeds_many_writer(name, storage_key, instance_var, allowed_types)
+    def define_polymorphic_embeds_many_writer(name, storage_key, instance_var)
       define_method("#{name}=") do |val|
         embedded_objects = []
         serialized = []
