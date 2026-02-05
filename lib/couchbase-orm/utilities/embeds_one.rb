@@ -24,6 +24,7 @@ module CouchbaseOrm
       })
 
       validates_embedded(name) if validate
+      validates_with CouchbaseOrm::PolymorphicTypeValidator, attributes: [name], allowed_types: allowed_types if allowed_types.present?
 
       if is_polymorphic
         define_polymorphic_embeds_one_reader(name, storage_key, instance_var)
@@ -80,10 +81,6 @@ module CouchbaseOrm
               else
                 val
               end
-
-        if allowed_types.present? && !allowed_types.include?(obj.class.name)
-          raise ArgumentError.new("#{obj.class.name} is not an allowed type for #{name}. Allowed types: #{allowed_types.join(', ')}")
-        end
 
         obj.embedded = true
         raw = obj.serialized_attributes

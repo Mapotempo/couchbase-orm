@@ -675,4 +675,77 @@ describe CouchbaseOrm::EmbedsMany do
       expect(article.attachments[1]).to be_a(VideoAttachment)
     end
   end
+
+  describe 'polymorphic embeds_many with types restriction' do
+    it 'accepts allowed types with objects' do
+      image = ImageAttachment.new(url: 'https://example.com/allowed.jpg', caption: 'Allowed')
+      video = VideoAttachment.new(url: 'https://example.com/allowed.mp4', duration: 60)
+      article = RestrictedArticle.new(attachments: [image, video])
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments[0]).to be_a(ImageAttachment)
+      expect(article.attachments[0].url).to eq('https://example.com/allowed.jpg')
+      expect(article.attachments[1]).to be_a(VideoAttachment)
+      expect(article.attachments[1].url).to eq('https://example.com/allowed.mp4')
+    end
+
+    it 'accepts allowed types with hashes' do
+      article = RestrictedArticle.new(
+        attachments: [
+          { type: 'image_attachment', url: 'https://example.com/hash.jpg', caption: 'Hash' },
+          { type: 'video_attachment', url: 'https://example.com/hash.mp4', duration: 90 }
+        ]
+      )
+
+      expect(article.attachments.size).to eq(2)
+      expect(article.attachments[0]).to be_a(ImageAttachment)
+      expect(article.attachments[0].url).to eq('https://example.com/hash.jpg')
+      expect(article.attachments[1]).to be_a(VideoAttachment)
+      expect(article.attachments[1].duration).to eq(90)
+    end
+
+    it 'rejects disallowed types with objects' do
+      audio = AudioAttachment.new(url: 'https://example.com/denied.mp3', bitrate: 128)
+      article = RestrictedArticle.new(attachments: [audio])
+
+      expect(article).not_to be_valid
+      expect(article.errors[:attachments]).to include('item #0 (AudioAttachment) is not an allowed type. Allowed types: ImageAttachment, VideoAttachment')
+    end
+
+    it 'rejects disallowed types with hashes' do
+      article = RestrictedArticle.new(
+        attachments: [{ type: 'audio_attachment', url: 'https://example.com/denied.mp3', bitrate: 128 }]
+      )
+
+      expect(article).not_to be_valid
+      expect(article.errors[:attachments]).to include('item #0 (AudioAttachment) is not an allowed type. Allowed types: ImageAttachment, VideoAttachment')
+    end
+
+    it 'rejects disallowed types mixed with allowed types' do
+      image = ImageAttachment.new(url: 'https://example.com/allowed.jpg', caption: 'Allowed')
+      audio = AudioAttachment.new(url: 'https://example.com/denied.mp3', bitrate: 128)
+      article = RestrictedArticle.new(attachments: [image, audio])
+
+      expect(article).not_to be_valid
+      expect(article.errors[:attachments]).to include('item #1 (AudioAttachment) is not an allowed type. Allowed types: ImageAttachment, VideoAttachment')
+    end
+
+    it 'persists and retrieves with type restrictions' do
+      article = RestrictedArticle.create!(
+        attachments: [
+          { type: 'image_attachment', url: 'https://example.com/restricted.jpg', caption: 'Restricted' },
+          { type: 'video_attachment', url: 'https://example.com/restricted.mp4', duration: 120 }
+        ]
+      )
+
+      loaded = RestrictedArticle.find(article.id)
+      expect(loaded.attachments.size).to eq(2)
+      expect(loaded.attachments[0]).to be_a(ImageAttachment)
+      expect(loaded.attachments[0].url).to eq('https://example.com/restricted.jpg')
+      expect(loaded.attachments[1]).to be_a(VideoAttachment)
+      expect(loaded.attachments[1].duration).to eq(120)
+    ensure
+      article.destroy! if article&.persisted?
+    end
+  end
 end

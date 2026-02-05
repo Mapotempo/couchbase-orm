@@ -22,6 +22,7 @@ module CouchbaseOrm
   autoload :EmbedsOne, 'couchbase-orm/utilities/embeds_one'
   autoload :EmbedsMany, 'couchbase-orm/utilities/embeds_many'
   autoload :EmbeddedAssociatedValidator, 'couchbase-orm/validators/embedded_associated_validator'
+  autoload :PolymorphicTypeValidator, 'couchbase-orm/validators/polymorphic_type_validator'
 
   # if COUCHBASE_ORM_DEBUG environement variable exist then logger is set to Logger::DEBUG level
   # else logger is set to Logger::INFO level

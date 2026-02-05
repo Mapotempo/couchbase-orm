@@ -544,16 +544,17 @@ describe CouchbaseOrm::EmbedsOne do
 
     it 'rejects disallowed types with objects' do
       audio = Audio.new(url: 'https://example.com/denied.mp3', bitrate: 128)
+      post = RestrictedPost.new(media: audio)
 
-      expect {
-        RestrictedPost.new(media: audio)
-      }.to raise_error(ArgumentError, 'Audio is not an allowed type for media. Allowed types: Image, Video')
+      expect(post).not_to be_valid
+      expect(post.errors[:media]).to include('Audio is not an allowed type. Allowed types: Image, Video')
     end
 
     it 'rejects disallowed types with hashes' do
-      expect {
-        RestrictedPost.new(media: { type: 'audio', url: 'https://example.com/denied.mp3', bitrate: 128 })
-      }.to raise_error(ArgumentError, 'Audio is not an allowed type for media. Allowed types: Image, Video')
+      post = RestrictedPost.new(media: { type: 'audio', url: 'https://example.com/denied.mp3', bitrate: 128 })
+
+      expect(post).not_to be_valid
+      expect(post.errors[:media]).to include('Audio is not an allowed type. Allowed types: Image, Video')
     end
 
     it 'persists and retrieves with type restrictions' do
