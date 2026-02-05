@@ -162,6 +162,28 @@ describe CouchbaseOrm::EmbedsOne do
     expect(person.send(:serialized_attributes)['profile'].first).not_to include('id')
   end
 
+  it 'includes type field and excludes empty id in as_json for embedded documents' do
+    user = User.new(profile: { bio: 'Test Bio' })
+    profile_json = user.profile.as_json
+
+    expect(profile_json).to include('type' => 'profile')
+    expect(profile_json).not_to have_key('id')
+    expect(profile_json['bio']).to eq('Test Bio')
+  end
+
+  it 'includes type field and includes id when id is present in embedded documents' do
+    user = User.new(profile: { bio: 'Test Bio' })
+    # Manually set an id on the profile
+    user.profile.instance_variable_set(:@attributes, user.profile.instance_variable_get(:@attributes).dup)
+    user.profile.send(:write_attribute, 'id', 'test-id-123')
+
+    profile_json = user.profile.as_json
+
+    expect(profile_json).to include('type' => 'profile')
+    expect(profile_json).to include('id' => 'test-id-123')
+    expect(profile_json['bio']).to eq('Test Bio')
+  end
+
   it 'saves changes in embedded document when parent is saved and reloads correctly' do
     user = User.create!(profile: { bio: 'Initial bio' })
 

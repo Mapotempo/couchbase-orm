@@ -98,8 +98,19 @@ describe CouchbaseOrm::Base do
     base = BaseTest.create!(name: 'joe')
 
     base_id = base.id
-    expect(base.to_json).to eq({ id: base_id, name: 'joe', job: nil, status: 'active' }.to_json)
-    expect(base.to_json(only: :name)).to eq({ name: 'joe' }.to_json)
+    expect(base.to_json).to eq({ id: base_id, name: 'joe', job: nil, status: 'active', type: 'base_test' }.to_json)
+    expect(base.to_json(only: :name)).to eq({ name: 'joe', type: 'base_test' }.to_json)
+
+    base.destroy
+  end
+
+  it 'includes type and id fields in as_json for Base models' do
+    base = BaseTest.create!(name: 'alice')
+    json = base.as_json
+
+    expect(json).to include('type' => 'base_test')
+    expect(json).to include('id' => base.id)
+    expect(json['name']).to eq('alice')
 
     base.destroy
   end
