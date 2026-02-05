@@ -1,0 +1,29 @@
+
+.. _rails-integration:
+
+*****************
+Rails Integration
+*****************
+
+.. default-domain:: woop
+
+.. contents:: On this page
+   :local:
+   :backlinks: none
+   :depth: 2
+   :class: singlecol
+
+CouchbaseOrm seamlessly integrates into Ruby on Rails applications.
+This page describes features that are automatically enabled in the context
+of a Rails application and Rails-related functionality which can be
+manually enabled.
+
+Model Preloading
+================
+
+Views are generated on application load if they don't exist or mismatch. 
+This works fine in production however by default in development models are lazy loaded.
+
+.. code-block:: ruby
+
+  config.eager_load = true

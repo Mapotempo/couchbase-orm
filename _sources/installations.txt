@@ -1,0 +1,31 @@
+.. _installation:
+
+************
+Installation
+************
+
+.. default-domain:: woop
+
+.. contents:: On this page
+   :local:
+   :backlinks: none
+   :depth: 2
+   :class: singlecol
+
+Install the Gem
+===============
+
+CouchbaseOrm is hosted on github https://github.com/Mapotempo/couchbase-orm.
+It can be installed manually or with bundler.
+
+To install the gem with bundler, include the following in your ``Gemfile``:
+
+.. code-block:: ruby
+
+  git_source(:github) do |repo_name|
+    repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
+    "https://github.com/#{repo_name}.git"
+  end
+
+  gem 'couchbase-orm', github: 'Mapotempo/couchbase-orm'
+  gem 'couchbase', '~> 3.3.0'

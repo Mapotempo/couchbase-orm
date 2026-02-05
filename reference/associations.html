@@ -1,0 +1,998 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Associations &#8212; CouchbaseOrm  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'reference/associations';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Validation" href="validations.html" />
+    <link rel="prev" title="Attribute Definition" href="attributes.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">CouchbaseOrm  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation-configuration.html">Installation &amp; Configuration</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installations.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compatibility.html">Compatibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rails-integration.html">Rails Integration</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../schema-configuration.html">Schema Configuration</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="attributes.html">Attribute Definition</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Associations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="validations.html">Validation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../working-with-data.html">Working With Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="crud.html">CRUD Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="queries.html">Queries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callbacks.html">Callbacks</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference external" href="https://mapotempo.github.io/couchbase-orm/api/">API</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/reference/associations.txt" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.txt</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Associations</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#embedded-associations">Embedded Associations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#embeds-one">Embeds One</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#embeds-many">Embeds Many</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#polymorphic-embedded-associations">Polymorphic Embedded Associations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#restricting-polymorphic-types">Restricting Polymorphic Types</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-storage-keys">Custom Storage Keys</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#embedded-association-validation">Embedded Association Validation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-class-names">Custom Class Names</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-differences-from-referenced-associations">Key Differences from Referenced Associations</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#referenced-associations">Referenced Associations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#has-many">Has Many</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#belongs-to">Belongs To</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#has-and-belongs-to-many">Has And Belongs To Many</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-association-names">Custom Association Names</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-foreign-keys">Custom Foreign Keys</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#polymorphism">Polymorphism</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dependent-behavior">Dependent Behavior</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="associations">
+<span id="id1"></span><h1>Associations<a class="headerlink" href="#associations" title="Link to this heading">#</a></h1>
+<nav class="contents singlecol local" id="on-this-page">
+<p class="topic-title">On this page</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#embedded-associations" id="id3">Embedded Associations</a></p>
+<ul>
+<li><p><a class="reference internal" href="#embeds-one" id="id4">Embeds One</a></p></li>
+<li><p><a class="reference internal" href="#embeds-many" id="id5">Embeds Many</a></p></li>
+<li><p><a class="reference internal" href="#polymorphic-embedded-associations" id="id6">Polymorphic Embedded Associations</a></p></li>
+<li><p><a class="reference internal" href="#restricting-polymorphic-types" id="id7">Restricting Polymorphic Types</a></p></li>
+<li><p><a class="reference internal" href="#custom-storage-keys" id="id8">Custom Storage Keys</a></p></li>
+<li><p><a class="reference internal" href="#embedded-association-validation" id="id9">Embedded Association Validation</a></p></li>
+<li><p><a class="reference internal" href="#custom-class-names" id="id10">Custom Class Names</a></p></li>
+<li><p><a class="reference internal" href="#key-differences-from-referenced-associations" id="id11">Key Differences from Referenced Associations</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#referenced-associations" id="id12">Referenced Associations</a></p>
+<ul>
+<li><p><a class="reference internal" href="#has-many" id="id13">Has Many</a></p></li>
+<li><p><a class="reference internal" href="#belongs-to" id="id14">Belongs To</a></p></li>
+<li><p><a class="reference internal" href="#has-and-belongs-to-many" id="id15">Has And Belongs To Many</a></p></li>
+<li><p><a class="reference internal" href="#custom-association-names" id="id16">Custom Association Names</a></p></li>
+<li><p><a class="reference internal" href="#custom-foreign-keys" id="id17">Custom Foreign Keys</a></p></li>
+<li><p><a class="reference internal" href="#polymorphism" id="id18">Polymorphism</a></p></li>
+<li><p><a class="reference internal" href="#dependent-behavior" id="id19">Dependent Behavior</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="embedded-associations">
+<h2>Embedded Associations<a class="headerlink" href="#embedded-associations" title="Link to this heading">#</a></h2>
+<p>CouchbaseOrm supports embedding documents within a parent document using
+<code class="docutils literal notranslate"><span class="pre">embeds_one</span></code> and <code class="docutils literal notranslate"><span class="pre">embeds_many</span></code>. Unlike referenced associations, embedded
+documents are stored directly within the parent document and do not have their
+own separate document ID in the database. This is useful for modeling
+has-one and has-many relationships where the child documents don’t need to exist
+independently.</p>
+<section id="embeds-one">
+<h3>Embeds One<a class="headerlink" href="#embeds-one" title="Link to this heading">#</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">embeds_one</span></code> association to declare that the parent embeds a single
+child document:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Profile</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:bio</span><span class="p">,</span><span class="w"> </span><span class="ss">:string</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:website</span><span class="p">,</span><span class="w"> </span><span class="ss">:string</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:name</span><span class="p">,</span><span class="w"> </span><span class="ss">:string</span>
+<span class="w">  </span><span class="n">embeds_one</span><span class="w"> </span><span class="ss">:profile</span>
+<span class="k">end</span>
+
+<span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">User</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Alice&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">profile</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="ss">bio</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Software Engineer&#39;</span><span class="w"> </span><span class="p">})</span>
+<span class="c1"># =&gt; #&lt;User _id: &quot;user::123&quot;, name: &quot;Alice&quot;, profile: {...}&gt;</span>
+
+<span class="n">user</span><span class="o">.</span><span class="n">profile</span>
+<span class="c1"># =&gt; #&lt;Profile bio: &quot;Software Engineer&quot;, website: nil&gt;</span>
+
+<span class="n">user</span><span class="o">.</span><span class="n">profile</span><span class="o">.</span><span class="n">bio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Senior Software Engineer&#39;</span>
+<span class="n">user</span><span class="o">.</span><span class="n">profile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">user</span><span class="o">.</span><span class="n">profile</span><span class="w">  </span><span class="c1"># Reassign to track changes</span>
+<span class="n">user</span><span class="o">.</span><span class="n">save!</span>
+</pre></div>
+</div>
+<p>The embedded document is stored as a hash within the parent:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="c1"># In the database, the document looks like:</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="s2">&quot;_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user::123&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Alice&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;profile&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s2">&quot;bio&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Software Engineer&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;website&quot;</span><span class="p">:</span><span class="w"> </span><span class="n">null</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Embedded documents cannot be saved, destroyed, or reloaded independently:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">user</span><span class="o">.</span><span class="n">profile</span><span class="o">.</span><span class="n">save</span>
+<span class="c1"># =&gt; raises &quot;Cannot save an embedded document!&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="embeds-many">
+<h3>Embeds Many<a class="headerlink" href="#embeds-many" title="Link to this heading">#</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">embeds_many</span></code> association to declare that the parent embeds multiple
+child documents:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Address</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:street</span><span class="p">,</span><span class="w"> </span><span class="ss">:string</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:city</span><span class="p">,</span><span class="w"> </span><span class="ss">:string</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:name</span><span class="p">,</span><span class="w"> </span><span class="ss">:string</span>
+<span class="w">  </span><span class="n">embeds_many</span><span class="w"> </span><span class="ss">:addresses</span>
+<span class="k">end</span>
+
+<span class="n">person</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span>
+<span class="w">  </span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Bob&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="ss">addresses</span><span class="p">:</span><span class="w"> </span><span class="o">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="ss">street</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;123 Main St&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">city</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;New York&#39;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="ss">street</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;456 Elm St&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">city</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Boston&#39;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">]</span>
+<span class="p">)</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">addresses</span>
+<span class="c1"># =&gt; [#&lt;Address street: &quot;123 Main St&quot;, city: &quot;New York&quot;&gt;,</span>
+<span class="c1">#     #&lt;Address street: &quot;456 Elm St&quot;, city: &quot;Boston&quot;&gt;]</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">addresses</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="no">Address</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">street</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;789 Oak Ave&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">city</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Chicago&#39;</span><span class="p">)</span>
+<span class="n">person</span><span class="o">.</span><span class="n">addresses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">person</span><span class="o">.</span><span class="n">addresses</span><span class="w">  </span><span class="c1"># Reassign to track changes</span>
+<span class="n">person</span><span class="o">.</span><span class="n">save!</span>
+</pre></div>
+</div>
+</section>
+<section id="polymorphic-embedded-associations">
+<h3>Polymorphic Embedded Associations<a class="headerlink" href="#polymorphic-embedded-associations" title="Link to this heading">#</a></h3>
+<p>Both <code class="docutils literal notranslate"><span class="pre">embeds_one</span></code> and <code class="docutils literal notranslate"><span class="pre">embeds_many</span></code> support polymorphic associations,
+allowing you to embed different types of documents in the same association:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Image</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:url</span><span class="p">,</span><span class="w"> </span><span class="ss">:string</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:caption</span><span class="p">,</span><span class="w"> </span><span class="ss">:string</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Video</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:url</span><span class="p">,</span><span class="w"> </span><span class="ss">:string</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:duration</span><span class="p">,</span><span class="w"> </span><span class="ss">:integer</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Post</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">embeds_one</span><span class="w"> </span><span class="ss">:media</span><span class="p">,</span><span class="w"> </span><span class="ss">polymorphic</span><span class="p">:</span><span class="w"> </span><span class="kp">true</span>
+<span class="k">end</span>
+
+<span class="c1"># Embed an image using an object</span>
+<span class="n">post</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Post</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">media</span><span class="p">:</span><span class="w"> </span><span class="no">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;photo.jpg&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">caption</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Sunset&#39;</span><span class="p">))</span>
+<span class="n">post</span><span class="o">.</span><span class="n">media</span>
+<span class="c1"># =&gt; #&lt;Image url: &quot;photo.jpg&quot;, caption: &quot;Sunset&quot;&gt;</span>
+
+<span class="c1"># Or use a hash with type key (snake_case class name)</span>
+<span class="n">post</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Post</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">media</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;image&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;photo.jpg&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">caption</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Sunset&#39;</span><span class="w"> </span><span class="p">})</span>
+
+<span class="c1"># Switch to a video</span>
+<span class="n">post</span><span class="o">.</span><span class="n">media</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Video</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;clip.mp4&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">duration</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="p">)</span>
+<span class="n">post</span><span class="o">.</span><span class="n">save!</span>
+</pre></div>
+</div>
+<p>For <code class="docutils literal notranslate"><span class="pre">embeds_many</span></code> with polymorphism:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Article</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">embeds_many</span><span class="w"> </span><span class="ss">:attachments</span><span class="p">,</span><span class="w"> </span><span class="ss">polymorphic</span><span class="p">:</span><span class="w"> </span><span class="kp">true</span>
+<span class="k">end</span>
+
+<span class="c1"># Using objects</span>
+<span class="n">article</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Article</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span>
+<span class="w">  </span><span class="ss">attachments</span><span class="p">:</span><span class="w"> </span><span class="o">[</span>
+<span class="w">    </span><span class="no">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;diagram.png&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">caption</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Architecture&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="no">Video</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;demo.mp4&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">duration</span><span class="p">:</span><span class="w"> </span><span class="mi">90</span><span class="p">)</span>
+<span class="w">  </span><span class="o">]</span>
+<span class="p">)</span>
+
+<span class="c1"># Or using hashes with type key (snake_case class names)</span>
+<span class="n">article</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Article</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span>
+<span class="w">  </span><span class="ss">attachments</span><span class="p">:</span><span class="w"> </span><span class="o">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;image&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;diagram.png&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">caption</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Architecture&#39;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;video&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;demo.mp4&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">duration</span><span class="p">:</span><span class="w"> </span><span class="mi">90</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">]</span>
+<span class="p">)</span>
+
+<span class="n">article</span><span class="o">.</span><span class="n">attachments</span>
+<span class="c1"># =&gt; [#&lt;Image ...&gt;, #&lt;Video ...&gt;]</span>
+</pre></div>
+</div>
+<p>When using polymorphic embedded associations, the type information is stored
+inside each embedded document as a <code class="docutils literal notranslate"><span class="pre">type</span></code> field. For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;post::123&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;media&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Image&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;photo.jpg&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;caption&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sunset&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Note</strong>: When using hashes with polymorphic associations, you must include
+the <code class="docutils literal notranslate"><span class="pre">type</span></code> key (either as a symbol <code class="docutils literal notranslate"><span class="pre">:type</span></code> or string <code class="docutils literal notranslate"><span class="pre">'type'</span></code>) with
+the snake_case version of the class name. For example, use <code class="docutils literal notranslate"><span class="pre">'image'</span></code> for
+the <code class="docutils literal notranslate"><span class="pre">Image</span></code> class or <code class="docutils literal notranslate"><span class="pre">'video_attachment'</span></code> for the <code class="docutils literal notranslate"><span class="pre">VideoAttachment</span></code> class.
+Without it, an <code class="docutils literal notranslate"><span class="pre">ArgumentError</span></code> will be raised.</p>
+</section>
+<section id="restricting-polymorphic-types">
+<h3>Restricting Polymorphic Types<a class="headerlink" href="#restricting-polymorphic-types" title="Link to this heading">#</a></h3>
+<p>You can restrict which types are allowed in a polymorphic association by
+passing an array of allowed class names to the <code class="docutils literal notranslate"><span class="pre">polymorphic</span></code> parameter:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Post</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="c1"># Only Image and Video are allowed</span>
+<span class="w">  </span><span class="n">embeds_one</span><span class="w"> </span><span class="ss">:media</span><span class="p">,</span><span class="w"> </span><span class="ss">polymorphic</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="s1">&#39;Image&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Video&#39;</span><span class="o">]</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Article</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="c1"># Only specific attachment types allowed</span>
+<span class="w">  </span><span class="n">embeds_many</span><span class="w"> </span><span class="ss">:attachments</span><span class="p">,</span><span class="w"> </span><span class="ss">polymorphic</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="s1">&#39;ImageAttachment&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;VideoAttachment&#39;</span><span class="o">]</span>
+<span class="k">end</span>
+
+<span class="c1"># This works</span>
+<span class="n">post</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Post</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">media</span><span class="p">:</span><span class="w"> </span><span class="no">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;photo.jpg&#39;</span><span class="p">))</span>
+<span class="n">post</span><span class="o">.</span><span class="n">valid?</span>
+<span class="c1"># =&gt; true</span>
+
+<span class="c1"># This raises a validation error</span>
+<span class="n">post</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Post</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">media</span><span class="p">:</span><span class="w"> </span><span class="no">Audio</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;song.mp3&#39;</span><span class="p">))</span>
+<span class="n">post</span><span class="o">.</span><span class="n">valid?</span>
+<span class="c1"># =&gt; false</span>
+<span class="n">post</span><span class="o">.</span><span class="n">errors</span><span class="o">[</span><span class="ss">:media</span><span class="o">]</span>
+<span class="c1"># =&gt; [&quot;Audio is not an allowed type. Allowed types: Image, Video&quot;]</span>
+</pre></div>
+</div>
+<p>You can use snake_case names in the array, which will be automatically
+converted to CamelCase class names:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Post</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">embeds_one</span><span class="w"> </span><span class="ss">:media</span><span class="p">,</span><span class="w"> </span><span class="ss">polymorphic</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="ss">:image</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;video&#39;</span><span class="o">]</span><span class="w">  </span><span class="c1"># Same as [&#39;Image&#39;, &#39;Video&#39;]</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p><strong>Polymorphic Type Validator</strong>: When type restrictions are specified, CouchbaseOrm
+automatically adds a <code class="docutils literal notranslate"><span class="pre">PolymorphicTypeValidator</span></code> to ensure that only allowed types
+can be assigned to the association. The validator:</p>
+<ul class="simple">
+<li><p>Validates both single objects (<code class="docutils literal notranslate"><span class="pre">embeds_one</span></code>) and arrays (<code class="docutils literal notranslate"><span class="pre">embeds_many</span></code>)</p></li>
+<li><p>Provides clear error messages listing the allowed types</p></li>
+<li><p>Skips validation when no type restrictions are set or the value is nil</p></li>
+<li><p>Runs during normal model validation (<code class="docutils literal notranslate"><span class="pre">valid?</span></code>, <code class="docutils literal notranslate"><span class="pre">save</span></code>, <code class="docutils literal notranslate"><span class="pre">create</span></code>, etc.)</p></li>
+</ul>
+<p>For <code class="docutils literal notranslate"><span class="pre">embeds_many</span></code> associations with type restrictions, each item in the array
+is validated individually:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Article</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">embeds_many</span><span class="w"> </span><span class="ss">:attachments</span><span class="p">,</span><span class="w"> </span><span class="ss">polymorphic</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="s1">&#39;Image&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Video&#39;</span><span class="o">]</span>
+<span class="k">end</span>
+
+<span class="n">article</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Article</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+<span class="w">  </span><span class="ss">attachments</span><span class="p">:</span><span class="w"> </span><span class="o">[</span>
+<span class="w">    </span><span class="no">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;photo.jpg&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="no">Audio</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">url</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;song.mp3&#39;</span><span class="p">)</span><span class="w">  </span><span class="c1"># Not allowed!</span>
+<span class="w">  </span><span class="o">]</span>
+<span class="p">)</span>
+
+<span class="n">article</span><span class="o">.</span><span class="n">valid?</span>
+<span class="c1"># =&gt; false</span>
+<span class="n">article</span><span class="o">.</span><span class="n">errors</span><span class="o">[</span><span class="ss">:attachments</span><span class="o">]</span>
+<span class="c1"># =&gt; [&quot;item #1 (Audio) is not an allowed type. Allowed types: Image, Video&quot;]</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-storage-keys">
+<h3>Custom Storage Keys<a class="headerlink" href="#custom-storage-keys" title="Link to this heading">#</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">store_as</span></code> option to specify a different attribute name for storage:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">embeds_one</span><span class="w"> </span><span class="ss">:profile</span><span class="p">,</span><span class="w"> </span><span class="ss">store_as</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;p&#39;</span>
+<span class="w">  </span><span class="n">embeds_many</span><span class="w"> </span><span class="ss">:addresses</span><span class="p">,</span><span class="w"> </span><span class="ss">store_as</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;addrs&#39;</span>
+<span class="k">end</span>
+
+<span class="c1"># In the database:</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="s2">&quot;_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user::123&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;p&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">&quot;bio&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="s2">&quot;addrs&quot;</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="p">{</span><span class="w"> </span><span class="s2">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="p">}</span><span class="o">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="embedded-association-validation">
+<h3>Embedded Association Validation<a class="headerlink" href="#embedded-association-validation" title="Link to this heading">#</a></h3>
+<p>By default, embedded associations are validated when the parent is validated.
+You can disable this with <code class="docutils literal notranslate"><span class="pre">validate:</span> <span class="pre">false</span></code>:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Profile</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:bio</span><span class="p">,</span><span class="w"> </span><span class="ss">:string</span>
+<span class="w">  </span><span class="n">validates</span><span class="w"> </span><span class="ss">:bio</span><span class="p">,</span><span class="w"> </span><span class="ss">presence</span><span class="p">:</span><span class="w"> </span><span class="kp">true</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">embeds_one</span><span class="w"> </span><span class="ss">:profile</span>
+<span class="k">end</span>
+
+<span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">profile</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="ss">bio</span><span class="p">:</span><span class="w"> </span><span class="kp">nil</span><span class="w"> </span><span class="p">})</span>
+<span class="n">user</span><span class="o">.</span><span class="n">valid?</span>
+<span class="c1"># =&gt; false</span>
+<span class="n">user</span><span class="o">.</span><span class="n">errors</span><span class="o">[</span><span class="ss">:profile</span><span class="o">]</span>
+<span class="c1"># =&gt; [&quot;is invalid&quot;]</span>
+
+<span class="c1"># To disable validation:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">embeds_one</span><span class="w"> </span><span class="ss">:profile</span><span class="p">,</span><span class="w"> </span><span class="ss">validate</span><span class="p">:</span><span class="w"> </span><span class="kp">false</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-class-names">
+<h3>Custom Class Names<a class="headerlink" href="#custom-class-names" title="Link to this heading">#</a></h3>
+<p>Specify a different class name for embedded associations when the class cannot
+be inferred from the association name:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">embeds_one</span><span class="w"> </span><span class="ss">:bio</span><span class="p">,</span><span class="w"> </span><span class="ss">class_name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Profile&#39;</span>
+<span class="w">  </span><span class="n">embeds_many</span><span class="w"> </span><span class="ss">:locations</span><span class="p">,</span><span class="w"> </span><span class="ss">class_name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Address&#39;</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</section>
+<section id="key-differences-from-referenced-associations">
+<h3>Key Differences from Referenced Associations<a class="headerlink" href="#key-differences-from-referenced-associations" title="Link to this heading">#</a></h3>
+<p>Embedded associations differ from referenced associations in several ways:</p>
+<ul class="simple">
+<li><p><strong>Storage</strong>: Embedded documents are stored within the parent document, not as
+separate documents in the database.</p></li>
+<li><p><strong>Lifecycle</strong>: Embedded documents cannot be saved, updated, or destroyed
+independently. They are always saved as part of the parent document.</p></li>
+<li><p><strong>Performance</strong>: Reading a parent document also loads all embedded documents
+in a single operation, which can be more efficient than separate queries.</p></li>
+<li><p><strong>Querying</strong>: Embedded documents cannot be queried independently. You must
+query the parent document and then access the embedded documents.</p></li>
+<li><p><strong>Identity</strong>: Embedded documents do not have their own document ID by default
+(the <code class="docutils literal notranslate"><span class="pre">id</span></code> field is removed when embedding).</p></li>
+</ul>
+</section>
+</section>
+<section id="referenced-associations">
+<h2>Referenced Associations<a class="headerlink" href="#referenced-associations" title="Link to this heading">#</a></h2>
+<p>CouchbaseOrm supports the <code class="docutils literal notranslate"><span class="pre">has_many</span></code>, <code class="docutils literal notranslate"><span class="pre">belongs_to</span></code> and
+<code class="docutils literal notranslate"><span class="pre">has_and_belongs_to_many</span></code> associations familiar to ActiveRecord users.</p>
+<section id="has-many">
+<h3>Has Many<a class="headerlink" href="#has-many" title="Link to this heading">#</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">has_many</span></code> association to declare that the parent has zero or more
+children stored in a separate collection:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Band</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+
+<span class="w">  </span><span class="n">has_many</span><span class="w"> </span><span class="ss">:members</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>The child model must use <code class="docutils literal notranslate"><span class="pre">belongs_to</span></code> to declare the
+association with the parent:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Member</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+
+<span class="w">  </span><span class="n">belongs_to</span><span class="w"> </span><span class="ss">:band</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>The child documents contain references to their
+respective parents:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">band</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Band</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">members</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="no">Member</span><span class="o">.</span><span class="n">new</span><span class="o">]</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;Band _id: 6001166d4896684910b8d1c5, &gt;</span>
+
+<span class="n">band</span><span class="o">.</span><span class="n">members</span>
+<span class="c1"># =&gt; [#&lt;Member _id: 6001166d4896684910b8d1c6, band_id: &#39;6001166d4896684910b8d1c5&#39;&gt;]</span>
+</pre></div>
+</div>
+<p>Use validations to require that at least one child is present:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Band</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+
+<span class="w">  </span><span class="n">has_many</span><span class="w"> </span><span class="ss">:members</span>
+
+<span class="w">  </span><span class="n">validates_presence_of</span><span class="w"> </span><span class="ss">:members</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</section>
+<section id="belongs-to">
+<h3>Belongs To<a class="headerlink" href="#belongs-to" title="Link to this heading">#</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">belongs_to</span></code> macro to associate a child with a parent stored in a
+separate collection. The <code class="docutils literal notranslate"><span class="pre">_id</span></code> of the parent (if a parent is associated)
+is stored in the child.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Studio</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+
+<span class="w">  </span><span class="n">belongs_to</span><span class="w"> </span><span class="ss">:band</span>
+<span class="k">end</span>
+
+<span class="n">studio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Studio</span><span class="o">.</span><span class="n">create!</span>
+<span class="c1"># =&gt; #&lt;Studio _id: 600118184896684987aa884f, band_id: nil&gt;</span>
+</pre></div>
+</div>
+<p>Although <code class="docutils literal notranslate"><span class="pre">has_many</span></code> associations require the
+corresponding <code class="docutils literal notranslate"><span class="pre">belongs_to</span></code> association to be defined on the child,
+<code class="docutils literal notranslate"><span class="pre">belongs_to</span></code> may also be used <code class="docutils literal notranslate"><span class="pre">has_many</span></code> macro.
+In this case the child is not accessible from the parent
+but the parent is accessible from the child:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Band</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Studio</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">belongs_to</span><span class="w"> </span><span class="ss">:band</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</section>
+<section id="has-and-belongs-to-many">
+<h3>Has And Belongs To Many<a class="headerlink" href="#has-and-belongs-to-many" title="Link to this heading">#</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">has_and_belongs_to_many</span></code> macro to declare a many-to-many
+association:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Band</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">has_and_belongs_to_many</span><span class="w"> </span><span class="ss">:tags</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Tag</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">has_and_belongs_to_many</span><span class="w"> </span><span class="ss">:bands</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>Both model instances store a list of ids of the associated models, if any:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">band</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Band</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">tags</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="no">Tag</span><span class="o">.</span><span class="n">create!</span><span class="o">]</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;Band _id: 60011d554896684b8b910a2a, tag_ids: [&#39;60011d554896684b8b910a29&#39;]&gt;</span>
+
+<span class="n">band</span><span class="o">.</span><span class="n">tags</span>
+<span class="c1"># =&gt; [#&lt;Tag _id: 60011d554896684b8b910a29, band_ids: [&#39;60011d554896684b8b910a2a&#39;]&gt;]</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-association-names">
+<h3>Custom Association Names<a class="headerlink" href="#custom-association-names" title="Link to this heading">#</a></h3>
+<p>You can name your associations whatever you like, but if the class cannot be inferred by
+CouchbaseOrm from the name, and neither can the opposite side you’ll want to provide the
+macro with some additional options to tell CouchbaseOrm how to hook them up.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Car</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchabseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">belongs_to</span><span class="w"> </span><span class="ss">:engine</span><span class="p">,</span><span class="w"> </span><span class="ss">class_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Motor&quot;</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Motor</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchabseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">has_many</span><span class="w"> </span><span class="ss">:machine</span><span class="p">,</span><span class="w"> </span><span class="ss">class_name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Car&quot;</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-foreign-keys">
+<h3>Custom Foreign Keys<a class="headerlink" href="#custom-foreign-keys" title="Link to this heading">#</a></h3>
+<p>The attributes used when looking up associations can be explicitly specified.
+The default is to use <code class="docutils literal notranslate"><span class="pre">id</span></code> on the “parent” association and <code class="docutils literal notranslate"><span class="pre">#{association_name}_id</span></code>
+on the “child” association, for example with a has_many/belongs_to:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Company</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">has_many</span><span class="w"> </span><span class="ss">:emails</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Email</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">belongs_to</span><span class="w"> </span><span class="ss">:company</span>
+<span class="k">end</span>
+
+<span class="n">company</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Company</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+<span class="c1"># looks up emails where emails.company_id == company.id</span>
+<span class="n">company</span><span class="o">.</span><span class="n">emails</span>
+</pre></div>
+</div>
+<p>Specify a different <code class="docutils literal notranslate"><span class="pre">foreign_key</span></code> to change the attribute name on the “child”
+association:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Company</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:c</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">  </span><span class="n">has_many</span><span class="w"> </span><span class="ss">:emails</span><span class="p">,</span><span class="w"> </span><span class="ss">foreign_key</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;c_ref&#39;</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Email</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="c1"># This definition of c_ref is automatically generated by CouchbaseOrm:</span>
+<span class="w">  </span><span class="c1"># attribute :c_ref, type: Object</span>
+<span class="w">  </span><span class="c1"># But the type can also be specified:</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:c_ref</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">  </span><span class="n">belongs_to</span><span class="w"> </span><span class="ss">:company</span><span class="p">,</span><span class="w"> </span><span class="ss">foreign_key</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;c_ref&#39;</span>
+<span class="k">end</span>
+
+<span class="n">company</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Company</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+<span class="c1"># looks up emails where emails.c_ref == company.c</span>
+<span class="n">company</span><span class="o">.</span><span class="n">emails</span>
+</pre></div>
+</div>
+</section>
+<section id="polymorphism">
+<h3>Polymorphism<a class="headerlink" href="#polymorphism" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">has_and_belongs_to_many</span></code> associations support polymorphism, which is
+having a single association potentially contain objects of different classes.
+For example, we could model an organization in which departments and teams
+have managers as follows:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Department</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">has_and_belongs_to_many</span><span class="w"> </span><span class="ss">:unit</span><span class="p">,</span><span class="w"> </span><span class="n">class_name</span><span class="w"> </span><span class="s2">&quot;Manager&quot;</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Team</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">has_and_belongs_to_many</span><span class="w"> </span><span class="ss">:unit</span><span class="p">,</span><span class="w"> </span><span class="n">class_name</span><span class="w"> </span><span class="s2">&quot;Manager&quot;</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Manager</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">belongs_to</span><span class="w"> </span><span class="ss">:unit</span><span class="p">,</span><span class="w"> </span><span class="ss">polymorphic</span><span class="p">:</span><span class="w"> </span><span class="kp">true</span>
+<span class="k">end</span>
+
+<span class="n">dept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Department</span><span class="o">.</span><span class="n">create!</span>
+<span class="n">team</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Team</span><span class="o">.</span><span class="n">create!</span>
+
+<span class="n">alice</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Manager</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">unit</span><span class="p">:</span><span class="w"> </span><span class="n">dept</span><span class="p">)</span>
+<span class="n">alice</span><span class="o">.</span><span class="n">unit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">dept</span>
+<span class="c1"># =&gt; true</span>
+<span class="n">dept</span><span class="o">.</span><span class="n">manager</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">alice</span>
+<span class="c1"># =&gt; true</span>
+</pre></div>
+</div>
+</section>
+<section id="dependent-behavior">
+<span id="id2"></span><h3>Dependent Behavior<a class="headerlink" href="#dependent-behavior" title="Link to this heading">#</a></h3>
+<p>You can provide dependent options to referenced associations to instruct CouchbaseOrm
+how to handle situations where one side of the association is deleted, or is attempted
+to be deleted. The options are as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">:destroy</span></code>: Destroy the child document(s) and run all of the model callbacks.</p></li>
+</ul>
+<p>If no <code class="docutils literal notranslate"><span class="pre">:dependent</span></code> option is provided, deleting the parent document leaves the child document unmodified
+(in other words, the child document continues to reference the now deleted parent document via the foreign key attribute).
+The child may become orphaned if it is ordinarily only referenced via the parent.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Band</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">has_many</span><span class="w"> </span><span class="ss">:albums</span><span class="p">,</span><span class="w"> </span><span class="ss">dependent</span><span class="p">:</span><span class="w"> </span><span class="ss">:destroy</span>
+<span class="w">  </span><span class="n">belongs_to</span><span class="w"> </span><span class="ss">:label</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Album</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">belongs_to</span><span class="w"> </span><span class="ss">:band</span>
+<span class="k">end</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Label</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">has_many</span><span class="w"> </span><span class="ss">:bands</span>
+<span class="k">end</span>
+
+<span class="no">Band</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">destroy</span><span class="w"> </span><span class="c1"># Will delete all associated albums.</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="attributes.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Attribute Definition</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="validations.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Validation</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#embedded-associations">Embedded Associations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#embeds-one">Embeds One</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#embeds-many">Embeds Many</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#polymorphic-embedded-associations">Polymorphic Embedded Associations</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#restricting-polymorphic-types">Restricting Polymorphic Types</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-storage-keys">Custom Storage Keys</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#embedded-association-validation">Embedded Association Validation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-class-names">Custom Class Names</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-differences-from-referenced-associations">Key Differences from Referenced Associations</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#referenced-associations">Referenced Associations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#has-many">Has Many</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#belongs-to">Belongs To</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#has-and-belongs-to-many">Has And Belongs To Many</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-association-names">Custom Association Names</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-foreign-keys">Custom Foreign Keys</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#polymorphism">Polymorphism</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dependent-behavior">Dependent Behavior</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Woop.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
