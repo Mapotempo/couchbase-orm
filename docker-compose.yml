@@ -2,7 +2,7 @@ version: '3.7'
 
 x-app-args: &app-args
   BUNDLE_VERSION: ${BUNDLE_VERSION:-2.4.22}
-  RUBY_VERSION: ${RUBY_VERSION:-2.7-slim-bullseye}
+  RUBY_VERSION: ${RUBY_VERSION:-3.0-slim-bullseye}
   BUNDLE_WITHOUT: production
 
 services:
@@ -12,7 +12,7 @@ services:
         <<: *app-args
       context: .
       dockerfile: Dockerfile
-    image: dev.example.com/mapotempo/couchbase-orm:ruby-${RUBY_VERSION:-2.7-slim-bullseye}_bundle-${BUNDLE_VERSION:-2.4.22}
+    image: dev.example.com/mapotempo/couchbase-orm:ruby-${RUBY_VERSION:-3.0-slim-bullseye}_bundle-${BUNDLE_VERSION:-2.4.22}
     volumes:
       - ./:/srv/app/
       - app_cache_vendor:/srv/app/vendor
@@ -21,7 +21,7 @@ services:
       - COUCHBASE_USER=tester
       - COUCHBASE_PASSWORD=password123
       - COUCHBASE_BUCKET=default
-      - ACTIVE_MODEL_VERSION=5.2.7
+      - ACTIVE_MODEL_VERSION=6.1.7.7
       - LOG_LEVEL=debug
     tty: true
     depends_on:
