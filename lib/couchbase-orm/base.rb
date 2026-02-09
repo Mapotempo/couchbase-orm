@@ -192,6 +192,9 @@ module CouchbaseOrm
     define_model_callbacks :initialize, :find, only: :after
     define_model_callbacks :create, :destroy, :save, :update
 
+    # Prevent duplicate validation errors (similar to ActiveRecord::AutosaveAssociation)
+    after_validation :_ensure_no_duplicate_errors
+
     Metadata = Struct.new(:cas)
 
     class MismatchTypeError < RuntimeError; end
@@ -255,6 +258,10 @@ module CouchbaseOrm
       name = self.class.attribute_aliases[name] || name
 
       @attributes.write_from_user(name, value)
+    end
+
+    def _ensure_no_duplicate_errors
+      errors.uniq!
     end
   end
 
