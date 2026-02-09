@@ -222,7 +222,7 @@ module CouchbaseOrm
           document = Couchbase::Management::DesignDocument.new
           document.views = views_actual
           document.name = @design_document
-          
+
           # Retry logic for view document creation (handles race conditions and storage backend issues)
           max_retries = 3
           retry_count = 0
