@@ -163,6 +163,17 @@ module CouchbaseOrm
   end
 
   class Document
+    class << self
+      def descendants
+        @__descendants ||= []
+      end
+
+      def inherited(subclass)
+        super
+        descendants << subclass
+      end
+    end
+    
     include ::ActiveModel::Model
     include ::ActiveModel::Dirty
     include ::ActiveModel::Attributes
