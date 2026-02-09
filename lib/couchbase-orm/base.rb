@@ -104,6 +104,7 @@ module CouchbaseOrm
           # In Rails 7.1+, this method was renamed and signature changed
           # ActiveRecord 7.1 still calls it with no args, so we handle that case
           return if args.empty?
+
           generate_alias_attribute_methods(*args)
         end
       end
@@ -165,7 +166,7 @@ module CouchbaseOrm
   class Document
     class << self
       def descendants
-        @__descendants ||= []
+        @__descendants ||= [] # rubocop:disable Naming/MemoizedInstanceVariableName
       end
 
       def inherited(subclass)
@@ -173,7 +174,7 @@ module CouchbaseOrm
         descendants << subclass
       end
     end
-    
+
     include ::ActiveModel::Model
     include ::ActiveModel::Dirty
     include ::ActiveModel::Attributes
