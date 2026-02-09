@@ -222,7 +222,24 @@ module CouchbaseOrm
           document = Couchbase::Management::DesignDocument.new
           document.views = views_actual
           document.name = @design_document
-          bucket.view_indexes.upsert_design_document(document, :production)
+
+          # Retry logic for view document creation (handles race conditions and storage backend issues)
+          max_retries = 3
+          retry_count = 0
+          begin
+            bucket.view_indexes.upsert_design_document(document, :production)
+          rescue Couchbase::Error::DesignDocumentNotFound, Couchbase::Error::InternalServerFailure => e
+            retry_count += 1
+            if retry_count <= max_retries
+              sleep_time = retry_count * 0.5  # exponential backoff: 0.5s, 1s, 1.5s
+              CouchbaseOrm.logger.warn("View document upsert failed (attempt #{retry_count}/#{max_retries}), retrying in #{sleep_time}s: #{e.message}")
+              sleep(sleep_time)
+              retry
+            else
+              CouchbaseOrm.logger.error("View document upsert failed after #{max_retries} retries: #{e.message}")
+              raise
+            end
+          end
 
           true
         else

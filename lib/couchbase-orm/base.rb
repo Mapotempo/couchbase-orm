@@ -64,6 +64,16 @@ module CouchbaseOrm
         true
       end
 
+      # Stub connection for ActiveRecord::Timestamp compatibility
+      def connection
+        @connection ||= Struct.new(:default_timezone).new(:utc)
+      end
+
+      # ActiveRecord 7.1 compatibility
+      def composite_primary_key?
+        false
+      end
+
       def _reflect_on_association(_attribute)
         false
       end
@@ -85,10 +95,28 @@ module CouchbaseOrm
           attribute_types.keys
         end
       end
+
+      # Rails 7.1+ renamed generate_alias_attributes to generate_alias_attribute_methods
+      # ActiveRecord still calls the old method name, so we need to provide compatibility
+      # The old method had no parameters, so we just provide an empty implementation
+      if ActiveModel::VERSION::MAJOR >= 7 && ActiveModel::VERSION::MINOR >= 1
+        def generate_alias_attributes(*args)
+          # In Rails 7.1+, this method was renamed and signature changed
+          # ActiveRecord 7.1 still calls it with no args, so we handle that case
+          return if args.empty?
+
+          generate_alias_attribute_methods(*args)
+        end
+      end
     end
 
     def _has_attribute?(attr_name)
       attribute_names.include?(attr_name.to_s)
+    end
+
+    # ActiveRecord 7.1 compatibility
+    def primary_key_values_present?
+      !id.nil?
     end
 
     def attribute_for_inspect(attr_name)
@@ -136,6 +164,17 @@ module CouchbaseOrm
   end
 
   class Document
+    class << self
+      def descendants
+        @__descendants ||= [] # rubocop:disable Naming/MemoizedInstanceVariableName
+      end
+
+      def inherited(subclass)
+        super
+        descendants << subclass
+      end
+    end
+
     include ::ActiveModel::Model
     include ::ActiveModel::Dirty
     include ::ActiveModel::Attributes
@@ -153,6 +192,9 @@ module CouchbaseOrm
 
     define_model_callbacks :initialize, :find, only: :after
     define_model_callbacks :create, :destroy, :save, :update
+
+    # Prevent duplicate validation errors (similar to ActiveRecord::AutosaveAssociation)
+    after_validation :_ensure_no_duplicate_errors
 
     Metadata = Struct.new(:cas)
 
@@ -217,6 +259,10 @@ module CouchbaseOrm
       name = self.class.attribute_aliases[name] || name
 
       @attributes.write_from_user(name, value)
+    end
+
+    def _ensure_no_duplicate_errors
+      errors.uniq!
     end
   end
 
