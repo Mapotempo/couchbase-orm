@@ -15,13 +15,13 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = '>= 3.0'
   gem.require_paths = ['lib']
 
-  gem.add_runtime_dependency     'activemodel',   ENV['ACTIVE_MODEL_VERSION'] || '>= 6.1.7.7', '< 7.1'
-  gem.add_runtime_dependency     'activerecord',  ENV['ACTIVE_MODEL_VERSION'] || '>= 6.1.7.7', '< 7.1'
+  gem.add_runtime_dependency     'activemodel',   ENV['ACTIVE_MODEL_VERSION'] || '>= 6.1.7.7', '<= 7.1'
+  gem.add_runtime_dependency     'activerecord',  ENV['ACTIVE_MODEL_VERSION'] || '>= 6.1.7.7', '<= 7.1'
 
   gem.add_runtime_dependency     'couchbase',    '~> 3.4.5'
   gem.add_runtime_dependency     'radix',        '~> 2.2' # converting numbers to and from any base
 
-  gem.add_development_dependency 'actionpack', ENV['ACTIVE_MODEL_VERSION'] || '>= 6.1.7.7', '< 7.1'
+  gem.add_development_dependency 'actionpack', ENV['ACTIVE_MODEL_VERSION'] || '>= 6.1.7.7', '<= 7.1'
   gem.add_development_dependency 'base64'
   gem.add_development_dependency 'mapotempo_rubocop', '<1.0'
   gem.add_development_dependency 'pry'
