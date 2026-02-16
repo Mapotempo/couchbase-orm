@@ -60,6 +60,7 @@ module CouchbaseOrm
           attrs.delete(:type)
           obj = klass.new(attrs)
           obj.embedded = true
+          obj.polymorphic_embedded = true
           obj
         end.compact
 
@@ -89,9 +90,9 @@ module CouchbaseOrm
                 end
 
           obj.embedded = true
-          raw = obj.serialized_attributes
+          obj.polymorphic_embedded = true
+          raw = obj.serializable_hash
           raw.delete('id') if raw['id'].blank?
-          raw['type'] = obj.class.name
 
           embedded_objects << obj
           serialized << raw
@@ -137,7 +138,7 @@ module CouchbaseOrm
         Array(val).each do |v|
           obj = v.is_a?(klass) ? v : klass.new(v)
           obj.embedded = true
-          raw = obj.serialized_attributes
+          raw = obj.serializable_hash
           raw.delete('id') if raw['id'].blank?
           embedded_objects << obj
           serialized << raw

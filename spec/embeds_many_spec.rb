@@ -146,16 +146,15 @@ describe CouchbaseOrm::EmbedsMany do
     expect(person.send(:serialized_attributes)['addresses'].first).not_to include('id')
   end
 
-  it 'includes type field and excludes empty id in as_json for embedded documents' do
+  it 'excludes empty id in as_json for embedded documents' do
     person = Person.new(addresses: [{ street: '123 Main St' }])
     address_json = person.addresses.first.as_json
 
-    expect(address_json).to include('type' => 'address')
     expect(address_json).not_to have_key('id')
     expect(address_json['street']).to eq('123 Main St')
   end
 
-  it 'includes type field and includes id when id is present in embedded documents' do
+  it 'includes id when id is present in embedded documents' do
     person = Person.new(addresses: [{ street: '456 Elm St' }])
     # Manually set an id on the address
     address = person.addresses.first
@@ -164,7 +163,6 @@ describe CouchbaseOrm::EmbedsMany do
 
     address_json = address.as_json
 
-    expect(address_json).to include('type' => 'address')
     expect(address_json).to include('id' => 'test-address-id')
     expect(address_json['street']).to eq('456 Elm St')
   end
