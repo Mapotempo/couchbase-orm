@@ -219,14 +219,6 @@ module CouchbaseOrm
       send(:"#{key}=", value)
     end
 
-    def serializable_hash(options = {})
-      result = super(options).merge('type' => self.class.design_document)
-      if embedded? && result['id'].blank?
-        result.delete('id')
-      end
-      result
-    end
-
     protected
 
     def serialized_attributes
