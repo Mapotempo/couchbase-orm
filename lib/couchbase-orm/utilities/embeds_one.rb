@@ -59,6 +59,7 @@ module CouchbaseOrm
         attrs.delete(:type)
         obj = klass.new(attrs)
         obj.embedded = true
+        obj.polymorphic_embedded = true
         instance_variable_set(instance_var, obj)
       end
     end
@@ -85,9 +86,9 @@ module CouchbaseOrm
               end
 
         obj.embedded = true
-        raw = obj.serialized_attributes
+        obj.polymorphic_embedded = true
+        raw = obj.serializable_hash
         raw.delete('id') if raw['id'].blank?
-        raw['type'] = obj.class.name
 
         write_attribute(storage_key, raw)
         instance_variable_set(instance_var, obj)
@@ -130,7 +131,7 @@ module CouchbaseOrm
         obj = val.is_a?(klass) ? val : klass.new(val)
         obj.embedded = true
 
-        raw = obj.serialized_attributes
+        raw = obj.serializable_hash
         raw.delete('id') if raw['id'].blank?
 
         write_attribute(storage_key, raw)

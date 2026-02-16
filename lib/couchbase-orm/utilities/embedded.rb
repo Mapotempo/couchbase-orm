@@ -28,11 +28,21 @@ module CouchbaseOrm
       end
     end
 
+    # rubocop:disable Metrics/BlockLength
     included do
       def dup
         copy = super
         copy.cleanup_embedded_memoization!
         copy
+      end
+
+      def serializable_hash(options = {})
+        result = super(options)
+        if polymorphic_embedded?
+          result['type'] = self.class.name
+        end
+        result.delete('id') if embedded? && result['id'].blank?
+        result
       end
 
       protected
@@ -45,6 +55,14 @@ module CouchbaseOrm
         @_embedded = value
       end
 
+      def polymorphic_embedded?
+        !!@_polymorphic_embedded
+      end
+
+      def polymorphic_embedded=(value)
+        @_polymorphic_embedded = value
+      end
+
       def cleanup_embedded_memoization!
         self.class.embedded.each_value do |value|
           ivar = value[:instance_var]
@@ -52,5 +70,6 @@ module CouchbaseOrm
         end
       end
     end
+    # rubocop:enable Metrics/BlockLength
   end
 end
