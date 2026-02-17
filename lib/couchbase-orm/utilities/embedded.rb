@@ -42,6 +42,7 @@ module CouchbaseOrm
           result[:type] = self.class.name
         end
         result.delete(:id) if embedded? && result[:id].blank?
+        result.delete('id') if embedded? && result['id'].blank?
         result
       end
 
