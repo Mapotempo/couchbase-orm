@@ -38,9 +38,7 @@ module CouchbaseOrm
 
       def serializable_hash(options = {})
         result = super(options)
-        
-        apply_association_defaults_to_hash(result) if self.class.respond_to?(:embedded)
-        
+                
         result[:type] = self.class.name if polymorphic_embedded?
         
         result.delete(:id) if embedded? && result[:id].blank?
@@ -73,38 +71,7 @@ module CouchbaseOrm
           remove_instance_variable(ivar) if instance_variable_defined?(ivar)
         end
       end
-
-      private
-
-      def apply_association_defaults_to_hash(result)
-        self.class.embedded.each do |name, config|
-          next unless config[:default].present?
-          
-          storage_key = config[:key].to_s
-          
-          next unless result[storage_key].nil?
-          
-          association_value = send(name)
-          next unless association_value.present?
-          
-          result[storage_key] = serialize_association_value(association_value)
-        end
-      end
-
-     def serialize_association_value(value)
-        if value.respond_to?(:map) && value.is_a?(Enumerable)
-          value.map { |item| serialize_single_embedded_object(item) }
-        else
-          serialize_single_embedded_object(value)
-        end
-      end
-
-      def serialize_single_embedded_object(object)
-        return object unless object.respond_to?(:serializable_hash)
-        
-        object.serializable_hash
-      end
+      # rubocop:enable Metrics/BlockLength
     end
-    # rubocop:enable Metrics/BlockLength
   end
 end

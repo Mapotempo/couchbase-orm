@@ -236,6 +236,8 @@ describe CouchbaseOrm::Embedded do
 
         json_hash = post.as_json
         expect(json_hash['media']).to be_a(Hash)
+        expect(json_hash['media'].keys).to_not include('id')
+        expect(json_hash['media'].keys).to_not include('type')
         expect(json_hash['media']['url']).to eq('https://default.com/image.jpg')
         expect(json_hash['media']['caption']).to eq('Default')
       end
@@ -243,10 +245,12 @@ describe CouchbaseOrm::Embedded do
       it 'includes default embedded object in to_json when not set' do
         post = PostWithDefaultMedia.new(title: 'Test Post')
 
-        json = JSON.parse(post.to_json)
-        expect(json['media']).to be_a(Hash)
-        expect(json['media']['url']).to eq('https://default.com/image.jpg')
-        expect(json['media']['caption']).to eq('Default')
+        json_hash = JSON.parse(post.to_json)
+        expect(json_hash['media']).to be_a(Hash)
+        expect(json_hash['media'].keys).to_not include('id')
+        expect(json_hash['media'].keys).to_not include('type')
+        expect(json_hash['media']['url']).to eq('https://default.com/image.jpg')
+        expect(json_hash['media']['caption']).to eq('Default')
       end
 
       it 'uses actual value if set, not default' do
@@ -254,6 +258,9 @@ describe CouchbaseOrm::Embedded do
         post = PostWithDefaultMedia.new(title: 'Test Post', media: custom_media)
 
         json_hash = post.as_json
+        expect(json_hash['media']).to be_a(Hash)
+        expect(json_hash['media'].keys).to_not include('id')
+        expect(json_hash['media'].keys).to_not include('type')
         expect(json_hash['media']['url']).to eq('https://custom.com/image.jpg')
         expect(json_hash['media']['caption']).to eq('Custom')
       end
@@ -263,6 +270,8 @@ describe CouchbaseOrm::Embedded do
 
         json_hash = post.as_json
         expect(json_hash['media']).to be_a(Hash)
+        expect(json_hash['media'].keys).to_not include('id')
+        expect(json_hash['media'].keys).to_not include('type')
         expect(json_hash['media']['url']).to eq('https://default.com/hash.jpg')
         expect(json_hash['media']['caption']).to eq('Default Hash')
       end
@@ -277,6 +286,8 @@ describe CouchbaseOrm::Embedded do
         json_hash = article.as_json
         expect(json_hash['attachments']).to be_an(Array)
         expect(json_hash['attachments'].size).to eq(1)
+        expect(json_hash['attachments'][0].keys).to_not include('id')
+        expect(json_hash['attachments'][0].keys).to_not include('type')
         expect(json_hash['attachments'][0]['url']).to eq('https://default.com/1.jpg')
         expect(json_hash['attachments'][0]['caption']).to eq('Default 1')
       end
@@ -284,10 +295,13 @@ describe CouchbaseOrm::Embedded do
       it 'includes default embedded collection in to_json when not set' do
         article = ArticleWithDefaultAttachments.new(title: 'Test Article')
 
-        json = JSON.parse(article.to_json)
-        expect(json['attachments']).to be_an(Array)
-        expect(json['attachments'].size).to eq(1)
-        expect(json['attachments'][0]['url']).to eq('https://default.com/1.jpg')
+        json_hash = JSON.parse(article.to_json)
+        expect(json_hash['attachments']).to be_an(Array)
+        expect(json_hash['attachments'].size).to eq(1)
+        expect(json_hash['attachments'][0].keys).to_not include('id')
+        expect(json_hash['attachments'][0].keys).to_not include('type')
+        expect(json_hash['attachments'][0]['url']).to eq('https://default.com/1.jpg')
+        expect(json_hash['attachments'][0]['caption']).to eq('Default 1')
       end
 
       it 'uses actual value if set, not default' do
@@ -296,6 +310,8 @@ describe CouchbaseOrm::Embedded do
 
         json_hash = article.as_json
         expect(json_hash['attachments'].size).to eq(1)
+        expect(json_hash['attachments'][0].keys).to_not include('id')
+        expect(json_hash['attachments'][0].keys).to_not include('type')
         expect(json_hash['attachments'][0]['url']).to eq('https://custom.com/image.jpg')
         expect(json_hash['attachments'][0]['caption']).to eq('Custom')
       end

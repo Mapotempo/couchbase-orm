@@ -52,8 +52,7 @@ module CouchbaseOrm
         unless raw.present?
           if default_value
             default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
-            default_obj.embedded = true if default_obj.respond_to?(:embedded=)
-            return instance_variable_set(instance_var, default_obj)
+            return self.send("#{name}=", default_obj)
           end
           return instance_variable_set(instance_var, nil)
         end
@@ -62,7 +61,7 @@ module CouchbaseOrm
         unless type.present?
           if default_value
             default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
-            return instance_variable_set(instance_var, default_obj)
+            return self.send("#{name}=", default_obj)
           end
           return instance_variable_set(instance_var, nil)
         end
@@ -127,9 +126,7 @@ module CouchbaseOrm
         unless raw.present?
           if default_value
             default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
-            default_obj.embedded = true if default_obj.respond_to?(:embedded=)
-
-            return instance_variable_set(instance_var, default_obj)
+            return self.send("#{name}=", default_obj)
           end
           return instance_variable_set(instance_var, nil)
         end

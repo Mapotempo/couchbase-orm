@@ -68,7 +68,7 @@ module CouchbaseOrm
         if raw_array.blank?
           if default_value
             default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
-            return instance_variable_set(instance_var, wrap_array.call(default_obj))
+            return self.send("#{name}=", wrap_array.call(default_obj))
           end
           return instance_variable_set(instance_var, [])
         end
@@ -148,7 +148,7 @@ module CouchbaseOrm
         if raw_array.blank?
           if default_value
             default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
-            return instance_variable_set(instance_var, wrap_array.call(default_obj))
+            return self.send("#{name}=", wrap_array.call(default_obj))
           end
           return instance_variable_set(instance_var, [])
         end

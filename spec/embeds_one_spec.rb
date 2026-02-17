@@ -706,6 +706,30 @@ describe CouchbaseOrm::EmbedsOne do
       user.destroy! if user&.persisted?
     end
 
+    it 'persists default value to database when saved' do
+      user = UserWithDefaultProc.new
+      expect(user.profile.language).to eq('en')
+      
+      user.save!
+
+      # Check that default was actually persisted by inspecting serialized attributes
+      raw_attributes = user.send(:serialized_attributes)
+      expect(raw_attributes['profile']).to be_a(Hash)
+      expect(raw_attributes['profile']['language']).to eq('en')
+
+      # Verify persistence by reloading from database
+      loaded = UserWithDefaultProc.find(user.id)
+      expect(loaded.profile).to be_a(DefaultProfile)
+      expect(loaded.profile.language).to eq('en')
+      
+      # Verify the data is in the raw database document
+      loaded_raw = loaded.send(:serialized_attributes)
+      expect(loaded_raw['profile']).to be_a(Hash)
+      expect(loaded_raw['profile']['language']).to eq('en')
+    ensure
+      user.destroy! if user&.persisted?
+    end
+
     it 'supports default value for polymorphic embeds_one' do
       post = PolymorphicPostWithDefault.new
       expect(post.media).to be_a(DefaultImage)

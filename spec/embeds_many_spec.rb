@@ -885,6 +885,36 @@ describe CouchbaseOrm::EmbedsMany do
       person.destroy! if person&.persisted?
     end
 
+    it 'persists default value to database when saved' do
+      person = PersonWithDefaultProc.new
+      expect(person.addresses.size).to eq(1)
+      expect(person.addresses.first.street).to eq('Default St')
+      
+      person.save!
+
+      # Check that default was actually persisted by inspecting serialized attributes
+      raw_attributes = person.send(:serialized_attributes)
+      expect(raw_attributes['addresses']).to be_an(Array)
+      expect(raw_attributes['addresses'].size).to eq(1)
+      expect(raw_attributes['addresses'][0]['street']).to eq('Default St')
+      expect(raw_attributes['addresses'][0]['city']).to eq('Default City')
+
+      # Verify persistence by reloading from database
+      loaded = PersonWithDefaultProc.find(person.id)
+      expect(loaded.addresses.size).to eq(1)
+      expect(loaded.addresses.first.street).to eq('Default St')
+      expect(loaded.addresses.first.city).to eq('Default City')
+      
+      # Verify the data is in the raw database document
+      loaded_raw = loaded.send(:serialized_attributes)
+      expect(loaded_raw['addresses']).to be_an(Array)
+      expect(loaded_raw['addresses'].size).to eq(1)
+      expect(loaded_raw['addresses'][0]['street']).to eq('Default St')
+      expect(loaded_raw['addresses'][0]['city']).to eq('Default City')
+    ensure
+      person.destroy! if person&.persisted?
+    end
+
     it 'supports default value for polymorphic embeds_many' do
       person = PolymorphicPersonWithDefault.new
       expect(person.attachments.size).to eq(1)
