@@ -39,8 +39,9 @@ module CouchbaseOrm
       def serializable_hash(options = {})
         result = super(options)
         if polymorphic_embedded?
-          result['type'] = self.class.name
+          result[:type] = self.class.name
         end
+        result.delete(:id) if embedded? && result[:id].blank?
         result.delete('id') if embedded? && result['id'].blank?
         result
       end
