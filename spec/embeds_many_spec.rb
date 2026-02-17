@@ -769,4 +769,148 @@ describe CouchbaseOrm::EmbedsMany do
       article.destroy! if article&.persisted?
     end
   end
+
+  describe 'embeds_many with default value' do
+    class DefaultAddress < CouchbaseOrm::Base
+      attribute :street, :string
+      attribute :city, :string
+    end
+
+    class PersonWithDefaultProc < CouchbaseOrm::Base
+      embeds_many :addresses, class_name: 'DefaultAddress', default: -> { [DefaultAddress.new(street: 'Default St', city: 'Default City')] }
+    end
+
+    class PersonWithDefaultStatic < CouchbaseOrm::Base
+      embeds_many :addresses, class_name: 'DefaultAddress', default: [DefaultAddress.new(street: 'Static St', city: 'Static City')]
+    end
+
+    class PersonWithInstanceContextDefault < CouchbaseOrm::Base
+      attribute :default_street, :string
+
+      embeds_many :addresses, class_name: 'DefaultAddress', default: -> {
+        [DefaultAddress.new(street: default_street || 'Fallback St', city: 'Context City')]
+      }
+    end
+
+    class PolymorphicPersonWithDefault < CouchbaseOrm::Base
+      embeds_many :attachments, polymorphic: true, default: -> { [ImageAttachment.new(url: 'https://default.com/image.jpg', caption: 'Default')] }
+    end
+
+    it 'returns default value when no data is present' do
+      person = PersonWithDefaultProc.new
+      expect(person.addresses.size).to eq(1)
+      expect(person.addresses.first.street).to eq('Default St')
+    end
+
+    it 'evaluates default proc each time for new instances' do
+      person1 = PersonWithDefaultProc.new
+      addrs1 = person1.addresses
+
+      person2 = PersonWithDefaultProc.new
+      addrs2 = person2.addresses
+
+      expect(addrs1).not_to equal(addrs2)
+      expect(addrs1.first).not_to equal(addrs2.first)
+      expect(addrs1.first.street).to eq('Default St')
+      expect(addrs2.first.street).to eq('Default St')
+    end
+
+    it 'supports static default values' do
+      person = PersonWithDefaultStatic.new
+      expect(person.addresses.size).to eq(1)
+      expect(person.addresses.first.street).to eq('Static St')
+    end
+
+    it 'uses instance context in default proc' do
+      person = PersonWithInstanceContextDefault.new(default_street: 'Custom St')
+      expect(person.addresses.first.street).to eq('Custom St')
+    end
+
+    it 'uses fallback in default proc when instance variable is nil' do
+      person = PersonWithInstanceContextDefault.new
+      expect(person.addresses.first.street).to eq('Fallback St')
+    end
+
+    it 'does not use default when data is explicitly set' do
+      person = PersonWithDefaultProc.new
+      person.addresses = [DefaultAddress.new(street: 'Explicit St', city: 'Explicit City')]
+      expect(person.addresses.first.street).to eq('Explicit St')
+    end
+
+    it 'memoizes the default value after first access' do
+      person = PersonWithDefaultProc.new
+      first_call = person.addresses
+      second_call = person.addresses
+
+      expect(first_call).to equal(second_call)
+    end
+
+    it 'allows explicitly setting to empty array to override default' do
+      person = PersonWithDefaultProc.new
+      person.addresses = []
+      expect(person.addresses).to eq([])
+    end
+
+    it 'uses default after reset when no data is present' do
+      person = PersonWithDefaultProc.new
+      original = person.addresses
+      expect(original.size).to eq(1)
+
+      person.addresses_reset
+      new_addrs = person.addresses
+
+      expect(new_addrs.size).to eq(1)
+      expect(new_addrs).not_to equal(original)
+    end
+
+    it 'persists and reloads without default when explicitly set' do
+      person = PersonWithDefaultProc.new
+      person.addresses = [DefaultAddress.new(street: 'Persisted St', city: 'Persisted City')]
+      person.save!
+
+      loaded = PersonWithDefaultProc.find(person.id)
+      expect(loaded.addresses.first.street).to eq('Persisted St')
+    ensure
+      person.destroy! if person&.persisted?
+    end
+
+    it 'uses default after reload when no data was saved' do
+      person = PersonWithDefaultProc.new
+      person.save!
+
+      loaded = PersonWithDefaultProc.find(person.id)
+      expect(loaded.addresses.size).to eq(1)
+      expect(loaded.addresses.first.street).to eq('Default St')
+    ensure
+      person.destroy! if person&.persisted?
+    end
+
+    it 'supports default value for polymorphic embeds_many' do
+      person = PolymorphicPersonWithDefault.new
+      expect(person.attachments.size).to eq(1)
+      expect(person.attachments.first).to be_a(ImageAttachment)
+    end
+
+    it 'does not use default for polymorphic when data is set' do
+      person = PolymorphicPersonWithDefault.new
+      person.attachments = [VideoAttachment.new(url: 'https://video.com/vid.mp4', duration: 60)]
+      expect(person.attachments.first).to be_a(VideoAttachment)
+    end
+
+    it 'can use default with empty array behavior' do
+      person = PersonWithDefaultProc.new
+      person.addresses = nil  # Setting to nil converts to []
+      expect(person.addresses).to eq([])
+    end
+
+    class PersonWithSingleDefault < CouchbaseOrm::Base
+      embeds_many :addresses, class_name: 'DefaultAddress', default: -> { DefaultAddress.new(street: 'Single') }
+    end
+
+    it 'default returns array even if proc returns single object' do
+      person = PersonWithSingleDefault.new
+      expect(person.addresses).to be_a(Array)
+      expect(person.addresses.size).to eq(1)
+    end
+  end
 end

@@ -587,4 +587,136 @@ describe CouchbaseOrm::EmbedsOne do
       post.destroy! if post&.persisted?
     end
   end
+
+  describe 'embeds_one with default value' do
+    class DefaultProfile < CouchbaseOrm::Base
+      attribute :language, :string
+      attribute :bio, :string
+    end
+
+    class UserWithDefaultProc < CouchbaseOrm::Base
+      embeds_one :profile, class_name: 'DefaultProfile', default: -> { DefaultProfile.new(language: 'en') }
+    end
+
+    class UserWithDefaultStatic < CouchbaseOrm::Base
+      embeds_one :profile, class_name: 'DefaultProfile', default: DefaultProfile.new(language: 'fr')
+    end
+
+    class UserWithInstanceContextDefault < CouchbaseOrm::Base
+      attribute :preferred_language, :string
+
+      embeds_one :profile, class_name: 'DefaultProfile', default: -> { DefaultProfile.new(language: preferred_language || 'de') }
+    end
+
+    class DefaultImage < CouchbaseOrm::Base
+      attribute :url, :string
+      attribute :caption, :string
+    end
+
+    class PolymorphicPostWithDefault < CouchbaseOrm::Base
+      embeds_one :media, polymorphic: true, default: -> { DefaultImage.new(url: 'default.jpg') }
+    end
+
+    it 'returns default value when no data is present' do
+      user = UserWithDefaultProc.new
+      expect(user.profile).to be_a(DefaultProfile)
+      expect(user.profile.language).to eq('en')
+    end
+
+    it 'evaluates default proc each time for new instances' do
+      user1 = UserWithDefaultProc.new
+      profile1 = user1.profile
+      
+      user2 = UserWithDefaultProc.new
+      profile2 = user2.profile
+
+      expect(profile1).not_to equal(profile2)
+      expect(profile1.language).to eq('en')
+      expect(profile2.language).to eq('en')
+    end
+
+    it 'supports static default values' do
+      user = UserWithDefaultStatic.new
+      expect(user.profile).to be_a(DefaultProfile)
+      expect(user.profile.language).to eq('fr')
+    end
+
+    it 'uses instance context in default proc' do
+      user = UserWithInstanceContextDefault.new(preferred_language: 'es')
+      expect(user.profile).to be_a(DefaultProfile)
+      expect(user.profile.language).to eq('es')
+    end
+
+    it 'uses fallback in default proc when instance variable is nil' do
+      user = UserWithInstanceContextDefault.new
+      expect(user.profile).to be_a(DefaultProfile)
+      expect(user.profile.language).to eq('de')
+    end
+
+    it 'does not use default when data is explicitly set' do
+      user = UserWithDefaultProc.new(profile: { language: 'ja', bio: 'Custom bio' })
+      expect(user.profile).to be_a(DefaultProfile)
+      expect(user.profile.language).to eq('ja')
+      expect(user.profile.bio).to eq('Custom bio')
+    end
+
+    it 'memoizes the default value after first access' do
+      user = UserWithDefaultProc.new
+      first_call = user.profile
+      second_call = user.profile
+
+      expect(first_call).to equal(second_call)
+    end
+
+    it 'allows explicitly setting to nil to override default' do
+      user = UserWithDefaultProc.new
+      user.profile = nil
+      expect(user.profile).to be_nil
+    end
+
+    it 'uses default after reset when no data is present' do
+      user = UserWithDefaultProc.new
+      first_profile = user.profile
+      expect(first_profile.language).to eq('en')
+
+      user.profile_reset
+      second_profile = user.profile
+      expect(second_profile).to be_a(DefaultProfile)
+      expect(second_profile.language).to eq('en')
+      expect(second_profile).not_to equal(first_profile)
+    end
+
+    it 'persists and reloads without default when explicitly set' do
+      user = UserWithDefaultProc.create!(profile: { language: 'zh', bio: 'Saved bio' })
+
+      loaded = UserWithDefaultProc.find(user.id)
+      expect(loaded.profile.language).to eq('zh')
+      expect(loaded.profile.bio).to eq('Saved bio')
+    ensure
+      user.destroy! if user&.persisted?
+    end
+
+    it 'uses default after reload when no data was saved' do
+      user = UserWithDefaultProc.create!
+
+      loaded = UserWithDefaultProc.find(user.id)
+      expect(loaded.profile).to be_a(DefaultProfile)
+      expect(loaded.profile.language).to eq('en')
+    ensure
+      user.destroy! if user&.persisted?
+    end
+
+    it 'supports default value for polymorphic embeds_one' do
+      post = PolymorphicPostWithDefault.new
+      expect(post.media).to be_a(DefaultImage)
+      expect(post.media.url).to eq('default.jpg')
+    end
+
+    it 'does not use default for polymorphic when data is set' do
+      post = PolymorphicPostWithDefault.new(media: { type: 'image', url: 'custom.jpg', caption: 'Custom' })
+      expect(post.media).to be_a(Image)
+      expect(post.media.url).to eq('custom.jpg')
+      expect(post.media.caption).to eq('Custom')
+    end
+  end
 end

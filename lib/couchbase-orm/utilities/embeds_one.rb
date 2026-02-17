@@ -2,7 +2,7 @@
 
 module CouchbaseOrm
   module EmbedsOne
-    def embeds_one(name, class_name: nil, store_as: nil, validate: true, polymorphic: false)
+    def embeds_one(name, class_name: nil, store_as: nil, validate: true, polymorphic: false, default: nil)
       storage_key = (store_as || name).to_sym
       attribute storage_key, :hash, default: nil
 
@@ -21,6 +21,7 @@ module CouchbaseOrm
         instance_var: instance_var,
         polymorphic: is_polymorphic,
         allowed_types: allowed_types,
+        default: default,
       })
 
       if validate
@@ -29,10 +30,10 @@ module CouchbaseOrm
       end
 
       if is_polymorphic
-        define_polymorphic_embeds_one_reader(name, storage_key, instance_var)
+        define_polymorphic_embeds_one_reader(name, storage_key, instance_var, default)
         define_polymorphic_embeds_one_writer(name, storage_key, instance_var)
       else
-        define_standard_embeds_one_reader(name, storage_key, instance_var, klass_name)
+        define_standard_embeds_one_reader(name, storage_key, instance_var, klass_name, default)
         define_standard_embeds_one_writer(name, storage_key, instance_var, klass_name)
       end
 
@@ -43,15 +44,27 @@ module CouchbaseOrm
 
     private
 
-    def define_polymorphic_embeds_one_reader(name, storage_key, instance_var)
+    def define_polymorphic_embeds_one_reader(name, storage_key, instance_var, default_value)
       define_method(name) do
         return instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
 
         raw = read_attribute(storage_key)
-        return instance_variable_set(instance_var, nil) unless raw.present?
+        unless raw.present?
+          if default_value
+            default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
+            return instance_variable_set(instance_var, default_obj)
+          end
+          return instance_variable_set(instance_var, nil)
+        end
 
         type = raw['type'] || raw[:type]
-        return instance_variable_set(instance_var, nil) unless type.present?
+        unless type.present?
+          if default_value
+            default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
+            return instance_variable_set(instance_var, default_obj)
+          end
+          return instance_variable_set(instance_var, nil)
+        end
 
         klass = type.constantize
         attrs = raw.dup
@@ -95,7 +108,7 @@ module CouchbaseOrm
       end
     end
 
-    def define_standard_embeds_one_reader(name, storage_key, instance_var, klass_name)
+    def define_standard_embeds_one_reader(name, storage_key, instance_var, klass_name, default_value)
       define_method("_resolve_embedded_class_for_#{name}") do
         @__resolved_classes ||= {}
         @__resolved_classes[name] ||= begin
@@ -110,7 +123,13 @@ module CouchbaseOrm
         return instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
 
         raw = read_attribute(storage_key)
-        return instance_variable_set(instance_var, nil) unless raw.present?
+        unless raw.present?
+          if default_value
+            default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
+            return instance_variable_set(instance_var, default_obj)
+          end
+          return instance_variable_set(instance_var, nil)
+        end
 
         klass = send("_resolve_embedded_class_for_#{name}")
         obj = klass.new(raw)
