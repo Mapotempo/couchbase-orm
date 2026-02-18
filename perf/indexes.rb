@@ -31,7 +31,7 @@ def build_and_watch_deferred_indexes(bucket:, timeout: 60)
 
   # Filtre les index différés (non ONLINE)
   index_names = all_indexes
-                .reject { |idx| idx.state.casecmp('online').zero? || idx.name == '#primary' }
+                .reject { |idx| idx.state.to_s.casecmp('online').zero? || idx.name == '#primary' }
                 .map(&:name)
 
   return unless index_names.any?
