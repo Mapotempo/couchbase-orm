@@ -95,6 +95,35 @@ class RestrictedArticle < CouchbaseOrm::Base
   embeds_many :attachments, polymorphic: ['ImageAttachment', 'VideoAttachment']
 end
 
+class DefaultAddress < CouchbaseOrm::Base
+  attribute :street, :string
+  attribute :city, :string
+end
+
+class PersonWithDefaultProc < CouchbaseOrm::Base
+  embeds_many :addresses, class_name: 'DefaultAddress', default: -> { [DefaultAddress.new(street: 'Default St', city: 'Default City')] }
+end
+
+class PersonWithDefaultStatic < CouchbaseOrm::Base
+  embeds_many :addresses, class_name: 'DefaultAddress', default: [DefaultAddress.new(street: 'Static St', city: 'Static City')]
+end
+
+class PersonWithInstanceContextDefault < CouchbaseOrm::Base
+  attribute :default_street, :string
+
+  embeds_many :addresses, class_name: 'DefaultAddress', default: lambda {
+    [DefaultAddress.new(street: default_street || 'Fallback St', city: 'Context City')]
+  }
+end
+
+class PolymorphicPersonWithDefault < CouchbaseOrm::Base
+  embeds_many :attachments, polymorphic: true, default: -> { [ImageAttachment.new(url: 'https://default.com/image.jpg', caption: 'Default')] }
+end
+
+class PersonWithSingleDefault < CouchbaseOrm::Base
+  embeds_many :addresses, class_name: 'DefaultAddress', default: -> { DefaultAddress.new(street: 'Single') }
+end
+
 describe CouchbaseOrm::EmbedsMany do
   let(:raw_data) { [{ street: '123 Main St' }, { street: '456 Elm St' }] }
 
@@ -771,31 +800,6 @@ describe CouchbaseOrm::EmbedsMany do
   end
 
   describe 'embeds_many with default value' do
-    class DefaultAddress < CouchbaseOrm::Base
-      attribute :street, :string
-      attribute :city, :string
-    end
-
-    class PersonWithDefaultProc < CouchbaseOrm::Base
-      embeds_many :addresses, class_name: 'DefaultAddress', default: -> { [DefaultAddress.new(street: 'Default St', city: 'Default City')] }
-    end
-
-    class PersonWithDefaultStatic < CouchbaseOrm::Base
-      embeds_many :addresses, class_name: 'DefaultAddress', default: [DefaultAddress.new(street: 'Static St', city: 'Static City')]
-    end
-
-    class PersonWithInstanceContextDefault < CouchbaseOrm::Base
-      attribute :default_street, :string
-
-      embeds_many :addresses, class_name: 'DefaultAddress', default: -> {
-        [DefaultAddress.new(street: default_street || 'Fallback St', city: 'Context City')]
-      }
-    end
-
-    class PolymorphicPersonWithDefault < CouchbaseOrm::Base
-      embeds_many :attachments, polymorphic: true, default: -> { [ImageAttachment.new(url: 'https://default.com/image.jpg', caption: 'Default')] }
-    end
-
     it 'returns default value when no data is present' do
       person = PersonWithDefaultProc.new
       expect(person.addresses.size).to eq(1)
@@ -889,7 +893,7 @@ describe CouchbaseOrm::EmbedsMany do
       person = PersonWithDefaultProc.new
       expect(person.addresses.size).to eq(1)
       expect(person.addresses.first.street).to eq('Default St')
-      
+
       person.save!
 
       # Check that default was actually persisted by inspecting serialized attributes
@@ -904,7 +908,7 @@ describe CouchbaseOrm::EmbedsMany do
       expect(loaded.addresses.size).to eq(1)
       expect(loaded.addresses.first.street).to eq('Default St')
       expect(loaded.addresses.first.city).to eq('Default City')
-      
+
       # Verify the data is in the raw database document
       loaded_raw = loaded.send(:serialized_attributes)
       expect(loaded_raw['addresses']).to be_an(Array)
@@ -931,10 +935,6 @@ describe CouchbaseOrm::EmbedsMany do
       person = PersonWithDefaultProc.new
       person.addresses = nil  # Setting to nil converts to []
       expect(person.addresses).to eq([])
-    end
-
-    class PersonWithSingleDefault < CouchbaseOrm::Base
-      embeds_many :addresses, class_name: 'DefaultAddress', default: -> { DefaultAddress.new(street: 'Single') }
     end
 
     it 'default returns array even if proc returns single object' do

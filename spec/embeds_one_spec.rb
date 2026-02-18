@@ -96,6 +96,34 @@ class RestrictedPost < CouchbaseOrm::Base
   embeds_one :media, polymorphic: ['Image', 'Video']
 end
 
+class DefaultProfile < CouchbaseOrm::Base
+  attribute :language, :string
+  attribute :bio, :string
+end
+
+class UserWithDefaultProc < CouchbaseOrm::Base
+  embeds_one :profile, class_name: 'DefaultProfile', default: -> { DefaultProfile.new(language: 'en') }
+end
+
+class UserWithDefaultStatic < CouchbaseOrm::Base
+  embeds_one :profile, class_name: 'DefaultProfile', default: DefaultProfile.new(language: 'fr')
+end
+
+class UserWithInstanceContextDefault < CouchbaseOrm::Base
+  attribute :preferred_language, :string
+
+  embeds_one :profile, class_name: 'DefaultProfile', default: -> { DefaultProfile.new(language: preferred_language || 'de') }
+end
+
+class DefaultImage < CouchbaseOrm::Base
+  attribute :url, :string
+  attribute :caption, :string
+end
+
+class PolymorphicPostWithDefault < CouchbaseOrm::Base
+  embeds_one :media, polymorphic: true, default: -> { DefaultImage.new(url: 'default.jpg') }
+end
+
 describe CouchbaseOrm::EmbedsOne do
   let(:raw_data) { { bio: 'Software Engineer' } }
 
@@ -589,34 +617,6 @@ describe CouchbaseOrm::EmbedsOne do
   end
 
   describe 'embeds_one with default value' do
-    class DefaultProfile < CouchbaseOrm::Base
-      attribute :language, :string
-      attribute :bio, :string
-    end
-
-    class UserWithDefaultProc < CouchbaseOrm::Base
-      embeds_one :profile, class_name: 'DefaultProfile', default: -> { DefaultProfile.new(language: 'en') }
-    end
-
-    class UserWithDefaultStatic < CouchbaseOrm::Base
-      embeds_one :profile, class_name: 'DefaultProfile', default: DefaultProfile.new(language: 'fr')
-    end
-
-    class UserWithInstanceContextDefault < CouchbaseOrm::Base
-      attribute :preferred_language, :string
-
-      embeds_one :profile, class_name: 'DefaultProfile', default: -> { DefaultProfile.new(language: preferred_language || 'de') }
-    end
-
-    class DefaultImage < CouchbaseOrm::Base
-      attribute :url, :string
-      attribute :caption, :string
-    end
-
-    class PolymorphicPostWithDefault < CouchbaseOrm::Base
-      embeds_one :media, polymorphic: true, default: -> { DefaultImage.new(url: 'default.jpg') }
-    end
-
     it 'returns default value when no data is present' do
       user = UserWithDefaultProc.new
       expect(user.profile).to be_a(DefaultProfile)
@@ -626,7 +626,7 @@ describe CouchbaseOrm::EmbedsOne do
     it 'evaluates default proc each time for new instances' do
       user1 = UserWithDefaultProc.new
       profile1 = user1.profile
-      
+
       user2 = UserWithDefaultProc.new
       profile2 = user2.profile
 
@@ -709,7 +709,7 @@ describe CouchbaseOrm::EmbedsOne do
     it 'persists default value to database when saved' do
       user = UserWithDefaultProc.new
       expect(user.profile.language).to eq('en')
-      
+
       user.save!
 
       # Check that default was actually persisted by inspecting serialized attributes
@@ -721,7 +721,7 @@ describe CouchbaseOrm::EmbedsOne do
       loaded = UserWithDefaultProc.find(user.id)
       expect(loaded.profile).to be_a(DefaultProfile)
       expect(loaded.profile.language).to eq('en')
-      
+
       # Verify the data is in the raw database document
       loaded_raw = loaded.send(:serialized_attributes)
       expect(loaded_raw['profile']).to be_a(Hash)

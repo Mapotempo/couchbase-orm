@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module CouchbaseOrm
+# rubocop:disable Metrics/ModuleLength
   module EmbedsMany
     def embeds_many(name, class_name: nil, store_as: nil, validate: true, polymorphic: false, default: nil)
       storage_key = (store_as || name).to_sym
@@ -47,7 +48,7 @@ module CouchbaseOrm
     # Returns a lambda that wraps objects in an array safely
     # Similar to ActiveSupport's Array.wrap, but duplicates arrays to prevent shared references
     def array_wrap_lambda
-      ->(obj) do
+      lambda do |obj|
         if obj.nil?
           []
         elsif obj.is_a?(Array)
@@ -185,4 +186,5 @@ module CouchbaseOrm
       end
     end
   end
+# rubocop:enable Metrics/ModuleLength
 end
