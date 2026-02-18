@@ -23,7 +23,7 @@ def create_partial_index(index_name:, bucket_name:, fields:, where:, defer_build
   N1QL
 end
 
-def build_and_watch_deferred_indexes(bucket:, timeout: 60)
+def build_and_watch_deferred_indexes(bucket:, timeout: 60000)
   cluster = CouchbaseOrm::Connection.cluster
 
   # Récupère tous les index du bucket
