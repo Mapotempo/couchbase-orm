@@ -28,6 +28,26 @@ class ArticleWithAttachments < CouchbaseOrm::Base
   embeds_many :attachments, polymorphic: true
 end
 
+class DefaultImageMedia < CouchbaseOrm::Base
+  attribute :url, :string
+  attribute :caption, :string
+end
+
+class PostWithDefaultMedia < CouchbaseOrm::Base
+  attribute :title, :string
+  embeds_one :media, class_name: 'DefaultImageMedia', default: -> { DefaultImageMedia.new(url: 'https://default.com/image.jpg', caption: 'Default') }
+end
+
+class PostWithDefaultMediaHash < CouchbaseOrm::Base
+  attribute :title, :string
+  embeds_one :media, class_name: 'DefaultImageMedia', default: DefaultImageMedia.new(url: 'https://default.com/hash.jpg', caption: 'Default Hash')
+end
+
+class ArticleWithDefaultAttachments < CouchbaseOrm::Base
+  attribute :title, :string
+  embeds_many :attachments, class_name: 'DefaultImageMedia', default: -> { [DefaultImageMedia.new(url: 'https://default.com/1.jpg', caption: 'Default 1')] }
+end
+
 describe CouchbaseOrm::Embedded do
   describe 'polymorphic embeds_one' do
     describe 'serialization' do
@@ -205,6 +225,95 @@ describe CouchbaseOrm::Embedded do
         expect(loaded.attachments[1].duration).to eq(75)
       ensure
         article.destroy if article&.persisted?
+      end
+    end
+  end
+
+  describe 'default values for embeds_one' do
+    describe 'serialization' do
+      it 'includes default embedded object in as_json when not set' do
+        post = PostWithDefaultMedia.new(title: 'Test Post')
+
+        json_hash = post.as_json
+        expect(json_hash['media']).to be_a(Hash)
+        expect(json_hash['media'].keys).not_to include('id')
+        expect(json_hash['media'].keys).not_to include('type')
+        expect(json_hash['media']['url']).to eq('https://default.com/image.jpg')
+        expect(json_hash['media']['caption']).to eq('Default')
+      end
+
+      it 'includes default embedded object in to_json when not set' do
+        post = PostWithDefaultMedia.new(title: 'Test Post')
+
+        json_hash = JSON.parse(post.to_json)
+        expect(json_hash['media']).to be_a(Hash)
+        expect(json_hash['media'].keys).not_to include('id')
+        expect(json_hash['media'].keys).not_to include('type')
+        expect(json_hash['media']['url']).to eq('https://default.com/image.jpg')
+        expect(json_hash['media']['caption']).to eq('Default')
+      end
+
+      it 'uses actual value if set, not default' do
+        custom_media = DefaultImageMedia.new(url: 'https://custom.com/image.jpg', caption: 'Custom')
+        post = PostWithDefaultMedia.new(title: 'Test Post', media: custom_media)
+
+        json_hash = post.as_json
+        expect(json_hash['media']).to be_a(Hash)
+        expect(json_hash['media'].keys).not_to include('id')
+        expect(json_hash['media'].keys).not_to include('type')
+        expect(json_hash['media']['url']).to eq('https://custom.com/image.jpg')
+        expect(json_hash['media']['caption']).to eq('Custom')
+      end
+
+      it 'supports non-proc default values' do
+        post = PostWithDefaultMediaHash.new(title: 'Test Post')
+
+        json_hash = post.as_json
+        expect(json_hash['media']).to be_a(Hash)
+        expect(json_hash['media'].keys).not_to include('id')
+        expect(json_hash['media'].keys).not_to include('type')
+        expect(json_hash['media']['url']).to eq('https://default.com/hash.jpg')
+        expect(json_hash['media']['caption']).to eq('Default Hash')
+      end
+    end
+  end
+
+  describe 'default values for embeds_many' do
+    describe 'serialization' do
+      it 'includes default embedded collection in as_json when not set' do
+        article = ArticleWithDefaultAttachments.new(title: 'Test Article')
+
+        json_hash = article.as_json
+        expect(json_hash['attachments']).to be_an(Array)
+        expect(json_hash['attachments'].size).to eq(1)
+        expect(json_hash['attachments'][0].keys).not_to include('id')
+        expect(json_hash['attachments'][0].keys).not_to include('type')
+        expect(json_hash['attachments'][0]['url']).to eq('https://default.com/1.jpg')
+        expect(json_hash['attachments'][0]['caption']).to eq('Default 1')
+      end
+
+      it 'includes default embedded collection in to_json when not set' do
+        article = ArticleWithDefaultAttachments.new(title: 'Test Article')
+
+        json_hash = JSON.parse(article.to_json)
+        expect(json_hash['attachments']).to be_an(Array)
+        expect(json_hash['attachments'].size).to eq(1)
+        expect(json_hash['attachments'][0].keys).not_to include('id')
+        expect(json_hash['attachments'][0].keys).not_to include('type')
+        expect(json_hash['attachments'][0]['url']).to eq('https://default.com/1.jpg')
+        expect(json_hash['attachments'][0]['caption']).to eq('Default 1')
+      end
+
+      it 'uses actual value if set, not default' do
+        custom_media = DefaultImageMedia.new(url: 'https://custom.com/image.jpg', caption: 'Custom')
+        article = ArticleWithDefaultAttachments.new(title: 'Test Article', attachments: [custom_media])
+
+        json_hash = article.as_json
+        expect(json_hash['attachments'].size).to eq(1)
+        expect(json_hash['attachments'][0].keys).not_to include('id')
+        expect(json_hash['attachments'][0].keys).not_to include('type')
+        expect(json_hash['attachments'][0]['url']).to eq('https://custom.com/image.jpg')
+        expect(json_hash['attachments'][0]['caption']).to eq('Custom')
       end
     end
   end

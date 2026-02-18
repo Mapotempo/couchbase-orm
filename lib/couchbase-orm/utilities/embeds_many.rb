@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 module CouchbaseOrm
+# rubocop:disable Metrics/ModuleLength
   module EmbedsMany
-    def embeds_many(name, class_name: nil, store_as: nil, validate: true, polymorphic: false)
+    def embeds_many(name, class_name: nil, store_as: nil, validate: true, polymorphic: false, default: nil)
       storage_key = (store_as || name).to_sym
       attribute storage_key, :array, type: :hash, default: []
 
@@ -21,6 +22,7 @@ module CouchbaseOrm
         instance_var: instance_var,
         polymorphic: is_polymorphic,
         allowed_types: allowed_types,
+        default: default,
       })
 
       if validate
@@ -29,10 +31,10 @@ module CouchbaseOrm
       end
 
       if is_polymorphic
-        define_polymorphic_embeds_many_reader(name, storage_key, instance_var)
+        define_polymorphic_embeds_many_reader(name, storage_key, instance_var, default)
         define_polymorphic_embeds_many_writer(name, storage_key, instance_var)
       else
-        define_standard_embeds_many_reader(name, storage_key, instance_var, klass_name)
+        define_standard_embeds_many_reader(name, storage_key, instance_var, klass_name, default)
         define_standard_embeds_many_writer(name, storage_key, instance_var, klass_name)
       end
 
@@ -43,11 +45,35 @@ module CouchbaseOrm
 
     private
 
-    def define_polymorphic_embeds_many_reader(name, storage_key, instance_var)
+    # Returns a lambda that wraps objects in an array safely
+    # Similar to ActiveSupport's Array.wrap, but duplicates arrays to prevent shared references
+    def array_wrap_lambda
+      lambda do |obj|
+        if obj.nil?
+          []
+        elsif obj.is_a?(Array)
+          obj.dup
+        else
+          [obj]
+        end
+      end
+    end
+
+    def define_polymorphic_embeds_many_reader(name, storage_key, instance_var, default_value)
+      wrap_array = array_wrap_lambda
+
       define_method(name) do
         return instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
 
         raw_array = read_attribute(storage_key)
+        if raw_array.blank?
+          if default_value
+            default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
+            return self.send("#{name}=", wrap_array.call(default_obj))
+          end
+          return instance_variable_set(instance_var, [])
+        end
+
         embedded_objects = raw_array.map do |raw|
           next unless raw.present?
 
@@ -103,7 +129,9 @@ module CouchbaseOrm
       end
     end
 
-    def define_standard_embeds_many_reader(name, storage_key, instance_var, klass_name)
+    def define_standard_embeds_many_reader(name, storage_key, instance_var, klass_name, default_value)
+      wrap_array = array_wrap_lambda
+
       define_method("_resolve_embedded_class_for_#{name}") do
         @__resolved_classes ||= {}
         @__resolved_classes[name] ||= begin
@@ -117,8 +145,17 @@ module CouchbaseOrm
       define_method(name) do
         return instance_variable_get(instance_var) if instance_variable_defined?(instance_var)
 
+        raw_array = read_attribute(storage_key)
+        if raw_array.blank?
+          if default_value
+            default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
+            return self.send("#{name}=", wrap_array.call(default_obj))
+          end
+          return instance_variable_set(instance_var, [])
+        end
+
         klass = send("_resolve_embedded_class_for_#{name}")
-        embedded_objects = read_attribute(storage_key).map do |raw|
+        embedded_objects = raw_array.map do |raw|
           obj = klass.new(raw)
           obj.embedded = true
           obj
@@ -149,4 +186,5 @@ module CouchbaseOrm
       end
     end
   end
+# rubocop:enable Metrics/ModuleLength
 end
