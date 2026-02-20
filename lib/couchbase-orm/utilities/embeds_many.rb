@@ -97,6 +97,7 @@ module CouchbaseOrm
     def define_polymorphic_embeds_many_writer(name, storage_key, instance_var, default_value)
       wrap_array = array_wrap_lambda
 
+      # rubocop:disable Metrics/BlockLength
       define_method("#{name}=") do |val|
         if val.nil?
           if default_value
@@ -140,6 +141,7 @@ module CouchbaseOrm
         write_attribute(storage_key, serialized)
         instance_variable_set(instance_var, embedded_objects)
       end
+      # rubocop:enable Metrics/BlockLength
     end
 
     def define_standard_embeds_many_reader(name, storage_key, instance_var, klass_name, default_value)
