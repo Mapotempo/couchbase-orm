@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Module: CouchbaseOrm::Views::ClassMethods
+  
+    &mdash; Documentation by YARD 0.9.38
+  
+</title>
+
+  <link rel="stylesheet" href="../../css/style.css" type="text/css" />
+
+  <link rel="stylesheet" href="../../css/common.css" type="text/css" />
+
+<script type="text/javascript">
+  pathId = "CouchbaseOrm::Views::ClassMethods";
+  relpath = '../../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="../../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../../_index.html">Index (C)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../../CouchbaseOrm.html" title="CouchbaseOrm (module)">CouchbaseOrm</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../Views.html" title="CouchbaseOrm::Views (module)">Views</a></span></span>
+     &raquo; 
+    <span class="title">ClassMethods</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Module: CouchbaseOrm::Views::ClassMethods
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+
+  
+  
+  
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/couchbase-orm/views.rb</dd>
+  </dl>
+  
+</div>
+
+
+  
+    <h2>
+      Constant Summary
+      <small><a href="#" class="constants_summary_toggle">collapse</a></small>
+    </h2>
+
+    <dl class="constants">
+      
+        <dt id="ViewDefaults-constant" class="">ViewDefaults =
+          
+        </dt>
+        <dd><pre class="code"><span class='lbrace'>{</span><span class='label'>include_docs:</span> <span class='kw'>true</span><span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+      
+    </dl>
+  
+
+
+
+
+
+
+
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#ensure_design_document!-instance_method" title="#ensure_design_document! (instance method)">#<strong>ensure_design_document!</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Ensures that the Couchbase design document is up-to-date with the defined views.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#index_view-instance_method" title="#index_view (instance method)">#<strong>index_view</strong>(attr, validate: true, find_method: nil, view_method: nil)  &#x21d2; void </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Sets up a Couchbase view and a corresponding finder method for the given attribute.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#view-instance_method" title="#view (instance method)">#<strong>view</strong>(name, map: nil, emit_key: nil, reduce: nil, **options)  &#x21d2; void </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Defines a Couchbase view with dynamic method creation.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="ensure_design_document!-instance_method">
+  
+    #<strong>ensure_design_document!</strong>  &#x21d2; <tt><span class='object_link'><a href="../../Boolean.html" title="Boolean (class)">Boolean</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Ensures that the Couchbase design document is up-to-date with the defined views.</p>
+
+<p>This method checks the current state of the design document in the Couchbase bucket and updates it if there are any discrepancies with the views defined in the current class.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+        <h5 class="example_title"><div class='inline'>
+<p>Ensure the design document is up-to-date</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='kw'>class</span> <span class='const'>User</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../../CouchbaseOrm.html" title="CouchbaseOrm (module)">CouchbaseOrm</a></span></span><span class='op'>::</span><span class='const'>Model</span>
+
+  <span class='id identifier rubyid_view'>view</span> <span class='symbol'>:by_email</span><span class='comma'>,</span> <span class='label'>emit_key:</span> <span class='symbol'>:email</span>
+  <span class='id identifier rubyid_view'>view</span> <span class='symbol'>:by_username</span><span class='comma'>,</span> <span class='label'>emit_key:</span> <span class='symbol'>:username</span>
+<span class='kw'>end</span>
+
+<span class='comment'># This will check the current design document for discrepancies and update if needed
+</span><span class='const'>User</span><span class='period'>.</span><span class='id identifier rubyid_ensure_design_document!'>ensure_design_document!</span></code></pre>
+    
+  </div>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="../../Boolean.html" title="Boolean (class)">Boolean</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>'true` if the design document was updated, `false` otherwise.</p>
+</div>
+      
+    </li>
+  
+</ul>
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Couchbase::Error::DesignDocumentNotFound</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>if the design document is not found.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/couchbase-orm/views.rb', line 180</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_ensure_design_document!'>ensure_design_document!</span>
+  <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>unless</span> <span class='ivar'>@views</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ivar'>@views</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span>
+
+  <span class='id identifier rubyid_existing'>existing</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
+  <span class='id identifier rubyid_update_required'>update_required</span> <span class='op'>=</span> <span class='kw'>false</span>
+
+    <span class='comment'># Grab the existing view details
+</span>  <span class='kw'>begin</span>
+    <span class='id identifier rubyid_ddoc'>ddoc</span> <span class='op'>=</span> <span class='id identifier rubyid_bucket'>bucket</span><span class='period'>.</span><span class='id identifier rubyid_view_indexes'>view_indexes</span><span class='period'>.</span><span class='id identifier rubyid_get_design_document'>get_design_document</span><span class='lparen'>(</span><span class='ivar'>@design_document</span><span class='comma'>,</span> <span class='symbol'>:production</span><span class='rparen'>)</span>
+  <span class='kw'>rescue</span> <span class='const'>Couchbase</span><span class='op'>::</span><span class='const'>Error</span><span class='op'>::</span><span class='const'>DesignDocumentNotFound</span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_existing'>existing</span> <span class='op'>=</span> <span class='id identifier rubyid_ddoc'>ddoc</span><span class='period'>.</span><span class='id identifier rubyid_views'>views</span> <span class='kw'>if</span> <span class='id identifier rubyid_ddoc'>ddoc</span>
+  <span class='id identifier rubyid_views_actual'>views_actual</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
+    <span class='comment'># Fill in the design documents
+</span>  <span class='ivar'>@views</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='id identifier rubyid_document'>document</span><span class='op'>|</span>
+    <span class='id identifier rubyid_views_actual'>views_actual</span><span class='lbracket'>[</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='const'>Couchbase</span><span class='op'>::</span><span class='const'>Management</span><span class='op'>::</span><span class='const'>View</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span>
+      <span class='id identifier rubyid_document'>document</span><span class='lbracket'>[</span><span class='symbol'>:map</span><span class='rbracket'>]</span><span class='op'>&amp;.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>{{design_document}}</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='ivar'>@design_document</span><span class='rparen'>)</span><span class='comma'>,</span>
+      <span class='id identifier rubyid_document'>document</span><span class='lbracket'>[</span><span class='symbol'>:reduce</span><span class='rbracket'>]</span><span class='op'>&amp;.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>{{design_document}}</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='ivar'>@design_document</span><span class='rparen'>)</span>
+    <span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+    <span class='comment'># Check there are no changes we need to apply
+</span>  <span class='id identifier rubyid_views_actual'>views_actual</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='id identifier rubyid_desired'>desired</span><span class='op'>|</span>
+    <span class='id identifier rubyid_check'>check</span> <span class='op'>=</span> <span class='id identifier rubyid_existing'>existing</span><span class='lbracket'>[</span><span class='id identifier rubyid_name'>name</span><span class='rbracket'>]</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_check'>check</span>
+      <span class='id identifier rubyid_cmap'>cmap</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_check'>check</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='op'>||</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>\s+</span><span class='regexp_end'>/</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_creduce'>creduce</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_check'>check</span><span class='period'>.</span><span class='id identifier rubyid_reduce'>reduce</span> <span class='op'>||</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>\s+</span><span class='regexp_end'>/</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_dmap'>dmap</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_desired'>desired</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='op'>||</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>\s+</span><span class='regexp_end'>/</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_dreduce'>dreduce</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_desired'>desired</span><span class='period'>.</span><span class='id identifier rubyid_reduce'>reduce</span> <span class='op'>||</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>\s+</span><span class='regexp_end'>/</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+
+      <span class='kw'>unless</span> <span class='id identifier rubyid_cmap'>cmap</span> <span class='op'>==</span> <span class='id identifier rubyid_dmap'>dmap</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_creduce'>creduce</span> <span class='op'>==</span> <span class='id identifier rubyid_dreduce'>dreduce</span>
+        <span class='id identifier rubyid_update_required'>update_required</span> <span class='op'>=</span> <span class='kw'>true</span>
+        <span class='kw'>break</span>
+      <span class='kw'>end</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_update_required'>update_required</span> <span class='op'>=</span> <span class='kw'>true</span>
+      <span class='kw'>break</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+    <span class='comment'># Updated the design document
+</span>  <span class='kw'>if</span> <span class='id identifier rubyid_update_required'>update_required</span>
+    <span class='id identifier rubyid_document'>document</span> <span class='op'>=</span> <span class='const'>Couchbase</span><span class='op'>::</span><span class='const'>Management</span><span class='op'>::</span><span class='const'>DesignDocument</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
+    <span class='id identifier rubyid_document'>document</span><span class='period'>.</span><span class='id identifier rubyid_views'>views</span> <span class='op'>=</span> <span class='id identifier rubyid_views_actual'>views_actual</span>
+    <span class='id identifier rubyid_document'>document</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span> <span class='op'>=</span> <span class='ivar'>@design_document</span>
+
+    <span class='comment'># Retry logic for view document creation (handles race conditions and storage backend issues)
+</span>    <span class='id identifier rubyid_max_retries'>max_retries</span> <span class='op'>=</span> <span class='int'>3</span>
+    <span class='id identifier rubyid_retry_count'>retry_count</span> <span class='op'>=</span> <span class='int'>0</span>
+    <span class='kw'>begin</span>
+      <span class='id identifier rubyid_bucket'>bucket</span><span class='period'>.</span><span class='id identifier rubyid_view_indexes'>view_indexes</span><span class='period'>.</span><span class='id identifier rubyid_upsert_design_document'>upsert_design_document</span><span class='lparen'>(</span><span class='id identifier rubyid_document'>document</span><span class='comma'>,</span> <span class='symbol'>:production</span><span class='rparen'>)</span>
+    <span class='kw'>rescue</span> <span class='const'>Couchbase</span><span class='op'>::</span><span class='const'>Error</span><span class='op'>::</span><span class='const'>DesignDocumentNotFound</span><span class='comma'>,</span> <span class='const'>Couchbase</span><span class='op'>::</span><span class='const'>Error</span><span class='op'>::</span><span class='const'>InternalServerFailure</span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_e'>e</span>
+      <span class='id identifier rubyid_retry_count'>retry_count</span> <span class='op'>+=</span> <span class='int'>1</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_retry_count'>retry_count</span> <span class='op'>&lt;=</span> <span class='id identifier rubyid_max_retries'>max_retries</span>
+        <span class='id identifier rubyid_sleep_time'>sleep_time</span> <span class='op'>=</span> <span class='id identifier rubyid_retry_count'>retry_count</span> <span class='op'>*</span> <span class='float'>0.5</span>  <span class='comment'># exponential backoff: 0.5s, 1s, 1.5s
+</span>        <span class='const'><span class='object_link'><a href="../../CouchbaseOrm.html" title="CouchbaseOrm (module)">CouchbaseOrm</a></span></span><span class='period'>.</span><span class='id identifier rubyid_logger'><span class='object_link'><a href="../../CouchbaseOrm.html#logger-class_method" title="CouchbaseOrm.logger (method)">logger</a></span></span><span class='period'>.</span><span class='id identifier rubyid_warn'>warn</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>View document upsert failed (attempt </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_retry_count'>retry_count</span><span class='embexpr_end'>}</span><span class='tstring_content'>/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_max_retries'>max_retries</span><span class='embexpr_end'>}</span><span class='tstring_content'>), retrying in </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_sleep_time'>sleep_time</span><span class='embexpr_end'>}</span><span class='tstring_content'>s: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_e'>e</span><span class='period'>.</span><span class='id identifier rubyid_message'>message</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_sleep'>sleep</span><span class='lparen'>(</span><span class='id identifier rubyid_sleep_time'>sleep_time</span><span class='rparen'>)</span>
+        <span class='kw'>retry</span>
+      <span class='kw'>else</span>
+        <span class='const'><span class='object_link'><a href="../../CouchbaseOrm.html" title="CouchbaseOrm (module)">CouchbaseOrm</a></span></span><span class='period'>.</span><span class='id identifier rubyid_logger'><span class='object_link'><a href="../../CouchbaseOrm.html#logger-class_method" title="CouchbaseOrm.logger (method)">logger</a></span></span><span class='period'>.</span><span class='id identifier rubyid_error'>error</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>View document upsert failed after </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_max_retries'>max_retries</span><span class='embexpr_end'>}</span><span class='tstring_content'> retries: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_e'>e</span><span class='period'>.</span><span class='id identifier rubyid_message'>message</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_raise'>raise</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>true</span>
+  <span class='kw'>else</span>
+    <span class='kw'>false</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="index_view-instance_method">
+  
+    #<strong>index_view</strong>(attr, validate: true, find_method: nil, view_method: nil)  &#x21d2; <tt>void</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p class="note returns_void">This method returns an undefined value.</p>
+<p>Sets up a Couchbase view and a corresponding finder method for the given attribute.</p>
+
+<p>Couchbase views allow you to create custom queries on your data using map and reduce functions. They are defined in design documents and can be queried to retrieve documents or aggregated data. For more details, see the [Couchbase Views Basics](<a href="https://docs.couchbase.com/server/current/learn/views/views-basics.html">docs.couchbase.com/server/current/learn/views/views-basics.html</a>).</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+        <h5 class="example_title"><div class='inline'>
+<p>Define an index view for the 'email` attribute</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='kw'>class</span> <span class='const'>User</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../../CouchbaseOrm.html" title="CouchbaseOrm (module)">CouchbaseOrm</a></span></span><span class='op'>::</span><span class='const'>Model</span>
+  <span class='id identifier rubyid_index_view'>index_view</span> <span class='symbol'>:email</span>
+<span class='kw'>end</span>
+
+<span class='comment'># This creates a view method `by_email` and a finder method `find_by_email`
+</span><span class='id identifier rubyid_users_by_email'>users_by_email</span> <span class='op'>=</span> <span class='const'>User</span><span class='period'>.</span><span class='id identifier rubyid_by_email'>by_email</span><span class='lparen'>(</span><span class='label'>key:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>user@example.com</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+<span class='id identifier rubyid_user'>user</span> <span class='op'>=</span> <span class='const'>User</span><span class='period'>.</span><span class='id identifier rubyid_find_by_email'>find_by_email</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>user@example.com</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span></code></pre>
+    
+      
+        <h5 class="example_title"><div class='inline'>
+<p>Define an index view for the 'username` attribute with custom method names</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='kw'>class</span> <span class='const'>User</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../../CouchbaseOrm.html" title="CouchbaseOrm (module)">CouchbaseOrm</a></span></span><span class='op'>::</span><span class='const'>Model</span>
+  <span class='id identifier rubyid_index_view'>index_view</span> <span class='symbol'>:username</span><span class='comma'>,</span> <span class='label'>find_method:</span> <span class='symbol'>:find_user_by_username</span><span class='comma'>,</span> <span class='label'>view_method:</span> <span class='symbol'>:by_username_view</span>
+<span class='kw'>end</span>
+
+<span class='comment'># This creates a view method `by_username_view` and a finder method `find_user_by_username`
+</span><span class='id identifier rubyid_users_by_username'>users_by_username</span> <span class='op'>=</span> <span class='const'>User</span><span class='period'>.</span><span class='id identifier rubyid_by_username_view'>by_username_view</span><span class='lparen'>(</span><span class='label'>key:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>john_doe</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+<span class='id identifier rubyid_user'>user</span> <span class='op'>=</span> <span class='const'>User</span><span class='period'>.</span><span class='id identifier rubyid_find_user_by_username'>find_user_by_username</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>john_doe</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span></code></pre>
+    
+  </div>
+<p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>attr</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>The attribute to create the view and finder method for.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>validate</span>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="../../Boolean.html" title="Boolean (class)">Boolean</a></span></tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>true</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>Whether to validate the presence of the attribute (default: true).</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>find_method</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>, <tt>String</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>The name of the finder method to be created (optional).</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>view_method</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>, <tt>String</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>The name of the view method to be created (optional).</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/couchbase-orm/views.rb', line 147</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_index_view'>index_view</span><span class='lparen'>(</span><span class='id identifier rubyid_attr'>attr</span><span class='comma'>,</span> <span class='label'>validate:</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='label'>find_method:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>view_method:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_view_method'>view_method</span> <span class='op'>||=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>by_</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_attr'>attr</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_find_method'>find_method</span> <span class='op'>||=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>find_</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_view_method'>view_method</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+
+  <span class='id identifier rubyid_validates'>validates</span><span class='lparen'>(</span><span class='id identifier rubyid_attr'>attr</span><span class='comma'>,</span> <span class='label'>presence:</span> <span class='kw'>true</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_validate'>validate</span>
+  <span class='id identifier rubyid_view'>view</span> <span class='id identifier rubyid_view_method'>view_method</span><span class='comma'>,</span> <span class='label'>emit_key:</span> <span class='id identifier rubyid_attr'>attr</span>
+
+  <span class='id identifier rubyid_instance_eval'>instance_eval</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>
+              def self.</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_find_method'>find_method</span><span class='embexpr_end'>}</span><span class='tstring_content'>(</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_attr'>attr</span><span class='embexpr_end'>}</span><span class='tstring_content'>)
+                  </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_view_method'>view_method</span><span class='embexpr_end'>}</span><span class='tstring_content'>(key: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_attr'>attr</span><span class='embexpr_end'>}</span><span class='tstring_content'>)
+              end
+          </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='kw'>__FILE__</span><span class='comma'>,</span> <span class='kw'>__LINE__</span> <span class='op'>-</span> <span class='int'>4</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="view-instance_method">
+  
+    #<strong>view</strong>(name, map: nil, emit_key: nil, reduce: nil, **options)  &#x21d2; <tt>void</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p class="note returns_void">This method returns an undefined value.</p>
+<p>Defines a Couchbase view with dynamic method creation.</p>
+
+<p>Couchbase views allow you to create custom queries on your data using map and reduce functions. They are defined in design documents and can be queried to retrieve documents or aggregated data. For more details, see the [Couchbase Views Basics](<a href="https://docs.couchbase.com/server/current/learn/views/views-basics.html">docs.couchbase.com/server/current/learn/views/views-basics.html</a>).</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+        <h5 class="example_title"><div class='inline'>
+<p>Define a simple view to emit documents by 'created_at`</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='kw'>class</span> <span class='const'>MyModel</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../../CouchbaseOrm.html" title="CouchbaseOrm (module)">CouchbaseOrm</a></span></span><span class='op'>::</span><span class='const'>Model</span>
+  <span class='id identifier rubyid_view'>view</span> <span class='symbol'>:by_created_at</span><span class='comma'>,</span> <span class='label'>emit_key:</span> <span class='symbol'>:created_at</span>
+<span class='kw'>end</span>
+
+<span class='comment'># You can now use the dynamically defined method:
+</span><span class='id identifier rubyid_results'>results</span> <span class='op'>=</span> <span class='const'>MyModel</span><span class='period'>.</span><span class='id identifier rubyid_by_created_at'>by_created_at</span></code></pre>
+    
+      
+        <h5 class="example_title"><div class='inline'>
+<p>Define a view with multiple emit keys</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='kw'>class</span> <span class='const'>MyModel</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../../CouchbaseOrm.html" title="CouchbaseOrm (module)">CouchbaseOrm</a></span></span><span class='op'>::</span><span class='const'>Model</span>
+  <span class='id identifier rubyid_view'>view</span> <span class='symbol'>:by_user_and_date</span><span class='comma'>,</span> <span class='label'>emit_key:</span> <span class='lbracket'>[</span><span class='symbol'>:user_id</span><span class='comma'>,</span> <span class='symbol'>:created_at</span><span class='rbracket'>]</span>
+<span class='kw'>end</span>
+
+<span class='comment'># Use the defined view method
+</span><span class='id identifier rubyid_results'>results</span> <span class='op'>=</span> <span class='const'>MyModel</span><span class='period'>.</span><span class='id identifier rubyid_by_user_and_date'>by_user_and_date</span></code></pre>
+    
+      
+        <h5 class="example_title"><div class='inline'>
+<p>Define a view with a custom map function</p>
+</div></h5>
+      
+      <pre class="example code"><code><span class='kw'>class</span> <span class='const'>MyModel</span>
+  <span class='id identifier rubyid_include'>include</span> <span class='const'><span class='object_link'><a href="../../CouchbaseOrm.html" title="CouchbaseOrm (module)">CouchbaseOrm</a></span></span><span class='op'>::</span><span class='const'>Model</span>
+  <span class='id identifier rubyid_view'>view</span> <span class='symbol'>:by_custom_map</span><span class='comma'>,</span> <span class='label'>map:</span> <span class='heredoc_beg'>&lt;&lt;-MAP</span>
+<span class='tstring_content'>    function (doc) {
+      if (doc.type === &quot;my_model&quot;) {
+        emit(doc.custom_field, null);
+      }
+    }
+</span><span class='heredoc_end'>  MAP
+</span><span class='kw'>end</span>
+
+<span class='comment'># Use the defined view method
+</span><span class='id identifier rubyid_results'>results</span> <span class='op'>=</span> <span class='const'>MyModel</span><span class='period'>.</span><span class='id identifier rubyid_by_custom_map'>by_custom_map</span></code></pre>
+    
+  </div>
+<p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>name</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>, <tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>The name of the view.</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>map</span>
+      
+      
+        <span class='type'>(<tt>String</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>The map function for the view (optional).</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>emit_key</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>, <tt>Array&lt;Symbol&gt;</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>The key(s) to emit from the map function (optional).</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>reduce</span>
+      
+      
+        <span class='type'>(<tt>String</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>The reduce function for the view (optional).</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>options</span>
+      
+      
+        <span class='type'>(<tt>Hash</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>Additional options for the view query.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Raises:</p>
+<ul class="raise">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>ArgumentError</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>if the class already responds to the given name.</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/couchbase-orm/views.rb', line 57</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_view'>view</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='label'>map:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>emit_key:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>reduce:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_raise'>raise</span> <span class='const'>ArgumentError</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='kw'>self</span><span class='embexpr_end'>}</span><span class='tstring_content'> already respond_to? </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
+
+  <span class='kw'>if</span> <span class='id identifier rubyid_emit_key'>emit_key</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span><span class='lparen'>(</span><span class='const'>Array</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_emit_key'>emit_key</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='op'>|</span>
+      <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>unknown emit_key attribute for view :</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'>, emit_key: :</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_key'>key</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>if</span> <span class='id identifier rubyid_key'>key</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_attribute_names'>attribute_names</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_key'>key</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_emit_key'>emit_key</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='id identifier rubyid_attribute_names'>attribute_names</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_emit_key'>emit_key</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_raise'>raise</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>unknown emit_key attribute for view :</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'>, emit_key: :</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_emit_key'>emit_key</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="#ViewDefaults-constant" title="CouchbaseOrm::Views::ClassMethods::ViewDefaults (constant)">ViewDefaults</a></span></span><span class='period'>.</span><span class='id identifier rubyid_merge'>merge</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_method_opts'>method_opts</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
+  <span class='id identifier rubyid_method_opts'>method_opts</span><span class='lbracket'>[</span><span class='symbol'>:map</span><span class='rbracket'>]</span>    <span class='op'>=</span> <span class='id identifier rubyid_map'>map</span>    <span class='kw'>if</span> <span class='id identifier rubyid_map'>map</span>
+  <span class='id identifier rubyid_method_opts'>method_opts</span><span class='lbracket'>[</span><span class='symbol'>:reduce</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_reduce'>reduce</span> <span class='kw'>if</span> <span class='id identifier rubyid_reduce'>reduce</span>
+
+  <span class='kw'>unless</span> <span class='id identifier rubyid_method_opts'>method_opts</span><span class='period'>.</span><span class='id identifier rubyid_key?'>key?</span> <span class='symbol'>:map</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_emit_key'>emit_key</span><span class='period'>.</span><span class='id identifier rubyid_instance_of?'>instance_of?</span><span class='lparen'>(</span><span class='const'>Array</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_method_opts'>method_opts</span><span class='lbracket'>[</span><span class='symbol'>:map</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='heredoc_beg'>&lt;&lt;~EMAP</span>
+<span class='tstring_content'>        function(doc) {
+</span><span class='tstring_content'>            if (doc.type === &quot;{{design_document}}&quot;) {
+</span><span class='tstring_content'>                emit([</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_emit_key'>emit_key</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_key'>key</span><span class='op'>|</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>doc.</span><span class='tstring_end'>&#39;</span></span> <span class='op'>+</span> <span class='id identifier rubyid_key'>key</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>,</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='embexpr_end'>}</span><span class='tstring_content'>], null);
+</span><span class='tstring_content'>            }
+</span><span class='tstring_content'>        }
+</span><span class='heredoc_end'>      EMAP
+</span>    <span class='kw'>else</span>
+      <span class='id identifier rubyid_emit_key'>emit_key</span> <span class='op'>||=</span> <span class='symbol'>:created_at</span>
+      <span class='id identifier rubyid_method_opts'>method_opts</span><span class='lbracket'>[</span><span class='symbol'>:map</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='heredoc_beg'>&lt;&lt;~EMAP</span>
+<span class='tstring_content'>        function(doc) {
+</span><span class='tstring_content'>            if (doc.type === &quot;{{design_document}}&quot;) {
+</span><span class='tstring_content'>                emit(doc.</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_emit_key'>emit_key</span><span class='embexpr_end'>}</span><span class='tstring_content'>, null);
+</span><span class='tstring_content'>            }
+</span><span class='tstring_content'>        }
+</span><span class='heredoc_end'>      EMAP
+</span>    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='ivar'>@views</span> <span class='op'>||=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
+
+  <span class='id identifier rubyid_name'>name</span> <span class='op'>=</span> <span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_sym'>to_sym</span>
+  <span class='ivar'>@views</span><span class='lbracket'>[</span><span class='id identifier rubyid_name'>name</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_method_opts'>method_opts</span>
+
+  <span class='id identifier rubyid_singleton_class'>singleton_class</span><span class='period'>.</span><span class='id identifier rubyid___send__'>__send__</span><span class='lparen'>(</span><span class='symbol'>:define_method</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='op'>**</span><span class='id identifier rubyid_opts'>opts</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_result_modifier'>result_modifier</span><span class='op'>|</span>
+    <span class='id identifier rubyid_opts'>opts</span> <span class='op'>=</span> <span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_merge'>merge</span><span class='lparen'>(</span><span class='id identifier rubyid_opts'>opts</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_reverse_merge'>reverse_merge</span><span class='lparen'>(</span><span class='label'>scan_consistency:</span> <span class='symbol'>:request_plus</span><span class='rparen'>)</span>
+    <span class='const'><span class='object_link'><a href="../../CouchbaseOrm.html" title="CouchbaseOrm (module)">CouchbaseOrm</a></span></span><span class='period'>.</span><span class='id identifier rubyid_logger'><span class='object_link'><a href="../../CouchbaseOrm.html#logger-class_method" title="CouchbaseOrm.logger (method)">logger</a></span></span><span class='period'>.</span><span class='id identifier rubyid_debug'>debug</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>View [</span><span class='embexpr_beg'>#{</span><span class='ivar'>@design_document</span><span class='embexpr_end'>}</span><span class='tstring_content'>, </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_content'>] options: </span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_opts'>opts</span><span class='period'>.</span><span class='id identifier rubyid_inspect'>inspect</span><span class='embexpr_end'>}</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_result_modifier'>result_modifier</span>
+      <span class='id identifier rubyid_include_docs'>include_docs</span><span class='lparen'>(</span><span class='id identifier rubyid_bucket'>bucket</span><span class='period'>.</span><span class='id identifier rubyid_view_query'>view_query</span><span class='lparen'>(</span><span class='ivar'>@design_document</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='comma'>,</span>
+                                     <span class='const'>Couchbase</span><span class='op'>::</span><span class='const'>Options</span><span class='op'>::</span><span class='const'>View</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>**</span><span class='id identifier rubyid_opts'>opts</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='symbol'>:include_docs</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span><span class='lparen'>(</span><span class='op'>&amp;</span><span class='id identifier rubyid_result_modifier'>result_modifier</span><span class='rparen'>)</span>
+    <span class='kw'>elsif</span> <span class='id identifier rubyid_opts'>opts</span><span class='lbracket'>[</span><span class='symbol'>:include_docs</span><span class='rbracket'>]</span>
+      <span class='id identifier rubyid_include_docs'>include_docs</span><span class='lparen'>(</span><span class='id identifier rubyid_bucket'>bucket</span><span class='period'>.</span><span class='id identifier rubyid_view_query'>view_query</span><span class='lparen'>(</span><span class='ivar'>@design_document</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='comma'>,</span>
+                                     <span class='const'>Couchbase</span><span class='op'>::</span><span class='const'>Options</span><span class='op'>::</span><span class='const'>View</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>**</span><span class='id identifier rubyid_opts'>opts</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='symbol'>:include_docs</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_bucket'>bucket</span><span class='period'>.</span><span class='id identifier rubyid_view_query'>view_query</span><span class='lparen'>(</span><span class='ivar'>@design_document</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='comma'>,</span> <span class='const'>Couchbase</span><span class='op'>::</span><span class='const'>Options</span><span class='op'>::</span><span class='const'>View</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='op'>**</span><span class='id identifier rubyid_opts'>opts</span><span class='period'>.</span><span class='id identifier rubyid_except'>except</span><span class='lparen'>(</span><span class='symbol'>:include_docs</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Fri Feb 20 09:18:29 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.38 (ruby-3.1.7).
+</div>
+
+    </div>
+  </body>
+</html>

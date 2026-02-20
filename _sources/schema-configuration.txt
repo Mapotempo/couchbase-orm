@@ -1,0 +1,23 @@
+.. _schema-configuration:
+
+********************
+Schema Configuration
+********************
+
+.. default-domain:: woop
+
+.. toctree::
+  :titlesonly:
+
+  reference/attributes
+  reference/associations
+  reference/validations
+
+Overview
+--------
+
+See the following sections to learn how to configure a schema with CouchbaseOrm:
+
+- :ref:`Attributes Definition <attributes>`
+- :ref:`Associations <associations>`
+- :ref:`Validation <validations>`

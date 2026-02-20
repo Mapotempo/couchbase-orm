@@ -1,0 +1,627 @@
+.. _attributes:
+
+********************
+Attribute Definition
+********************
+
+.. default-domain:: woop
+
+.. contents:: On this page
+   :local:
+   :backlinks: none
+   :depth: 2
+   :class: singlecol
+
+
+.. _attribute-types:
+
+Attribute Types
+===============
+
+Couchbase stores underlying document data using
+`json types, and
+CouchbaseOrm converts Json types to Ruby types at runtime in your application.
+For example, a attribute defined with ``type: :float`` will use the Ruby ``Float``
+class in-memory and will persist in the database as the the JSON ``double`` type.
+
+Attribute type definitions determine how CouchbaseOrm behaves when constructing queries
+and retrieving/writing attributes from/to the database. Specifically:
+
+1. When assigning values to attributes at runtime, the values are converted to the
+   specified type.
+2. When persisting data to Couchbase, the data is sent in an appropriate
+   type, permitting richer data manipulation within Couchbase or by other
+   tools.
+3. When querying documents, query parameters are converted to the specified
+   type before being sent to Couchbase.
+4. When retrieving documents from the database, attribute values are converted
+   to the specified type.
+
+Changing the attribute definitions in a model class does not alter data already stored in
+Couchbase. To update type or contents of attributes of existing documents,
+the attribute must be re-saved to the database. Note that, due to CouchbaseOrm
+tracking which attributes on a model change and only saving the changed ones,
+it may be necessary to explicitly write a attribute value when changing the
+type of an existing attribute without changing the stored values.
+
+Consider a simple class for modeling a person in an application. A person may
+have a name, date_of_birth, and weight. We can define these attributes
+on a person by using the ``attribute`` macro.
+
+.. code-block:: ruby
+
+   class Person < CouchbaseOrm::Base
+     attribute :name, type: String
+     attribute :date_of_birth, type: Date
+     attribute :weight, type: Float
+   end
+
+The valid types for attributes are as follows:
+
+- ``Array``
+- ``Boolean``
+- :ref:`Date <attribute-type-date>`
+- :ref:`DateTime <attribute-type-date-time>`
+- ``Float``
+- :ref:`Hash <attribute-type-hash>`
+- ``Integer``
+- :ref:`Object <untyped-attributes>`
+- ``String``
+- :ref:`Time <attribute-type-time>`
+
+To define custom attribute types, refer to :ref:`Custom Attribute Types <custom-attribute-types>` below.
+
+.. _untyped-attributes:
+
+Untyped Attributes
+------------------
+
+.. code-block:: ruby
+
+  class Product < CouchbaseOrm::Base
+    attribute :properties
+  end
+
+An untyped attribute can store values of any type which is directly serializable
+to JSON. This is useful when a attribute may contain values of different types
+(i.e. it is a variant type attribute), or when the type of values is not known
+ahead of time:
+
+.. code-block:: ruby
+
+  product = Product.new(properties: "color=white,size=large")
+  product.properties
+  # => "color=white,size=large"
+
+  product = Product.new(properties: {color: "white", size: "large"})
+  product.properties
+  # => {:color=>"white", :size=>"large"}
+
+.. _attribute-type-hash:
+
+Attribute Type: Hash
+--------------------
+
+When using a attribute of type Hash, be wary of adhering to the
+legal key names for Couchabse or else the values will not store properly.
+
+.. code-block:: ruby
+
+   class Person < CouchbaseOrm::Base
+     attribute :first_name
+     attribute :url, type: Hash
+
+     # will update the attributes properly and save the values
+     def set_vals
+       self.first_name = 'Daniel'
+       self.url = {'home_page' => 'http://www.homepage.com'}
+       save
+     end
+
+     # all data will fail to save due to the illegal hash key
+     def set_vals_fail
+       self.first_name = 'Daniel'
+       self.url = {'home.page' => 'http://www.homepage.com'}
+       save
+     end
+   end
+
+
+.. _attribute-type-time:
+
+Attribute Type: Time
+--------------------
+
+``Time`` attributes store values as ``Time`` instances in the configured
+time zone.
+
+``Date`` and ``DateTime`` instances are converted to ``Time`` instances upon
+assignment to a ``Time`` attribute:
+
+.. code-block:: ruby
+
+  class Voter < CouchbaseOrm::Base
+
+    attribute :registered_at, type: Time
+  end
+
+  Voter.new(registered_at: Date.today)
+  # => #<Voter _id: 5fdd80392c97a618f07ba344, registered_at: 2020-12-18 05:00:00 UTC>
+
+In the above example, the value was interpreted as the beginning of today in
+local time, because the application was not configured to use UTC times.
+
+.. note::
+
+  When the database contains a string value for a ``Time`` attribute, CouchbaseOrm
+  parses the string value using ``Time.parse`` which considers values without
+  time zones to be in local time.
+
+
+.. _attribute-type-date:
+
+Attribute Type: Date
+--------------------
+
+CouchbaseOrm allows assignment of values of several types to ``Date`` attributes:
+
+- ``Date`` - the provided date is stored as is.
+- ``Time``, ``DateTime``, - the date component
+  of the value is taken in the value's time zone.
+- ``String`` - the date specified in the string is used.
+
+In other words, if a date is specified in the value, that date is used without
+first converting the value to the configured time zone.
+
+As a date & time to date conversion is lossy (it discards the time component),
+especially if an application operates with times in different time zones it is
+recommended to explicitly convert ``String``, ``Time`` and ``DateTime``
+objects to ``Date`` objects before assigning the values to attributes of type
+``Date``.
+
+.. note::
+
+  When the database contains a string value for a ``Date`` attribute, CouchbaseOrm
+  parses the string value using ``Time.parse``, discards the time portion of
+  the resulting ``Time`` object and uses the date portion. ``Time.parse``
+  considers values without time zones to be in local time.
+
+
+.. _attribute-type-date-time:
+
+Attribute Type: DateTime
+------------------------
+
+Couchbase stores all times as UTC timestamps. When assigning a value to a
+``DateTime`` attribute, or when querying a ``DateTime`` attribute, CouchbaseOrm
+converts the passed in value to a UTC ``Time`` before sending it to the
+Couchbase server.
+
+``Time``, ``DateTime`` objects embed
+time zone information, and the value persisted is the specified moment in
+time, in UTC.
+
+.. code-block:: ruby
+
+   class Ticket < Couchabse::Base
+     attribute :opened_at, type: DateTime
+   end
+
+   Time.zone = 'Berlin'
+
+   ticket = Ticket.create!(opened_at: '2018-02-18 07:00:08 -0500')
+
+    ticket.opened_at
+    # => Sun, 18 Feb 2018 13:00:08 +0100
+    ticket
+    # => #<Ticket _id: 5c13d4b9026d7c4e7870bb2f, opened_at: 2018-02-18 12:00:08 UTC>
+
+    Time.zone = 'America/New_York'
+    ticket.opened_at
+    # => Sun, 18 Feb 2018 07:00:08 -0500
+
+If a string is used as a ``DateTime`` attribute value, the behavior depends on
+whether the string includes a time zone:
+
+.. code-block:: ruby
+
+    Time.zone = 'America/New_York'
+    ticket.opened_at = 'Mar 4, 2018 10:00:00'
+    ticket.opened_at
+    # => Sun, 04 Mar 2018 15:00:00 +0000
+
+.. note::
+
+  When the database contains a string value for a ``DateTime`` attribute, CouchbaseOrm
+  parses the string value using ``Time.parse`` which considers values without
+  time zones to be in local time.
+
+Using Symbols Or Strings Instead Of Classes
+-------------------------------------------
+
+CouchbaseOrm permits using symbols or strings instead of classes to specify the
+type of attributes, for example:
+
+.. code-block:: ruby
+
+  class Order < CouchbaseOrm::Base
+
+    attribute :state, type: :integer
+    # Equivalent to:
+    attribute :state, type: "integer"
+    # Equivalent to:
+    attribute :state, type: Integer
+  end
+
+Only standard attribute types as listed below can be specified using symbols or
+strings in this manner. CouchbaseOrm recognizes the following expansions:
+
+- ``:array`` => ``Array``
+- ``:boolean`` => ``Boolean``
+- ``:date`` => ``Date``
+- ``:date_time`` => ``DateTime``
+- ``:float`` => ``Float``
+- ``:hash`` => ``Hash``
+- ``:integer`` => ``Integer``
+- ``:string`` => ``String``
+- ``:time`` => ``Time``
+
+.. _attribute-default-values:
+
+Specifying Attribute Default Values
+-----------------------------------
+
+A attribute can be configured to have a default value. The default value can be
+fixed, as in the following example:
+
+.. code-block:: ruby
+
+  class Order < CouchbaseOrm::Base
+
+    attribute :state, type: String, default: 'created'
+  end
+
+The default value can also be specified as a ``Proc``:
+
+.. code-block:: ruby
+
+  class Order < CouchbaseOrm::Base
+
+    attribute :fulfill_by, type: Time, default: ->{ Time.now + 3.days }
+  end
+
+.. note::
+
+  Default values that are not ``Proc`` instances are evaluated at class load
+  time, meaning the following two definitions are not equivalent:
+
+  .. code-block:: ruby
+
+    attribute :submitted_at, type: Time, default: Time.now
+    attribute :submitted_at, type: Time, default: ->{ Time.now }
+
+  The second definition is most likely the desired one, which causes the
+  time of submission to be set to the current time at the moment of
+  document instantiation.
+
+To set a default which depends on the document's state, use ``self``
+inside the ``Proc`` instance which would evaluate to the document instance
+being operated on:
+
+.. code-block:: ruby
+
+  attribute :fulfill_by, type: Time, default: ->{
+    # Order should be fulfilled in 2 business hours.
+    if (7..8).include?(self.submitted_at.hour)
+      self.submitted_at + 4.hours
+    elsif (9..3).include?(self.submitted_at.hour)
+      self.submitted_at + 2.hours
+    else
+      (self.submitted_at + 1.day).change(hour: 11)
+    end
+  }
+
+When defining a default value as a ``Proc``, CouchbaseOrm will apply the default
+after all other attributes are set and associations are initialized.
+To have the default be applied before the other attributes are set,
+use the ``pre_processed: true`` attribute option:
+
+.. code-block:: ruby
+
+  attribute :fulfill_by, type: Time, default: ->{ Time.now + 3.days },
+    pre_processed: true
+
+The ``pre_processed: true`` option is also necessary when specifying a custom
+default value via a ``Proc`` for the ``_id`` attribute, to ensure the ``_id``
+is set correctly via associations:
+
+.. code-block:: ruby
+
+  attribute :_id, type: String, default: -> { 'hello' }, pre_processed: true
+
+.. _attribute-aliases:
+
+Attribute Aliases
+-----------------
+
+It is possible to define attribute aliases. The value will be stored in the
+destination attribute but can be accessed from either the destination attribute or
+from the aliased attribute:
+
+.. code-block:: ruby
+
+  class Band < CouchbaseOrm::Base
+
+    attribute :name, type: String
+    alias_attribute :n, :name
+  end
+
+  band = Band.new(n: 'Astral Projection')
+  # => #<Band _id: 5fc1c1ee2c97a64accbeb5e1, name: "Astral Projection">
+
+  band.attributes
+  # => {"_id"=>'5fc1c1ee2c97a64accbeb5e1', "name"=>"Astral Projection"}
+
+  band.n
+  # => "Astral Projection"
+
+Aliases can be removed from model classes using the ``unalias_attribute``
+method.
+
+.. code-block:: ruby
+
+  class Band
+    unalias_attribute :n
+  end
+
+.. _customizing-attribute-behavior:
+
+Customizing Attribute Behavior
+==============================
+
+CouchbaseOrm offers several ways to customize the behavior of attributes.
+
+
+.. _custom-getters-and-setters:
+
+Custom Getters And Setters
+--------------------------
+
+You may override getters and setters for attributes to modify the values
+when they are being accessed or written. The getters and setters use the
+same name as the attribute. Use ``read_attribute`` and ``write_attribute``
+methods inside the getters and setters to operate on the raw attribute
+values.
+
+For example, CouchbaseOrm provides the ``:default`` attribute option to write a
+default value into the attribute. If you wish to have a attribute default value
+in your application but do not wish to persist it, you can override the
+getter as follows:
+
+.. code-block:: ruby
+
+  class DistanceMeasurement < CouchbaseOrm::Base
+    attribute :value, type: Float
+    attribute :unit, type: String
+
+    def unit
+      read_attribute(:unit) || "m"
+    end
+
+    def to_s
+      "#{value} #{unit}"
+    end
+  end
+
+  measurement = DistanceMeasurement.new(value: 2)
+  measurement.to_s
+  # => "2.0 m"
+  measurement.attributes
+  # => {"_id"=>'613fa0b0a15d5d61502f3447', "value"=>2.0}
+
+To give another example, a attribute which converts empty strings to nil values
+may be implemented as follows:
+
+.. code-block:: ruby
+
+  class DistanceMeasurement < CouchbaseOrm::Base
+
+    attribute :value, type: Float
+    attribute :unit, type: String
+
+    def unit=(value)
+      if value.blank?
+        value = nil
+      end
+      write_attribute(:unit, value)
+    end
+  end
+
+  measurement = DistanceMeasurement.new(value: 2, unit: "")
+  measurement.attributes
+  # => {"_id"=>'613fa15aa15d5d617216104c', "value"=>2.0, "unit"=>nil}
+
+
+.. _custom-attribute-types:
+
+Custom Attribute Types
+----------------------
+
+You can define custom types in CouchbaseOrm and determine how they are serialized
+and deserialized. In this example, we define a new attribute type ``Point``, which we
+can use in our model class as follows:
+
+.. code-block:: ruby
+
+  class Venue < CouchbaseOrm::Base
+    attribute :location, :nested, type: Point
+  end
+
+Then make a Ruby class to represent the type. This class must define methods
+used for Couchbase serialization and deserialization as follows:
+
+.. code-block:: ruby
+
+  class Point < CouchbaseOrm::NestedDocument
+    attribute :x, type: :float
+    attribute :y, type: :float
+
+    validates :x, :y, presence: true
+  end 
+
+.. code-block:: ruby
+
+   point = Point.new(x: 12, y: 24)
+   venue = Venue.new(location: point)
+   venue = Venue.new(location: {x: 12, y: 24 })
+
+.. _dynamic-attributes:
+
+Dynamic Attributes
+==================
+
+By default, CouchbaseOrm requires all attributes that may be set on a document to
+be explicitly defined using ``attribute`` declarations. CouchbaseOrm also supports
+creating attributes on the fly from an arbitrary hash or documents stored in
+the database. When a model uses attributes not explicitly defined, such attributes
+are called *dynamic attributes*.
+
+To enable dynamic attributes, include ``CouchbaseOrm::Attributes::Dynamic`` module
+in the model:
+
+.. code-block:: ruby
+
+  class Person < CouchbaseOrm::Base
+    include CouchbaseOrm::Attributes::Dynamic
+  end
+
+  bob = Person.new(name: 'Bob', age: 42)
+  bob.name
+  # => "Bob"
+
+It is possible to use ``attribute`` declarations and dynamic attributes in the same
+model class. Attributes for which there is a ``attribute`` declaration will be
+treated according to the ``attribute`` declaration, with remaining attributes
+being treated as dynamic attributes.
+
+Attribute values in the dynamic attributes must initially be set by either
+passing the attribute hash to the constructor, mass assignment via
+``attributes=``, mass assignment via ``[]=``, using ``write_attribute``,
+or they must already be present in the database.
+
+.. code-block:: ruby
+
+  # OK
+  bob = Person.new(name: 'Bob')
+
+  # OK
+  bob = Person.new
+  bob.attributes = {age: 42}
+
+  # OK
+  bob = Person.new
+  bob['age'] = 42
+
+  # Raises NoMethodError: undefined method age=
+  bob = Person.new
+  bob.age = 42
+
+  # OK
+  bob = Person.new
+  # OK - string access
+  bob.write_attribute('age', 42)
+  # OK - symbol access
+  bob.write_attribute(:name, 'Bob')
+
+  # OK, initializes attributes from whatever is in the database
+  bob = Person.find('123')
+
+If an attribute is not present in a particular model instance's attributes
+hash, both the reader and the writer for the corresponding attribute are not
+defined, and invoking them raises ``NoMethodError``:
+
+.. code-block:: ruby
+
+  bob = Person.new
+  bob.attributes = {age: 42}
+
+  bob.age
+  # => 42
+
+  # raises NoMethodError
+  bob.name
+
+  # raises NoMethodError
+  bob.name = 'Bob'
+
+  # OK
+  bob['name'] = 'Bob'
+
+  bob.name
+  # => "Bob"
+
+Attributes can always be read using mass attribute access or ``read_attribute``
+(this applies to models not using dynamic attributes as well):
+
+.. code-block:: ruby
+
+  bob = Person.new(age: 42)
+
+  # OK - string access
+  bob['name']
+  # => nil
+
+  # OK - symbol access
+  bob[:name]
+  # => nil
+
+  # OK - string access
+  bob['age']
+  # => 42
+
+  # OK - symbol access
+  bob[:age]
+  # => 42
+
+  # OK
+  bob.attributes['name']
+  # => nil
+
+  # OK
+  bob.attributes['age']
+  # => 42
+
+  # Returns nil - keys are always strings
+  bob.attributes[:age]
+  # => nil
+
+  # OK
+  bob.read_attribute('name')
+  # => nil
+
+  # OK
+  bob.read_attribute(:name)
+  # => nil
+
+  # OK - string access
+  bob.read_attribute('age')
+  # => 42
+
+  # OK - symbol access
+  bob.read_attribute(:age)
+  # => 42
+
+Special Characters in Attribute Names
+-------------------------------------
+
+CouchbaseOrm permits dynamic attribute names to include spaces and punctuation:
+
+.. code-block:: ruby
+
+  bob = Person.new('hello world' => 'MDB')
+  bob.send('hello world')
+  # => "MDB"
+
+  bob.write_attribute("hello%world", 'MDB')
+  bob[:"hello%world"]
+  # => "MDB"

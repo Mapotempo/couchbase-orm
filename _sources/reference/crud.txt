@@ -1,0 +1,614 @@
+
+.. _crud:
+
+***************
+CRUD Operations
+***************
+
+.. default-domain:: woop
+
+.. contents:: On this page
+   :local:
+   :backlinks: none
+   :depth: 2
+   :class: singlecol
+
+
+Saving Documents
+================
+
+CouchbaseOrm supports all expected CRUD operations for those familiar with other
+Ruby mappers like Active Record or Data Mapper. What distinguishes CouchbaseOrm
+from other mappers for Couchbase is that the general persistence operations
+perform atomic updates on only the attributes that have changed instead of
+writing the entire document to the database each time.
+
+The persistence sections will provide examples on what database operation is
+performed when executing the documented command.
+
+Standard
+--------
+
+CouchbaseOrm's standard persistence methods come in the form of common methods you
+would find in other mapping frameworks. The following table shows all standard
+operations with examples.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 60
+
+   * - Operation
+     - Example
+
+   * - ``Model#attributes``
+
+       *Returns the document's attributes as a* ``ActiveSupport::HashWithIndifferentAccess`` *, and its values in Ruby form.*
+     -
+        .. code-block:: ruby
+
+          person = Person.new(first_name: "Heinrich", last_name: "Heine")
+
+          person.attributes
+          # => { "_id" => '633467d03282a43784c2d56e', "first_name" => "Heinrich", "last_name" => "Heine" }
+
+   * - ``Model.create!``
+
+       *Insert a document, raising an
+       error if a validation or server error occurs.*
+
+       *Pass a hash of attributes to create one document with the specified
+       attributes.
+       If a single hash is passed, the corresponding document is returned.*
+
+       *If a block is given to* ``create!`` *, it will be invoked with each
+       document as the argument in turn prior to attempting to save that
+       document.*
+
+       *If there is a problem saving any of the documents, such as
+       a validation error or a server error, an exception is raised
+       and, consequently, none of the documents are returned.*
+     -
+        .. code-block:: ruby
+
+          Person.create!(
+            first_name: "Heinrich",
+            last_name: "Heine"
+          ) # => Person instance
+
+          Person.create!([
+            { first_name: "Heinrich", last_name: "Heine" },
+            { first_name: "Willy", last_name: "Brandt" }
+          ]) # => Array of two Person instances
+
+          Person.create!(first_name: "Heinrich") do |doc|
+            doc.last_name = "Heine"
+          end # => Person instance
+
+   * - ``Model.create``
+
+       *Instantiate a document and, if validations pass,
+       insert them into the database.*
+
+       ``create`` *is similar to* ``create!`` *but does not raise
+       exceptions on validation errors. It still raises errors on server
+       errors, such as trying to insert a document with an* ``_id`` *that
+       already exists in the collection.*
+
+       *If any validation errors are encountered, the respective document
+       is not inserted but is returned along with documents that were inserted.
+       Use* ``persisted?`` *,* ``new_record?`` *or* ``errors`` *methods
+       to check which of the returned documents were inserted into the
+       database.*
+     -
+        .. code-block:: ruby
+
+          Person.create(
+            first_name: "Heinrich",
+            last_name: "Heine"
+          ) # => Person instance
+
+          Person.create([
+            { first_name: "Heinrich", last_name: "Heine" },
+            { first_name: "Willy", last_name: "Brandt" }
+          ]) # => Array of two Person instances
+
+          Person.create(first_name: "Heinrich") do |doc|
+            doc.last_name = "Heine"
+          end # => Person instance
+
+          class Post  < CouchbaseOrm::Base
+            validates_uniqueness_of :title
+          end
+
+          posts = Post.create([{title: "test"}, {title: "test"}])
+          # => array of two Post instances
+          posts.map { |post| post.persisted? } # => [true, false]
+
+   * - ``Model#save!``
+
+       *Save the changed attributes to the database atomically, or insert the document if
+       new. Raises an exception if validations fail or there is a server error.*
+
+       *Returns true if the changed attributes were saved, raises an exception otherwise.*
+     -
+        .. code-block:: ruby
+
+          person = Person.new(
+            first_name: "Heinrich",
+            last_name: "Heine"
+          )
+          person.save!
+
+          person.first_name = "Christian Johan"
+          person.save!
+
+   * - ``Model#save``
+
+       *Save the changed attributes to the database atomically, or insert the document
+       if new.*
+
+       *Returns true if the changed attributes were saved. Returns false
+       if there were any validation errors. Raises an exception if
+       the document passed validation but there was a server error during
+       the save.*
+
+       *Pass* ``validate: false`` *option to bypass validations.*
+
+     -
+        .. code-block:: ruby
+
+          person = Person.new(
+            first_name: "Heinrich",
+            last_name: "Heine"
+          )
+          person.save
+          person.save(validate: false)
+
+          person.first_name = "Christian Johan"
+          person.save
+
+   * - ``Model#update_attributes``
+
+       *Update the document attributes in the database. Will return true if validation passed,
+       false if not.*
+     -
+        .. code-block:: ruby
+
+          person.update_attributes(
+            first_name: "Jean",
+            last_name: "Zorg"
+          )
+
+   * - ``Model#update_attributes!``
+
+       *Update the document attributes in the database and raise an error if validation failed.*
+     -
+        .. code-block:: ruby
+
+          person.update_attributes!(
+            first_name: "Leo",
+            last_name: "Tolstoy"
+          )
+
+   * - ``Model#update_attribute``
+
+       *Update a single attribute, bypassing validations.*
+     -
+        .. code-block:: ruby
+
+          person.update_attribute(:first_name, "Jean")
+
+   * - ``Model#touch``
+
+       *Update the document's updated_at timestamp*
+
+       *Attempting to touch a destroyed document will raise* ``FrozenError``,
+       *same as if attempting to update an attribute on a destroyed
+       document.*
+     -
+        .. code-block:: ruby
+
+          person.touch
+
+   * - ``Model#delete``
+
+       *Deletes the document from the database without running callbacks.*
+
+       *If the document is not persisted, CouchbaseOrm will attempt to delete from
+       the database any document with the same* ``_id``.
+     -
+        .. code-block:: ruby
+
+          person.delete
+
+          person = Person.create!(...)
+          unsaved_person = Person.new(id: person.id)
+          unsaved_person.delete
+          person.reload
+          # raises CouchbaseOrm::Errors::DocumentNotFound because the person was deleted
+
+   * - ``Model#destroy``
+
+       *Deletes the document from the database while running destroy callbacks.*
+
+       *If the document is not persisted, CouchbaseOrm will attempt to delete from
+       the database any document with the same* ``_id``.
+     -
+        .. code-block:: ruby
+
+          person.destroy
+
+          person = Person.create!(...)
+          unsaved_person = Person.new(id: person.id)
+          unsaved_person.destroy
+          person.reload
+          # raises CouchbaseOrm::Errors::DocumentNotFound because the person was deleted
+
+   * - ``Model.delete_all``
+
+       *Deletes all documents from the database without running any callbacks.*
+     -
+        .. code-block:: ruby
+
+          Person.delete_all
+
+CouchbaseOrm provides the following persistence-related attributes:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 60
+
+   * - Attribute
+     - Example
+
+
+   * - ``Model#new_record?``
+
+       *Returns* ``true`` *if the model instance has not yet been saved
+       to the database. Opposite of* ``persisted?``
+     -
+        .. code-block:: ruby
+
+          person = Person.new(
+            first_name: "Heinrich",
+            last_name: "Heine"
+          )
+          person.new_record? # => true
+          person.save!
+          person.new_record? # => false
+
+   * - ``Model#persisted?``
+
+       *Returns* ``true`` *if the model instance has been saved
+       to the database. Opposite of* ``new_record?``
+     -
+        .. code-block:: ruby
+
+          person = Person.new(
+            first_name: "Heinrich",
+            last_name: "Heine"
+          )
+          person.persisted? # => false
+          person.save!
+          person.persisted? # => true
+
+Reloading
+=========
+
+Use the ``reload`` method to fetch the most recent version of a document from
+the database. Any unsaved modifications to the document's attributes are lost:
+
+.. code-block:: ruby
+
+  band = Band.create!(name: 'foo')
+  # => #<Band _id: 6206d06de1b8324561f179c9, name: "foo", description: nil, likes: nil>
+
+  band.name = 'bar'
+  band
+  # => #<Band _id: 6206d06de1b8324561f179c9, name: "bar", description: nil, likes: nil>
+
+  band.reload
+  # => #<Band _id: 6206d06de1b8324561f179c9, name: "foo", description: nil, likes: nil>
+
+If a document has referenced associations, the loaded
+associations' are not reloaded but their values are cleared, such that these
+associations would be loaded from the database at the next access.
+
+.. note::
+
+  Some operations on associations, for example assignment, persists the new
+  document. In these cases there may not be any unsaved modifications to
+  revert by reloading. In the following example, the assignment of the
+  empty array to the association is immediately persisted and reloading
+  does not make any changes to the document:
+
+  .. code-block:: ruby
+
+    # Assuming band has many tours, which could be referenced:
+    band = Band.create!(tours: [Tour.create!])
+    # ... or embedded:
+    band = Band.create!(tours: [Tour.new])
+
+    # This writes the empty tour list into the database.
+    band.tours = []
+
+    # There are no unsaved modifications in band at this point to be reverted.
+    band.reload
+
+    # Returns the empty array since this is what is in the database.
+    band.tours
+    # => []
+
+Getters & Setters
+-----------------
+
+The recommended way is to use the getter and setter methods generated for
+each declared attribute:
+
+.. code-block:: ruby
+
+  class Person < CouchbaseOrm::Base
+    attribute :first_name
+  end
+
+  person = Person.new
+
+  person.first_name = "Artem"
+  person.first_name
+  # => "Artem"
+
+To use this mechanism, each attribute must be explicitly declared, or the
+model class must enable :ref:`dynamic attributes <dynamic-attributes>`.
+
+
+Custom Getters & Setters
+------------------------
+
+It is possible to explicitly define the getter and setter methods to provide
+custom behavior when reading or writing attributes, for example value
+transformations or storing values under different attribute names. In this case
+``read_attribute`` and ``write_attribute`` methods can be used to read and
+write the values directly into the attributes hash:
+
+.. code-block:: ruby
+
+  class Person  < CouchbaseOrm::Base
+    def first_name
+      read_attribute(:fn)
+    end
+
+    def first_name=(value)
+      write_attribute(:fn, value)
+    end
+  end
+
+  person = Person.new
+
+  person.first_name = "Artem"
+  person.first_name
+  # => "Artem"
+
+  person.attributes
+  # => {"_id"=> '606477dc2c97a628cf47075b', "fn"=>"Artem"}
+
+.. _read-write-attribute:
+
+``read_attribute`` & ``write_attribute``
+----------------------------------------
+
+The ``read_attribute`` and ``write_attribute`` methods can be used explicitly
+as well.
+
+.. code-block:: ruby
+
+  class Person  < CouchbaseOrm::Base
+    attribute :first_name, as: :fn
+    attribute :last_name, as: :ln
+  end
+
+  person = Person.new(first_name: "Artem")
+  # => #<Person _id: 60647a522c97a6292c195b4b, first_name(fn): "Artem", last_name(ln): nil>
+
+  person.read_attribute(:first_name)
+  # => "Artem"
+
+  person.read_attribute(:fn)
+  # => "Artem"
+
+  person.write_attribute(:last_name, "Pushkin")
+  person
+  # => #<Person _id: 60647a522c97a6292c195b4b, first_name(fn): "Artem", last_name(ln): "Pushkin">
+
+  person.write_attribute(:ln, "Medvedev")
+  person
+  # => #<Person _id: 60647a522c97a6292c195b4b, first_name(fn): "Artem", last_name(ln): "Medvedev">
+
+``read_attribute`` and ``write_attribute`` do not require that a attribute with
+the used name is defined, but writing attribute values with ``write_attribute``
+does not cause the respective attribute to be defined either:
+
+.. code-block:: ruby
+
+  person.write_attribute(:undefined, "Hello")
+  person
+  # => #<Person _id: 60647b212c97a6292c195b4c, first_name(fn): "Artem", last_name(ln): "Medvedev">
+  person.attributes
+  # => {"_id"=> '60647b212c97a6292c195b4c', "first_name"=>"Artem", "last_name"=>"Medvedev", "undefined"=>"Hello"}
+
+  person.read_attribute(:undefined)
+  # => "Hello"
+  person.undefined
+  # raises NoMethodError
+
+When ``read_attribute`` is used to access a missing attribute, it returns ``nil``.
+
+
+Hash Access
+-----------
+
+CouchbaseOrm model instances define the ``[]`` and ``[]=`` methods to provide
+``ActiveSupport::HashWithIndifferentAccess `` style access to the attributes. ``[]`` is an alias for
+``read_attribute`` and ``[]=`` is an alias for ``write_attribute``; see
+the section on :ref:`read_attribute and write_attribute <read-write-attribute>`
+for the detailed description of their behavior.
+
+.. code-block:: ruby
+
+  class Person < CouchbaseOrm::Base
+    attribute :first_name, as: :fn
+    attribute :last_name, as: :ln
+  end
+
+  person = Person.new(first_name: "Artem")
+
+  person["fn"]
+  # => "Artem"
+
+  person[:first_name]
+  # => "Artem"
+
+  person[:ln] = "Medvedev"
+  person
+  # => #<Person _id: 606483742c97a629bdde5cfc, first_name(fn): "Artem", last_name(ln): "Medvedev">
+
+  person["last_name"] = "Pushkin"
+  person
+  # => #<Person _id: 606483742c97a629bdde5cfc, first_name(fn): "Artem", last_name(ln): "Pushkin">
+
+Dirty Tracking
+==============
+
+CouchbaseOrm supports tracking of changed or "dirty" attributes with an API that mirrors that of
+Active Model. If a defined attribute has been modified in a model the model will be marked as
+dirty and some additional behavior comes into play.
+
+
+Viewing Changes
+---------------
+
+There are various ways to view what has been altered on a model. Changes are recorded
+from the time a document is instantiated, either as a new document or via loading from
+the database up to the time it is saved. Any persistence operation clears the changes.
+
+.. code-block:: ruby
+
+   class Person < CouchbaseOrm::Base
+     attribute :name, type: String
+   end
+
+   person = Person.first
+   person.name = "Alan Garner"
+
+   # Check to see if the document has changed.
+   person.changed? # true
+
+   # Get an array of the names of the changed attributes.
+   person.changed # [ :name ]
+
+   # Get a hash of the old and changed values for each attribute.
+   person.changes # { "name" => [ "Alan Parsons", "Alan Garner" ] }
+
+   # Check if a specific attribute has changed.
+   person.name_changed? # true
+
+   # Get the changes for a specific attribute.
+   person.name_change # [ "Alan Parsons", "Alan Garner" ]
+
+   # Get the previous value for a attribute.
+   person.name_was # "Alan Parsons"
+
+.. note::
+
+  Setting the associations on a document does not cause the ``changes`` or
+  ``changed_attributes`` hashes to be modified. This is true for all associations
+  whether referenced or embedded. Note that changing the _id(s) attribute on
+  referenced associations does cause the changes to show up in the ``changes``
+  and the ``changed_attributes`` hashes.
+
+
+Resetting Changes
+-----------------
+
+You can reset changes of a attribute to its previous value by calling the reset method.
+
+.. code-block:: ruby
+
+   person = Person.first
+   person.name = "Alan Garner"
+
+   # Reset the changed name back to the original
+   person.reset_name!
+   person.name # "Alan Parsons"
+
+
+Persistence
+-----------
+
+CouchbaseOrm uses dirty tracking as the core of its persistence operations. It looks at the
+changes on a document and atomically updates only what has changed, unlike other frameworks
+that write the entire document on each save. If no changes have been made, CouchbaseOrm will
+not hit the database on a call to ``Model#save``.
+
+
+Viewing Previous Changes
+------------------------
+
+After a document has been persisted, you can see what the changes were previously by
+calling ``Model#previous_changes``.
+
+.. code-block:: ruby
+
+   person = Person.first
+   person.name = "Alan Garner"
+   person.save # Clears out current changes.
+
+   # View the previous changes.
+   person.previous_changes # { "name" => [ "Alan Parsons", "Alan Garner" ] }
+
+
+Updating Container Fields
+=========================
+
+Be aware that, until
+is resolved, all attributes including container ones must be assigned to for
+their values to be persisted to the database.
+
+For example, adding to a set like this does not work:
+
+.. code-block:: ruby
+
+  class Band  < CouchbaseOrm::Base
+    attribute :tours, type: Set
+  end
+
+  band = Band.new
+  band.tours
+  # => #<Set: {}>
+
+  band.tours << 'London'
+  # => #<Set: {"London"}>
+  band.tours
+  # => #<Set: {}>
+
+Instead, the attribute value must be modified outside of the model and assigned
+back to the model as follows:
+
+.. code-block:: ruby
+
+  class Band  < CouchbaseOrm::Base
+    attribute :tours, type: Set
+  end
+
+  band = Band.new
+
+  tours = band.tours
+  # => #<Set: {}>
+
+  tours << 'London'
+  # => #<Set: {"London"}>
+
+  band.tours = tours
+  # => #<Set: {"London"}>
+
+  band.tours
+  # => #<Set: {"London"}>

@@ -1,0 +1,1024 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Attribute Definition &#8212; CouchbaseOrm  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'reference/attributes';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Associations" href="associations.html" />
+    <link rel="prev" title="Schema Configuration" href="../schema-configuration.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">CouchbaseOrm  documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation-configuration.html">Installation &amp; Configuration</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installations.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compatibility.html">Compatibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rails-integration.html">Rails Integration</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../schema-configuration.html">Schema Configuration</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Attribute Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="associations.html">Associations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="validations.html">Validation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../working-with-data.html">Working With Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="crud.html">CRUD Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="queries.html">Queries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="callbacks.html">Callbacks</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference external" href="https://mapotempo.github.io/couchbase-orm/api/">API</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/reference/attributes.txt" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.txt</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Attribute Definition</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-types">Attribute Types</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#untyped-attributes">Untyped Attributes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-type-hash">Attribute Type: Hash</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-type-time">Attribute Type: Time</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-type-date">Attribute Type: Date</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-type-datetime">Attribute Type: DateTime</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-symbols-or-strings-instead-of-classes">Using Symbols Or Strings Instead Of Classes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specifying-attribute-default-values">Specifying Attribute Default Values</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-aliases">Attribute Aliases</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#customizing-attribute-behavior">Customizing Attribute Behavior</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-getters-and-setters">Custom Getters And Setters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-attribute-types">Custom Attribute Types</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dynamic-attributes">Dynamic Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#special-characters-in-attribute-names">Special Characters in Attribute Names</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="attribute-definition">
+<span id="attributes"></span><h1>Attribute Definition<a class="headerlink" href="#attribute-definition" title="Link to this heading">#</a></h1>
+<nav class="contents singlecol local" id="on-this-page">
+<p class="topic-title">On this page</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#attribute-types" id="id11">Attribute Types</a></p>
+<ul>
+<li><p><a class="reference internal" href="#untyped-attributes" id="id12">Untyped Attributes</a></p></li>
+<li><p><a class="reference internal" href="#attribute-type-hash" id="id13">Attribute Type: Hash</a></p></li>
+<li><p><a class="reference internal" href="#attribute-type-time" id="id14">Attribute Type: Time</a></p></li>
+<li><p><a class="reference internal" href="#attribute-type-date" id="id15">Attribute Type: Date</a></p></li>
+<li><p><a class="reference internal" href="#attribute-type-datetime" id="id16">Attribute Type: DateTime</a></p></li>
+<li><p><a class="reference internal" href="#using-symbols-or-strings-instead-of-classes" id="id17">Using Symbols Or Strings Instead Of Classes</a></p></li>
+<li><p><a class="reference internal" href="#specifying-attribute-default-values" id="id18">Specifying Attribute Default Values</a></p></li>
+<li><p><a class="reference internal" href="#attribute-aliases" id="id19">Attribute Aliases</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#customizing-attribute-behavior" id="id20">Customizing Attribute Behavior</a></p>
+<ul>
+<li><p><a class="reference internal" href="#custom-getters-and-setters" id="id21">Custom Getters And Setters</a></p></li>
+<li><p><a class="reference internal" href="#custom-attribute-types" id="id22">Custom Attribute Types</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#dynamic-attributes" id="id23">Dynamic Attributes</a></p>
+<ul>
+<li><p><a class="reference internal" href="#special-characters-in-attribute-names" id="id24">Special Characters in Attribute Names</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="attribute-types">
+<span id="id1"></span><h2>Attribute Types<a class="headerlink" href="#attribute-types" title="Link to this heading">#</a></h2>
+<p>Couchbase stores underlying document data using
+<cite>json types, and
+CouchbaseOrm converts Json types to Ruby types at runtime in your application.
+For example, a attribute defined with ``type: :float`</cite> will use the Ruby <code class="docutils literal notranslate"><span class="pre">Float</span></code>
+class in-memory and will persist in the database as the the JSON <code class="docutils literal notranslate"><span class="pre">double</span></code> type.</p>
+<p>Attribute type definitions determine how CouchbaseOrm behaves when constructing queries
+and retrieving/writing attributes from/to the database. Specifically:</p>
+<ol class="arabic simple">
+<li><p>When assigning values to attributes at runtime, the values are converted to the
+specified type.</p></li>
+<li><p>When persisting data to Couchbase, the data is sent in an appropriate
+type, permitting richer data manipulation within Couchbase or by other
+tools.</p></li>
+<li><p>When querying documents, query parameters are converted to the specified
+type before being sent to Couchbase.</p></li>
+<li><p>When retrieving documents from the database, attribute values are converted
+to the specified type.</p></li>
+</ol>
+<p>Changing the attribute definitions in a model class does not alter data already stored in
+Couchbase. To update type or contents of attributes of existing documents,
+the attribute must be re-saved to the database. Note that, due to CouchbaseOrm
+tracking which attributes on a model change and only saving the changed ones,
+it may be necessary to explicitly write a attribute value when changing the
+type of an existing attribute without changing the stored values.</p>
+<p>Consider a simple class for modeling a person in an application. A person may
+have a name, date_of_birth, and weight. We can define these attributes
+on a person by using the <code class="docutils literal notranslate"><span class="pre">attribute</span></code> macro.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:name</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:date_of_birth</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="no">Date</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:weight</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>The valid types for attributes are as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Array</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Boolean</span></code></p></li>
+<li><p><a class="reference internal" href="#attribute-type-date"><span class="std std-ref">Date</span></a></p></li>
+<li><p><a class="reference internal" href="#attribute-type-date-time"><span class="std std-ref">DateTime</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Float</span></code></p></li>
+<li><p><a class="reference internal" href="#attribute-type-hash"><span class="std std-ref">Hash</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Integer</span></code></p></li>
+<li><p><a class="reference internal" href="#untyped-attributes"><span class="std std-ref">Object</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">String</span></code></p></li>
+<li><p><a class="reference internal" href="#attribute-type-time"><span class="std std-ref">Time</span></a></p></li>
+</ul>
+<p>To define custom attribute types, refer to <a class="reference internal" href="#custom-attribute-types"><span class="std std-ref">Custom Attribute Types</span></a> below.</p>
+<section id="untyped-attributes">
+<span id="id2"></span><h3>Untyped Attributes<a class="headerlink" href="#untyped-attributes" title="Link to this heading">#</a></h3>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Product</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:properties</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>An untyped attribute can store values of any type which is directly serializable
+to JSON. This is useful when a attribute may contain values of different types
+(i.e. it is a variant type attribute), or when the type of values is not known
+ahead of time:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">product</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Product</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">properties</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;color=white,size=large&quot;</span><span class="p">)</span>
+<span class="n">product</span><span class="o">.</span><span class="n">properties</span>
+<span class="c1"># =&gt; &quot;color=white,size=large&quot;</span>
+
+<span class="n">product</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Product</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">properties</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="ss">color</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;white&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">size</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;large&quot;</span><span class="p">})</span>
+<span class="n">product</span><span class="o">.</span><span class="n">properties</span>
+<span class="c1"># =&gt; {:color=&gt;&quot;white&quot;, :size=&gt;&quot;large&quot;}</span>
+</pre></div>
+</div>
+</section>
+<section id="attribute-type-hash">
+<span id="id3"></span><h3>Attribute Type: Hash<a class="headerlink" href="#attribute-type-hash" title="Link to this heading">#</a></h3>
+<p>When using a attribute of type Hash, be wary of adhering to the
+legal key names for Couchabse or else the values will not store properly.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:first_name</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:url</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="no">Hash</span>
+
+<span class="w">  </span><span class="c1"># will update the attributes properly and save the values</span>
+<span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nf">set_vals</span>
+<span class="w">    </span><span class="nb">self</span><span class="o">.</span><span class="n">first_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Daniel&#39;</span>
+<span class="w">    </span><span class="nb">self</span><span class="o">.</span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="s1">&#39;home_page&#39;</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s1">&#39;http://www.homepage.com&#39;</span><span class="p">}</span>
+<span class="w">    </span><span class="n">save</span>
+<span class="w">  </span><span class="k">end</span>
+
+<span class="w">  </span><span class="c1"># all data will fail to save due to the illegal hash key</span>
+<span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nf">set_vals_fail</span>
+<span class="w">    </span><span class="nb">self</span><span class="o">.</span><span class="n">first_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Daniel&#39;</span>
+<span class="w">    </span><span class="nb">self</span><span class="o">.</span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="s1">&#39;home.page&#39;</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s1">&#39;http://www.homepage.com&#39;</span><span class="p">}</span>
+<span class="w">    </span><span class="n">save</span>
+<span class="w">  </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</section>
+<section id="attribute-type-time">
+<span id="id4"></span><h3>Attribute Type: Time<a class="headerlink" href="#attribute-type-time" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Time</span></code> attributes store values as <code class="docutils literal notranslate"><span class="pre">Time</span></code> instances in the configured
+time zone.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Date</span></code> and <code class="docutils literal notranslate"><span class="pre">DateTime</span></code> instances are converted to <code class="docutils literal notranslate"><span class="pre">Time</span></code> instances upon
+assignment to a <code class="docutils literal notranslate"><span class="pre">Time</span></code> attribute:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Voter</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:registered_at</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="no">Time</span>
+<span class="k">end</span>
+
+<span class="no">Voter</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">registered_at</span><span class="p">:</span><span class="w"> </span><span class="no">Date</span><span class="o">.</span><span class="n">today</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;Voter _id: 5fdd80392c97a618f07ba344, registered_at: 2020-12-18 05:00:00 UTC&gt;</span>
+</pre></div>
+</div>
+<p>In the above example, the value was interpreted as the beginning of today in
+local time, because the application was not configured to use UTC times.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When the database contains a string value for a <code class="docutils literal notranslate"><span class="pre">Time</span></code> attribute, CouchbaseOrm
+parses the string value using <code class="docutils literal notranslate"><span class="pre">Time.parse</span></code> which considers values without
+time zones to be in local time.</p>
+</div>
+</section>
+<section id="attribute-type-date">
+<span id="id5"></span><h3>Attribute Type: Date<a class="headerlink" href="#attribute-type-date" title="Link to this heading">#</a></h3>
+<p>CouchbaseOrm allows assignment of values of several types to <code class="docutils literal notranslate"><span class="pre">Date</span></code> attributes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Date</span></code> - the provided date is stored as is.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Time</span></code>, <code class="docutils literal notranslate"><span class="pre">DateTime</span></code>, - the date component
+of the value is taken in the value’s time zone.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">String</span></code> - the date specified in the string is used.</p></li>
+</ul>
+<p>In other words, if a date is specified in the value, that date is used without
+first converting the value to the configured time zone.</p>
+<p>As a date &amp; time to date conversion is lossy (it discards the time component),
+especially if an application operates with times in different time zones it is
+recommended to explicitly convert <code class="docutils literal notranslate"><span class="pre">String</span></code>, <code class="docutils literal notranslate"><span class="pre">Time</span></code> and <code class="docutils literal notranslate"><span class="pre">DateTime</span></code>
+objects to <code class="docutils literal notranslate"><span class="pre">Date</span></code> objects before assigning the values to attributes of type
+<code class="docutils literal notranslate"><span class="pre">Date</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When the database contains a string value for a <code class="docutils literal notranslate"><span class="pre">Date</span></code> attribute, CouchbaseOrm
+parses the string value using <code class="docutils literal notranslate"><span class="pre">Time.parse</span></code>, discards the time portion of
+the resulting <code class="docutils literal notranslate"><span class="pre">Time</span></code> object and uses the date portion. <code class="docutils literal notranslate"><span class="pre">Time.parse</span></code>
+considers values without time zones to be in local time.</p>
+</div>
+</section>
+<section id="attribute-type-datetime">
+<span id="attribute-type-date-time"></span><h3>Attribute Type: DateTime<a class="headerlink" href="#attribute-type-datetime" title="Link to this heading">#</a></h3>
+<p>Couchbase stores all times as UTC timestamps. When assigning a value to a
+<code class="docutils literal notranslate"><span class="pre">DateTime</span></code> attribute, or when querying a <code class="docutils literal notranslate"><span class="pre">DateTime</span></code> attribute, CouchbaseOrm
+converts the passed in value to a UTC <code class="docutils literal notranslate"><span class="pre">Time</span></code> before sending it to the
+Couchbase server.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Time</span></code>, <code class="docutils literal notranslate"><span class="pre">DateTime</span></code> objects embed
+time zone information, and the value persisted is the specified moment in
+time, in UTC.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Ticket</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">Couchabse</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:opened_at</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="no">DateTime</span>
+<span class="k">end</span>
+
+<span class="no">Time</span><span class="o">.</span><span class="n">zone</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Berlin&#39;</span>
+
+<span class="n">ticket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Ticket</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">opened_at</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;2018-02-18 07:00:08 -0500&#39;</span><span class="p">)</span>
+
+<span class="w"> </span><span class="n">ticket</span><span class="o">.</span><span class="n">opened_at</span>
+<span class="w"> </span><span class="c1"># =&gt; Sun, 18 Feb 2018 13:00:08 +0100</span>
+<span class="w"> </span><span class="n">ticket</span>
+<span class="w"> </span><span class="c1"># =&gt; #&lt;Ticket _id: 5c13d4b9026d7c4e7870bb2f, opened_at: 2018-02-18 12:00:08 UTC&gt;</span>
+
+<span class="w"> </span><span class="no">Time</span><span class="o">.</span><span class="n">zone</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;America/New_York&#39;</span>
+<span class="w"> </span><span class="n">ticket</span><span class="o">.</span><span class="n">opened_at</span>
+<span class="w"> </span><span class="c1"># =&gt; Sun, 18 Feb 2018 07:00:08 -0500</span>
+</pre></div>
+</div>
+<p>If a string is used as a <code class="docutils literal notranslate"><span class="pre">DateTime</span></code> attribute value, the behavior depends on
+whether the string includes a time zone:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="no">Time</span><span class="o">.</span><span class="n">zone</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;America/New_York&#39;</span>
+<span class="n">ticket</span><span class="o">.</span><span class="n">opened_at</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Mar 4, 2018 10:00:00&#39;</span>
+<span class="n">ticket</span><span class="o">.</span><span class="n">opened_at</span>
+<span class="c1"># =&gt; Sun, 04 Mar 2018 15:00:00 +0000</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When the database contains a string value for a <code class="docutils literal notranslate"><span class="pre">DateTime</span></code> attribute, CouchbaseOrm
+parses the string value using <code class="docutils literal notranslate"><span class="pre">Time.parse</span></code> which considers values without
+time zones to be in local time.</p>
+</div>
+</section>
+<section id="using-symbols-or-strings-instead-of-classes">
+<h3>Using Symbols Or Strings Instead Of Classes<a class="headerlink" href="#using-symbols-or-strings-instead-of-classes" title="Link to this heading">#</a></h3>
+<p>CouchbaseOrm permits using symbols or strings instead of classes to specify the
+type of attributes, for example:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Order</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:state</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="ss">:integer</span>
+<span class="w">  </span><span class="c1"># Equivalent to:</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:state</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">  </span><span class="c1"># Equivalent to:</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:state</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">Integer</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>Only standard attribute types as listed below can be specified using symbols or
+strings in this manner. CouchbaseOrm recognizes the following expansions:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">:array</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Array</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:boolean</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Boolean</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:date</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Date</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:date_time</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">DateTime</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:float</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Float</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:hash</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Hash</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:integer</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Integer</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:string</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">String</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:time</span></code> =&gt; <code class="docutils literal notranslate"><span class="pre">Time</span></code></p></li>
+</ul>
+</section>
+<section id="specifying-attribute-default-values">
+<span id="attribute-default-values"></span><h3>Specifying Attribute Default Values<a class="headerlink" href="#specifying-attribute-default-values" title="Link to this heading">#</a></h3>
+<p>A attribute can be configured to have a default value. The default value can be
+fixed, as in the following example:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Order</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:state</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="ss">default</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;created&#39;</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>The default value can also be specified as a <code class="docutils literal notranslate"><span class="pre">Proc</span></code>:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Order</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:fulfill_by</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="no">Time</span><span class="p">,</span><span class="w"> </span><span class="ss">default</span><span class="p">:</span><span class="w"> </span><span class="o">-&gt;</span><span class="p">{</span><span class="w"> </span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="w"> </span><span class="p">}</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Default values that are not <code class="docutils literal notranslate"><span class="pre">Proc</span></code> instances are evaluated at class load
+time, meaning the following two definitions are not equivalent:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">attribute</span><span class="w"> </span><span class="ss">:submitted_at</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="no">Time</span><span class="p">,</span><span class="w"> </span><span class="ss">default</span><span class="p">:</span><span class="w"> </span><span class="no">Time</span><span class="o">.</span><span class="n">now</span>
+<span class="n">attribute</span><span class="w"> </span><span class="ss">:submitted_at</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="no">Time</span><span class="p">,</span><span class="w"> </span><span class="ss">default</span><span class="p">:</span><span class="w"> </span><span class="o">-&gt;</span><span class="p">{</span><span class="w"> </span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The second definition is most likely the desired one, which causes the
+time of submission to be set to the current time at the moment of
+document instantiation.</p>
+</div>
+<p>To set a default which depends on the document’s state, use <code class="docutils literal notranslate"><span class="pre">self</span></code>
+inside the <code class="docutils literal notranslate"><span class="pre">Proc</span></code> instance which would evaluate to the document instance
+being operated on:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">attribute</span><span class="w"> </span><span class="ss">:fulfill_by</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="no">Time</span><span class="p">,</span><span class="w"> </span><span class="ss">default</span><span class="p">:</span><span class="w"> </span><span class="o">-&gt;</span><span class="p">{</span>
+<span class="w">  </span><span class="c1"># Order should be fulfilled in 2 business hours.</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="mi">7</span><span class="o">..</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">submitted_at</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span>
+<span class="w">    </span><span class="nb">self</span><span class="o">.</span><span class="n">submitted_at</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">4</span><span class="o">.</span><span class="n">hours</span>
+<span class="w">  </span><span class="k">elsif</span><span class="w"> </span><span class="p">(</span><span class="mi">9</span><span class="o">..</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">submitted_at</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span>
+<span class="w">    </span><span class="nb">self</span><span class="o">.</span><span class="n">submitted_at</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="o">.</span><span class="n">hours</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="p">(</span><span class="nb">self</span><span class="o">.</span><span class="n">submitted_at</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">)</span><span class="o">.</span><span class="n">change</span><span class="p">(</span><span class="ss">hour</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="p">)</span>
+<span class="w">  </span><span class="k">end</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>When defining a default value as a <code class="docutils literal notranslate"><span class="pre">Proc</span></code>, CouchbaseOrm will apply the default
+after all other attributes are set and associations are initialized.
+To have the default be applied before the other attributes are set,
+use the <code class="docutils literal notranslate"><span class="pre">pre_processed:</span> <span class="pre">true</span></code> attribute option:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">attribute</span><span class="w"> </span><span class="ss">:fulfill_by</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="no">Time</span><span class="p">,</span><span class="w"> </span><span class="ss">default</span><span class="p">:</span><span class="w"> </span><span class="o">-&gt;</span><span class="p">{</span><span class="w"> </span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">3</span><span class="o">.</span><span class="n">days</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="ss">pre_processed</span><span class="p">:</span><span class="w"> </span><span class="kp">true</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">pre_processed:</span> <span class="pre">true</span></code> option is also necessary when specifying a custom
+default value via a <code class="docutils literal notranslate"><span class="pre">Proc</span></code> for the <code class="docutils literal notranslate"><span class="pre">_id</span></code> attribute, to ensure the <code class="docutils literal notranslate"><span class="pre">_id</span></code>
+is set correctly via associations:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">attribute</span><span class="w"> </span><span class="ss">:_id</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="ss">default</span><span class="p">:</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s1">&#39;hello&#39;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="ss">pre_processed</span><span class="p">:</span><span class="w"> </span><span class="kp">true</span>
+</pre></div>
+</div>
+</section>
+<section id="attribute-aliases">
+<span id="id6"></span><h3>Attribute Aliases<a class="headerlink" href="#attribute-aliases" title="Link to this heading">#</a></h3>
+<p>It is possible to define attribute aliases. The value will be stored in the
+destination attribute but can be accessed from either the destination attribute or
+from the aliased attribute:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Band</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:name</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span>
+<span class="w">  </span><span class="n">alias_attribute</span><span class="w"> </span><span class="ss">:n</span><span class="p">,</span><span class="w"> </span><span class="ss">:name</span>
+<span class="k">end</span>
+
+<span class="n">band</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Band</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">n</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Astral Projection&#39;</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;Band _id: 5fc1c1ee2c97a64accbeb5e1, name: &quot;Astral Projection&quot;&gt;</span>
+
+<span class="n">band</span><span class="o">.</span><span class="n">attributes</span>
+<span class="c1"># =&gt; {&quot;_id&quot;=&gt;&#39;5fc1c1ee2c97a64accbeb5e1&#39;, &quot;name&quot;=&gt;&quot;Astral Projection&quot;}</span>
+
+<span class="n">band</span><span class="o">.</span><span class="n">n</span>
+<span class="c1"># =&gt; &quot;Astral Projection&quot;</span>
+</pre></div>
+</div>
+<p>Aliases can be removed from model classes using the <code class="docutils literal notranslate"><span class="pre">unalias_attribute</span></code>
+method.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Band</span>
+<span class="w">  </span><span class="n">unalias_attribute</span><span class="w"> </span><span class="ss">:n</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="customizing-attribute-behavior">
+<span id="id7"></span><h2>Customizing Attribute Behavior<a class="headerlink" href="#customizing-attribute-behavior" title="Link to this heading">#</a></h2>
+<p>CouchbaseOrm offers several ways to customize the behavior of attributes.</p>
+<section id="custom-getters-and-setters">
+<span id="id8"></span><h3>Custom Getters And Setters<a class="headerlink" href="#custom-getters-and-setters" title="Link to this heading">#</a></h3>
+<p>You may override getters and setters for attributes to modify the values
+when they are being accessed or written. The getters and setters use the
+same name as the attribute. Use <code class="docutils literal notranslate"><span class="pre">read_attribute</span></code> and <code class="docutils literal notranslate"><span class="pre">write_attribute</span></code>
+methods inside the getters and setters to operate on the raw attribute
+values.</p>
+<p>For example, CouchbaseOrm provides the <code class="docutils literal notranslate"><span class="pre">:default</span></code> attribute option to write a
+default value into the attribute. If you wish to have a attribute default value
+in your application but do not wish to persist it, you can override the
+getter as follows:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DistanceMeasurement</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:value</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:unit</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span>
+
+<span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nf">unit</span>
+<span class="w">    </span><span class="n">read_attribute</span><span class="p">(</span><span class="ss">:unit</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="s2">&quot;m&quot;</span>
+<span class="w">  </span><span class="k">end</span>
+
+<span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nf">to_s</span>
+<span class="w">    </span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">value</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">unit</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">measurement</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">DistanceMeasurement</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">value</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span>
+<span class="n">measurement</span><span class="o">.</span><span class="n">to_s</span>
+<span class="c1"># =&gt; &quot;2.0 m&quot;</span>
+<span class="n">measurement</span><span class="o">.</span><span class="n">attributes</span>
+<span class="c1"># =&gt; {&quot;_id&quot;=&gt;&#39;613fa0b0a15d5d61502f3447&#39;, &quot;value&quot;=&gt;2.0}</span>
+</pre></div>
+</div>
+<p>To give another example, a attribute which converts empty strings to nil values
+may be implemented as follows:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DistanceMeasurement</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:value</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">Float</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:unit</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span>
+
+<span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nf">unit=</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">value</span><span class="o">.</span><span class="n">blank?</span>
+<span class="w">      </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kp">nil</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">write_attribute</span><span class="p">(</span><span class="ss">:unit</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">)</span>
+<span class="w">  </span><span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">measurement</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">DistanceMeasurement</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">value</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="ss">unit</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">measurement</span><span class="o">.</span><span class="n">attributes</span>
+<span class="c1"># =&gt; {&quot;_id&quot;=&gt;&#39;613fa15aa15d5d617216104c&#39;, &quot;value&quot;=&gt;2.0, &quot;unit&quot;=&gt;nil}</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-attribute-types">
+<span id="id9"></span><h3>Custom Attribute Types<a class="headerlink" href="#custom-attribute-types" title="Link to this heading">#</a></h3>
+<p>You can define custom types in CouchbaseOrm and determine how they are serialized
+and deserialized. In this example, we define a new attribute type <code class="docutils literal notranslate"><span class="pre">Point</span></code>, which we
+can use in our model class as follows:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Venue</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:location</span><span class="p">,</span><span class="w"> </span><span class="ss">:nested</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="no">Point</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>Then make a Ruby class to represent the type. This class must define methods
+used for Couchbase serialization and deserialization as follows:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Point</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">NestedDocument</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:x</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="ss">:float</span>
+<span class="w">  </span><span class="n">attribute</span><span class="w"> </span><span class="ss">:y</span><span class="p">,</span><span class="w"> </span><span class="ss">type</span><span class="p">:</span><span class="w"> </span><span class="ss">:float</span>
+
+<span class="w">  </span><span class="n">validates</span><span class="w"> </span><span class="ss">:x</span><span class="p">,</span><span class="w"> </span><span class="ss">:y</span><span class="p">,</span><span class="w"> </span><span class="ss">presence</span><span class="p">:</span><span class="w"> </span><span class="kp">true</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">point</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Point</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">x</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="ss">y</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="p">)</span>
+<span class="n">venue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Venue</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">location</span><span class="p">:</span><span class="w"> </span><span class="n">point</span><span class="p">)</span>
+<span class="n">venue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Venue</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">location</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="ss">x</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="ss">y</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="w"> </span><span class="p">})</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="dynamic-attributes">
+<span id="id10"></span><h2>Dynamic Attributes<a class="headerlink" href="#dynamic-attributes" title="Link to this heading">#</a></h2>
+<p>By default, CouchbaseOrm requires all attributes that may be set on a document to
+be explicitly defined using <code class="docutils literal notranslate"><span class="pre">attribute</span></code> declarations. CouchbaseOrm also supports
+creating attributes on the fly from an arbitrary hash or documents stored in
+the database. When a model uses attributes not explicitly defined, such attributes
+are called <em>dynamic attributes</em>.</p>
+<p>To enable dynamic attributes, include <code class="docutils literal notranslate"><span class="pre">CouchbaseOrm::Attributes::Dynamic</span></code> module
+in the model:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Base</span>
+<span class="w">  </span><span class="kp">include</span><span class="w"> </span><span class="no">CouchbaseOrm</span><span class="o">::</span><span class="no">Attributes</span><span class="o">::</span><span class="no">Dynamic</span>
+<span class="k">end</span>
+
+<span class="n">bob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Bob&#39;</span><span class="p">,</span><span class="w"> </span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">)</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">name</span>
+<span class="c1"># =&gt; &quot;Bob&quot;</span>
+</pre></div>
+</div>
+<p>It is possible to use <code class="docutils literal notranslate"><span class="pre">attribute</span></code> declarations and dynamic attributes in the same
+model class. Attributes for which there is a <code class="docutils literal notranslate"><span class="pre">attribute</span></code> declaration will be
+treated according to the <code class="docutils literal notranslate"><span class="pre">attribute</span></code> declaration, with remaining attributes
+being treated as dynamic attributes.</p>
+<p>Attribute values in the dynamic attributes must initially be set by either
+passing the attribute hash to the constructor, mass assignment via
+<code class="docutils literal notranslate"><span class="pre">attributes=</span></code>, mass assignment via <code class="docutils literal notranslate"><span class="pre">[]=</span></code>, using <code class="docutils literal notranslate"><span class="pre">write_attribute</span></code>,
+or they must already be present in the database.</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="c1"># OK</span>
+<span class="n">bob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Bob&#39;</span><span class="p">)</span>
+
+<span class="c1"># OK</span>
+<span class="n">bob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">attributes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">}</span>
+
+<span class="c1"># OK</span>
+<span class="n">bob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span>
+<span class="n">bob</span><span class="o">[</span><span class="s1">&#39;age&#39;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span>
+
+<span class="c1"># Raises NoMethodError: undefined method age=</span>
+<span class="n">bob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">age</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span>
+
+<span class="c1"># OK</span>
+<span class="n">bob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span>
+<span class="c1"># OK - string access</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">write_attribute</span><span class="p">(</span><span class="s1">&#39;age&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">42</span><span class="p">)</span>
+<span class="c1"># OK - symbol access</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">write_attribute</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Bob&#39;</span><span class="p">)</span>
+
+<span class="c1"># OK, initializes attributes from whatever is in the database</span>
+<span class="n">bob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;123&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If an attribute is not present in a particular model instance’s attributes
+hash, both the reader and the writer for the corresponding attribute are not
+defined, and invoking them raises <code class="docutils literal notranslate"><span class="pre">NoMethodError</span></code>:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">bob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">attributes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">}</span>
+
+<span class="n">bob</span><span class="o">.</span><span class="n">age</span>
+<span class="c1"># =&gt; 42</span>
+
+<span class="c1"># raises NoMethodError</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">name</span>
+
+<span class="c1"># raises NoMethodError</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Bob&#39;</span>
+
+<span class="c1"># OK</span>
+<span class="n">bob</span><span class="o">[</span><span class="s1">&#39;name&#39;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Bob&#39;</span>
+
+<span class="n">bob</span><span class="o">.</span><span class="n">name</span>
+<span class="c1"># =&gt; &quot;Bob&quot;</span>
+</pre></div>
+</div>
+<p>Attributes can always be read using mass attribute access or <code class="docutils literal notranslate"><span class="pre">read_attribute</span></code>
+(this applies to models not using dynamic attributes as well):</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">bob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">age</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># OK - string access</span>
+<span class="n">bob</span><span class="o">[</span><span class="s1">&#39;name&#39;</span><span class="o">]</span>
+<span class="c1"># =&gt; nil</span>
+
+<span class="c1"># OK - symbol access</span>
+<span class="n">bob</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span>
+<span class="c1"># =&gt; nil</span>
+
+<span class="c1"># OK - string access</span>
+<span class="n">bob</span><span class="o">[</span><span class="s1">&#39;age&#39;</span><span class="o">]</span>
+<span class="c1"># =&gt; 42</span>
+
+<span class="c1"># OK - symbol access</span>
+<span class="n">bob</span><span class="o">[</span><span class="ss">:age</span><span class="o">]</span>
+<span class="c1"># =&gt; 42</span>
+
+<span class="c1"># OK</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">attributes</span><span class="o">[</span><span class="s1">&#39;name&#39;</span><span class="o">]</span>
+<span class="c1"># =&gt; nil</span>
+
+<span class="c1"># OK</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">attributes</span><span class="o">[</span><span class="s1">&#39;age&#39;</span><span class="o">]</span>
+<span class="c1"># =&gt; 42</span>
+
+<span class="c1"># Returns nil - keys are always strings</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">attributes</span><span class="o">[</span><span class="ss">:age</span><span class="o">]</span>
+<span class="c1"># =&gt; nil</span>
+
+<span class="c1"># OK</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">read_attribute</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+<span class="c1"># =&gt; nil</span>
+
+<span class="c1"># OK</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">read_attribute</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span>
+<span class="c1"># =&gt; nil</span>
+
+<span class="c1"># OK - string access</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">read_attribute</span><span class="p">(</span><span class="s1">&#39;age&#39;</span><span class="p">)</span>
+<span class="c1"># =&gt; 42</span>
+
+<span class="c1"># OK - symbol access</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">read_attribute</span><span class="p">(</span><span class="ss">:age</span><span class="p">)</span>
+<span class="c1"># =&gt; 42</span>
+</pre></div>
+</div>
+<section id="special-characters-in-attribute-names">
+<h3>Special Characters in Attribute Names<a class="headerlink" href="#special-characters-in-attribute-names" title="Link to this heading">#</a></h3>
+<p>CouchbaseOrm permits dynamic attribute names to include spaces and punctuation:</p>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="n">bob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="s1">&#39;MDB&#39;</span><span class="p">)</span>
+<span class="n">bob</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">)</span>
+<span class="c1"># =&gt; &quot;MDB&quot;</span>
+
+<span class="n">bob</span><span class="o">.</span><span class="n">write_attribute</span><span class="p">(</span><span class="s2">&quot;hello%world&quot;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;MDB&#39;</span><span class="p">)</span>
+<span class="n">bob</span><span class="o">[</span><span class="ss">:&quot;hello%world&quot;</span><span class="o">]</span>
+<span class="c1"># =&gt; &quot;MDB&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../schema-configuration.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Schema Configuration</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="associations.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Associations</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-types">Attribute Types</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#untyped-attributes">Untyped Attributes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-type-hash">Attribute Type: Hash</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-type-time">Attribute Type: Time</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-type-date">Attribute Type: Date</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-type-datetime">Attribute Type: DateTime</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-symbols-or-strings-instead-of-classes">Using Symbols Or Strings Instead Of Classes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#specifying-attribute-default-values">Specifying Attribute Default Values</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-aliases">Attribute Aliases</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#customizing-attribute-behavior">Customizing Attribute Behavior</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-getters-and-setters">Custom Getters And Setters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-attribute-types">Custom Attribute Types</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dynamic-attributes">Dynamic Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#special-characters-in-attribute-names">Special Characters in Attribute Names</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Author name not set
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Woop.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

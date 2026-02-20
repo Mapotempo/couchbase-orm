@@ -1,0 +1,568 @@
+.. _associations:
+
+************
+Associations
+************
+
+.. default-domain:: woop
+
+.. contents:: On this page
+   :local:
+   :backlinks: none
+   :depth: 2
+   :class: singlecol
+
+Embedded Associations
+=====================
+
+CouchbaseOrm supports embedding documents within a parent document using
+``embeds_one`` and ``embeds_many``. Unlike referenced associations, embedded
+documents are stored directly within the parent document and do not have their
+own separate document ID in the database. This is useful for modeling
+has-one and has-many relationships where the child documents don't need to exist
+independently.
+
+Embeds One
+----------
+
+Use the ``embeds_one`` association to declare that the parent embeds a single
+child document:
+
+.. code-block:: ruby
+
+  class Profile < CouchbaseOrm::Base
+    attribute :bio, :string
+    attribute :website, :string
+  end
+
+  class User < CouchbaseOrm::Base
+    attribute :name, :string
+    embeds_one :profile
+  end
+
+  user = User.create!(name: 'Alice', profile: { bio: 'Software Engineer' })
+  # => #<User _id: "user::123", name: "Alice", profile: {...}>
+
+  user.profile
+  # => #<Profile bio: "Software Engineer", website: nil>
+
+  user.profile.bio = 'Senior Software Engineer'
+  user.profile = user.profile  # Reassign to track changes
+  user.save!
+
+The embedded document is stored as a hash within the parent:
+
+.. code-block:: ruby
+
+  # In the database, the document looks like:
+  {
+    "_id": "user::123",
+    "name": "Alice",
+    "profile": {
+      "bio": "Software Engineer",
+      "website": null
+    }
+  }
+
+Embedded documents cannot be saved, destroyed, or reloaded independently:
+
+.. code-block:: ruby
+
+  user.profile.save
+  # => raises "Cannot save an embedded document!"
+
+Embeds Many
+-----------
+
+Use the ``embeds_many`` association to declare that the parent embeds multiple
+child documents:
+
+.. code-block:: ruby
+
+  class Address < CouchbaseOrm::Base
+    attribute :street, :string
+    attribute :city, :string
+  end
+
+  class Person < CouchbaseOrm::Base
+    attribute :name, :string
+    embeds_many :addresses
+  end
+
+  person = Person.create!(
+    name: 'Bob',
+    addresses: [
+      { street: '123 Main St', city: 'New York' },
+      { street: '456 Elm St', city: 'Boston' }
+    ]
+  )
+
+  person.addresses
+  # => [#<Address street: "123 Main St", city: "New York">,
+  #     #<Address street: "456 Elm St", city: "Boston">]
+
+  person.addresses << Address.new(street: '789 Oak Ave', city: 'Chicago')
+  person.addresses = person.addresses  # Reassign to track changes
+  person.save!
+
+Polymorphic Embedded Associations
+----------------------------------
+
+Both ``embeds_one`` and ``embeds_many`` support polymorphic associations,
+allowing you to embed different types of documents in the same association:
+
+.. code-block:: ruby
+
+  class Image < CouchbaseOrm::Base
+    attribute :url, :string
+    attribute :caption, :string
+  end
+
+  class Video < CouchbaseOrm::Base
+    attribute :url, :string
+    attribute :duration, :integer
+  end
+
+  class Post < CouchbaseOrm::Base
+    embeds_one :media, polymorphic: true
+  end
+
+  # Embed an image using an object
+  post = Post.create!(media: Image.new(url: 'photo.jpg', caption: 'Sunset'))
+  post.media
+  # => #<Image url: "photo.jpg", caption: "Sunset">
+
+  # Or use a hash with type key (snake_case class name)
+  post = Post.create!(media: { type: 'image', url: 'photo.jpg', caption: 'Sunset' })
+
+  # Switch to a video
+  post.media = Video.new(url: 'clip.mp4', duration: 120)
+  post.save!
+
+For ``embeds_many`` with polymorphism:
+
+.. code-block:: ruby
+
+  class Article < CouchbaseOrm::Base
+    embeds_many :attachments, polymorphic: true
+  end
+
+  # Using objects
+  article = Article.create!(
+    attachments: [
+      Image.new(url: 'diagram.png', caption: 'Architecture'),
+      Video.new(url: 'demo.mp4', duration: 90)
+    ]
+  )
+
+  # Or using hashes with type key (snake_case class names)
+  article = Article.create!(
+    attachments: [
+      { type: 'image', url: 'diagram.png', caption: 'Architecture' },
+      { type: 'video', url: 'demo.mp4', duration: 90 }
+    ]
+  )
+
+  article.attachments
+  # => [#<Image ...>, #<Video ...>]
+
+When using polymorphic embedded associations, the type information is stored
+inside each embedded document as a ``type`` field. For example:
+
+.. code-block:: json
+
+  {
+    "_id": "post::123",
+    "media": {
+      "type": "Image",
+      "url": "photo.jpg",
+      "caption": "Sunset"
+    }
+  }
+
+**Note**: When using hashes with polymorphic associations, you must include
+the ``type`` key (either as a symbol ``:type`` or string ``'type'``) with
+the snake_case version of the class name. For example, use ``'image'`` for
+the ``Image`` class or ``'video_attachment'`` for the ``VideoAttachment`` class.
+Without it, an ``ArgumentError`` will be raised.
+
+Restricting Polymorphic Types
+------------------------------
+
+You can restrict which types are allowed in a polymorphic association by
+passing an array of allowed class names to the ``polymorphic`` parameter:
+
+.. code-block:: ruby
+
+  class Post < CouchbaseOrm::Base
+    # Only Image and Video are allowed
+    embeds_one :media, polymorphic: ['Image', 'Video']
+  end
+
+  class Article < CouchbaseOrm::Base
+    # Only specific attachment types allowed
+    embeds_many :attachments, polymorphic: ['ImageAttachment', 'VideoAttachment']
+  end
+
+  # This works
+  post = Post.new(media: Image.new(url: 'photo.jpg'))
+  post.valid?
+  # => true
+
+  # This raises a validation error
+  post = Post.new(media: Audio.new(url: 'song.mp3'))
+  post.valid?
+  # => false
+  post.errors[:media]
+  # => ["Audio is not an allowed type. Allowed types: Image, Video"]
+
+You can use snake_case names in the array, which will be automatically
+converted to CamelCase class names:
+
+.. code-block:: ruby
+
+  class Post < CouchbaseOrm::Base
+    embeds_one :media, polymorphic: [:image, 'video']  # Same as ['Image', 'Video']
+  end
+
+**Polymorphic Type Validator**: When type restrictions are specified, CouchbaseOrm
+automatically adds a ``PolymorphicTypeValidator`` to ensure that only allowed types
+can be assigned to the association. The validator:
+
+- Validates both single objects (``embeds_one``) and arrays (``embeds_many``)
+- Provides clear error messages listing the allowed types
+- Skips validation when no type restrictions are set or the value is nil
+- Runs during normal model validation (``valid?``, ``save``, ``create``, etc.)
+
+For ``embeds_many`` associations with type restrictions, each item in the array
+is validated individually:
+
+.. code-block:: ruby
+
+  class Article < CouchbaseOrm::Base
+    embeds_many :attachments, polymorphic: ['Image', 'Video']
+  end
+
+  article = Article.new(
+    attachments: [
+      Image.new(url: 'photo.jpg'),
+      Audio.new(url: 'song.mp3')  # Not allowed!
+    ]
+  )
+  
+  article.valid?
+  # => false
+  article.errors[:attachments]
+  # => ["item #1 (Audio) is not an allowed type. Allowed types: Image, Video"]
+
+Custom Storage Keys
+-------------------
+
+Use the ``store_as`` option to specify a different attribute name for storage:
+
+.. code-block:: ruby
+
+  class User < CouchbaseOrm::Base
+    embeds_one :profile, store_as: 'p'
+    embeds_many :addresses, store_as: 'addrs'
+  end
+
+  # In the database:
+  {
+    "_id": "user::123",
+    "p": { "bio": "..." },
+    "addrs": [{ "street": "..." }]
+  }
+
+Embedded Association Validation
+--------------------------------
+
+By default, embedded associations are validated when the parent is validated.
+You can disable this with ``validate: false``:
+
+.. code-block:: ruby
+
+  class Profile < CouchbaseOrm::Base
+    attribute :bio, :string
+    validates :bio, presence: true
+  end
+
+  class User < CouchbaseOrm::Base
+    embeds_one :profile
+  end
+
+  user = User.new(profile: { bio: nil })
+  user.valid?
+  # => false
+  user.errors[:profile]
+  # => ["is invalid"]
+
+  # To disable validation:
+  class User < CouchbaseOrm::Base
+    embeds_one :profile, validate: false
+  end
+
+Custom Class Names
+------------------
+
+Specify a different class name for embedded associations when the class cannot
+be inferred from the association name:
+
+.. code-block:: ruby
+
+  class User < CouchbaseOrm::Base
+    embeds_one :bio, class_name: 'Profile'
+    embeds_many :locations, class_name: 'Address'
+  end
+
+Key Differences from Referenced Associations
+---------------------------------------------
+
+Embedded associations differ from referenced associations in several ways:
+
+- **Storage**: Embedded documents are stored within the parent document, not as
+  separate documents in the database.
+
+- **Lifecycle**: Embedded documents cannot be saved, updated, or destroyed
+  independently. They are always saved as part of the parent document.
+
+- **Performance**: Reading a parent document also loads all embedded documents
+  in a single operation, which can be more efficient than separate queries.
+
+- **Querying**: Embedded documents cannot be queried independently. You must
+  query the parent document and then access the embedded documents.
+
+- **Identity**: Embedded documents do not have their own document ID by default
+  (the ``id`` field is removed when embedding).
+
+Referenced Associations
+=======================
+
+CouchbaseOrm supports the ``has_many``, ``belongs_to`` and
+``has_and_belongs_to_many`` associations familiar to ActiveRecord users.
+
+Has Many
+--------
+
+Use the ``has_many`` association to declare that the parent has zero or more
+children stored in a separate collection:
+
+.. code-block:: ruby
+
+  class Band < CouchbaseOrm::Base
+
+    has_many :members
+  end
+
+The child model must use ``belongs_to`` to declare the
+association with the parent:
+
+.. code-block:: ruby
+
+  class Member < CouchbaseOrm::Base
+
+    belongs_to :band
+  end
+
+The child documents contain references to their
+respective parents:
+
+.. code-block:: ruby
+
+  band = Band.create!(members: [Member.new])
+  # => #<Band _id: 6001166d4896684910b8d1c5, >
+
+  band.members
+  # => [#<Member _id: 6001166d4896684910b8d1c6, band_id: '6001166d4896684910b8d1c5'>]
+
+Use validations to require that at least one child is present:
+
+.. code-block:: ruby
+
+  class Band < CouchbaseOrm::Base
+
+    has_many :members
+
+    validates_presence_of :members
+  end
+
+Belongs To
+----------
+
+Use the ``belongs_to`` macro to associate a child with a parent stored in a
+separate collection. The ``_id`` of the parent (if a parent is associated)
+is stored in the child.
+
+.. code-block:: ruby
+
+  class Studio < CouchbaseOrm::Base
+
+    belongs_to :band
+  end
+
+  studio = Studio.create!
+  # => #<Studio _id: 600118184896684987aa884f, band_id: nil>
+
+Although ``has_many`` associations require the
+corresponding ``belongs_to`` association to be defined on the child,
+``belongs_to`` may also be used ``has_many`` macro. 
+In this case the child is not accessible from the parent
+but the parent is accessible from the child:
+
+.. code-block:: ruby
+
+  class Band < CouchbaseOrm::Base
+  end
+
+  class Studio < CouchbaseOrm::Base
+    belongs_to :band
+  end
+
+Has And Belongs To Many
+-----------------------
+
+Use the ``has_and_belongs_to_many`` macro to declare a many-to-many
+association:
+
+.. code-block:: ruby
+
+  class Band < CouchbaseOrm::Base
+    has_and_belongs_to_many :tags
+  end
+
+  class Tag < CouchbaseOrm::Base
+    has_and_belongs_to_many :bands
+  end
+
+Both model instances store a list of ids of the associated models, if any:
+
+.. code-block:: ruby
+
+  band = Band.create!(tags: [Tag.create!])
+  # => #<Band _id: 60011d554896684b8b910a2a, tag_ids: ['60011d554896684b8b910a29']>
+
+  band.tags
+  # => [#<Tag _id: 60011d554896684b8b910a29, band_ids: ['60011d554896684b8b910a2a']>]
+
+Custom Association Names
+------------------------
+
+You can name your associations whatever you like, but if the class cannot be inferred by
+CouchbaseOrm from the name, and neither can the opposite side you'll want to provide the
+macro with some additional options to tell CouchbaseOrm how to hook them up.
+
+.. code-block:: ruby
+
+   class Car < CouchabseOrm::Base
+     belongs_to :engine, class_name: "Motor"
+   end
+
+   class Motor < CouchabseOrm::Base
+     has_many :machine, class_name: "Car"
+   end
+
+Custom Foreign Keys
+-----------------------------
+
+The attributes used when looking up associations can be explicitly specified.
+The default is to use ``id`` on the "parent" association and ``#{association_name}_id``
+on the "child" association, for example with a has_many/belongs_to:
+
+.. code-block:: ruby
+
+  class Company < CouchbaseOrm::Base
+    has_many :emails
+  end
+
+  class Email < CouchbaseOrm::Base
+    belongs_to :company
+  end
+
+  company = Company.find(id)
+  # looks up emails where emails.company_id == company.id
+  company.emails
+
+Specify a different ``foreign_key`` to change the attribute name on the "child"
+association:
+
+.. code-block:: ruby
+
+  class Company < CouchbaseOrm::Base
+    attribute :c, type: String
+    has_many :emails, foreign_key: 'c_ref'
+  end
+
+  class Email < CouchbaseOrm::Base
+    # This definition of c_ref is automatically generated by CouchbaseOrm:
+    # attribute :c_ref, type: Object
+    # But the type can also be specified:
+    attribute :c_ref, type: String
+    belongs_to :company, foreign_key: 'c_ref'
+  end
+
+  company = Company.find(id)
+  # looks up emails where emails.c_ref == company.c
+  company.emails
+
+Polymorphism
+------------
+
+``has_and_belongs_to_many`` associations support polymorphism, which is
+having a single association potentially contain objects of different classes.
+For example, we could model an organization in which departments and teams
+have managers as follows:
+
+.. code-block:: ruby
+
+  class Department < CouchbaseOrm::Base
+    has_and_belongs_to_many :unit, class_name "Manager"
+  end
+
+  class Team < CouchbaseOrm::Base
+    has_and_belongs_to_many :unit, class_name "Manager"
+  end
+
+  class Manager < CouchbaseOrm::Base
+    belongs_to :unit, polymorphic: true
+  end
+
+  dept = Department.create!
+  team = Team.create!
+
+  alice = Manager.create!(unit: dept)
+  alice.unit == dept
+  # => true
+  dept.manager == alice
+  # => true
+
+.. _dependent-behavior:
+
+Dependent Behavior
+------------------
+
+You can provide dependent options to referenced associations to instruct CouchbaseOrm
+how to handle situations where one side of the association is deleted, or is attempted
+to be deleted. The options are as follows:
+
+- ``:destroy``: Destroy the child document(s) and run all of the model callbacks.
+
+If no ``:dependent`` option is provided, deleting the parent document leaves the child document unmodified
+(in other words, the child document continues to reference the now deleted parent document via the foreign key attribute).
+The child may become orphaned if it is ordinarily only referenced via the parent.
+
+.. code-block:: ruby
+
+   class Band < CouchbaseOrm::Base
+     has_many :albums, dependent: :destroy
+     belongs_to :label
+   end
+
+   class Album < CouchbaseOrm::Base
+     belongs_to :band
+   end
+
+   class Label < CouchbaseOrm::Base
+     has_many :bands
+   end
+
+   Band.first.destroy # Will delete all associated albums.
