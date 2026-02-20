@@ -32,10 +32,10 @@ module CouchbaseOrm
 
       if is_polymorphic
         define_polymorphic_embeds_many_reader(name, storage_key, instance_var, default)
-        define_polymorphic_embeds_many_writer(name, storage_key, instance_var)
+        define_polymorphic_embeds_many_writer(name, storage_key, instance_var, default)
       else
         define_standard_embeds_many_reader(name, storage_key, instance_var, klass_name, default)
-        define_standard_embeds_many_writer(name, storage_key, instance_var, klass_name)
+        define_standard_embeds_many_writer(name, storage_key, instance_var, klass_name, default)
       end
 
       define_method(:"#{name}_reset") do
@@ -94,12 +94,26 @@ module CouchbaseOrm
       end
     end
 
-    def define_polymorphic_embeds_many_writer(name, storage_key, instance_var)
+    def define_polymorphic_embeds_many_writer(name, storage_key, instance_var, default_value)
+      wrap_array = array_wrap_lambda
+
+      # rubocop:disable Metrics/BlockLength
       define_method("#{name}=") do |val|
+        if val.nil?
+          if default_value
+            default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
+            return self.send("#{name}=", wrap_array.call(default_obj)) unless default_obj.nil?
+          end
+
+          write_attribute(storage_key, [])
+          instance_variable_set(instance_var, [])
+          return
+        end
+
         embedded_objects = []
         serialized = []
 
-        Array(val).each do |v|
+        wrap_array.call(val).each do |v|
           next if v.nil?
 
           obj = if v.is_a?(Hash)
@@ -127,6 +141,7 @@ module CouchbaseOrm
         write_attribute(storage_key, serialized)
         instance_variable_set(instance_var, embedded_objects)
       end
+      # rubocop:enable Metrics/BlockLength
     end
 
     def define_standard_embeds_many_reader(name, storage_key, instance_var, klass_name, default_value)
@@ -165,14 +180,27 @@ module CouchbaseOrm
       end
     end
 
-    def define_standard_embeds_many_writer(name, storage_key, instance_var, _klass_name)
+    def define_standard_embeds_many_writer(name, storage_key, instance_var, _klass_name, default_value)
+      wrap_array = array_wrap_lambda
+
       define_method("#{name}=") do |val|
+        if val.nil?
+          if default_value
+            default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
+            return self.send("#{name}=", wrap_array.call(default_obj)) unless default_obj.nil?
+          end
+
+          write_attribute(storage_key, [])
+          instance_variable_set(instance_var, [])
+          return
+        end
+
         klass = send("_resolve_embedded_class_for_#{name}")
 
         embedded_objects = []
         serialized = []
 
-        Array(val).each do |v|
+        wrap_array.call(val).each do |v|
           obj = v.is_a?(klass) ? v : klass.new(v)
           obj.embedded = true
           raw = obj.serializable_hash

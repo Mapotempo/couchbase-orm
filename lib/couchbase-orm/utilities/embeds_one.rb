@@ -31,10 +31,10 @@ module CouchbaseOrm
 
       if is_polymorphic
         define_polymorphic_embeds_one_reader(name, storage_key, instance_var, default)
-        define_polymorphic_embeds_one_writer(name, storage_key, instance_var)
+        define_polymorphic_embeds_one_writer(name, storage_key, instance_var, default)
       else
         define_standard_embeds_one_reader(name, storage_key, instance_var, klass_name, default)
-        define_standard_embeds_one_writer(name, storage_key, instance_var, klass_name)
+        define_standard_embeds_one_writer(name, storage_key, instance_var, klass_name, default)
       end
 
       define_method(:"#{name}_reset") do
@@ -77,9 +77,14 @@ module CouchbaseOrm
       end
     end
 
-    def define_polymorphic_embeds_one_writer(name, storage_key, instance_var)
+    def define_polymorphic_embeds_one_writer(name, storage_key, instance_var, default_value)
       define_method("#{name}=") do |val|
         if val.nil?
+          if default_value
+            default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
+            return self.send("#{name}=", default_obj) unless default_obj.nil?
+          end
+
           write_attribute(storage_key, nil)
           instance_variable_set(instance_var, nil)
           return
@@ -138,9 +143,14 @@ module CouchbaseOrm
       end
     end
 
-    def define_standard_embeds_one_writer(name, storage_key, instance_var, _klass_name)
+    def define_standard_embeds_one_writer(name, storage_key, instance_var, _klass_name, default_value)
       define_method("#{name}=") do |val|
         if val.nil?
+          if default_value
+            default_obj = default_value.is_a?(Proc) ? instance_exec(&default_value) : default_value
+            return self.send("#{name}=", default_obj) unless default_obj.nil?
+          end
+
           write_attribute(storage_key, nil)
           instance_variable_set(instance_var, nil)
           return
