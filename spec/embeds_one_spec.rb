@@ -124,6 +124,20 @@ class PolymorphicPostWithDefault < CouchbaseOrm::Base
   embeds_one :media, polymorphic: true, default: -> { DefaultImage.new(url: 'default.jpg') }
 end
 
+class SendNotificationMissionFeature < CouchbaseOrm::Base
+  attribute :enable, :boolean
+end
+
+class FeaturesContainer < CouchbaseOrm::Base
+  embeds_one :send_notification_mission,
+             class_name: 'SendNotificationMissionFeature',
+             default: -> { SendNotificationMissionFeature.new(enable: true) }
+end
+
+class CompanyWithFeatures < CouchbaseOrm::Base
+  embeds_one :features, class_name: 'FeaturesContainer', default: -> { FeaturesContainer.new }
+end
+
 describe CouchbaseOrm::EmbedsOne do
   let(:raw_data) { { bio: 'Software Engineer' } }
 
@@ -668,10 +682,11 @@ describe CouchbaseOrm::EmbedsOne do
       expect(first_call).to equal(second_call)
     end
 
-    it 'allows explicitly setting to nil to override default' do
+    it 'uses default when explicitly setting nil' do
       user = UserWithDefaultProc.new
       user.profile = nil
-      expect(user.profile).to be_nil
+      expect(user.profile).to be_a(DefaultProfile)
+      expect(user.profile.language).to eq('en')
     end
 
     it 'uses default after reset when no data is present' do
@@ -698,6 +713,18 @@ describe CouchbaseOrm::EmbedsOne do
 
     it 'uses default after reload when no data was saved' do
       user = UserWithDefaultProc.create!
+
+      loaded = UserWithDefaultProc.find(user.id)
+      expect(loaded.profile).to be_a(DefaultProfile)
+      expect(loaded.profile.language).to eq('en')
+    ensure
+      user.destroy! if user&.persisted?
+    end
+
+    it 'returns default value when fetched record has empty raw data' do
+      user = UserWithDefaultProc.new
+      user.send(:write_attribute, :profile, {})
+      user.save!
 
       loaded = UserWithDefaultProc.find(user.id)
       expect(loaded.profile).to be_a(DefaultProfile)
@@ -734,6 +761,25 @@ describe CouchbaseOrm::EmbedsOne do
       post = PolymorphicPostWithDefault.new
       expect(post.media).to be_a(DefaultImage)
       expect(post.media.url).to eq('default.jpg')
+    end
+
+    it 'instantiates nested embeds_one default when nested raw value is nil' do
+      company = CompanyWithFeatures.new(features: { send_notification_mission: nil })
+
+      expect(company.features).to be_a(FeaturesContainer)
+      expect(company.features.send_notification_mission).to be_a(SendNotificationMissionFeature)
+      expect(company.features.send_notification_mission.enable).to be true
+    end
+
+    it 'instantiates nested embeds_one default when fetched company has send_notification_mission as nil' do
+      company = CompanyWithFeatures.create!(features: { send_notification_mission: nil })
+
+      loaded = CompanyWithFeatures.find(company.id)
+      expect(loaded.features).to be_a(FeaturesContainer)
+      expect(loaded.features.send_notification_mission).to be_a(SendNotificationMissionFeature)
+      expect(loaded.features.send_notification_mission.enable).to be true
+    ensure
+      company.destroy! if company&.persisted?
     end
 
     it 'does not use default for polymorphic when data is set' do

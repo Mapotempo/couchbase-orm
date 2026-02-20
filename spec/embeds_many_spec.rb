@@ -931,16 +931,40 @@ describe CouchbaseOrm::EmbedsMany do
       expect(person.attachments.first).to be_a(VideoAttachment)
     end
 
-    it 'can use default with empty array behavior' do
+    it 'uses default when explicitly setting nil' do
       person = PersonWithDefaultProc.new
-      person.addresses = nil  # Setting to nil converts to []
-      expect(person.addresses).to eq([])
+      person.addresses = nil
+
+      expect(person.addresses.size).to eq(1)
+      expect(person.addresses.first.street).to eq('Default St')
+      expect(person.addresses.first.city).to eq('Default City')
+    end
+
+    it 'uses default for polymorphic embeds_many when explicitly setting nil' do
+      person = PolymorphicPersonWithDefault.new
+      person.attachments = nil
+
+      expect(person.attachments.size).to eq(1)
+      expect(person.attachments.first).to be_a(ImageAttachment)
+      expect(person.attachments.first.url).to eq('https://default.com/image.jpg')
     end
 
     it 'default returns array even if proc returns single object' do
       person = PersonWithSingleDefault.new
       expect(person.addresses).to be_a(Array)
       expect(person.addresses.size).to eq(1)
+    end
+
+    it 'uses default when fetched record has nil raw data and default returns single object' do
+      person = PersonWithSingleDefault.create!(addresses: nil)
+
+      loaded = PersonWithSingleDefault.find(person.id)
+      expect(loaded.addresses).to be_a(Array)
+      expect(loaded.addresses.size).to eq(1)
+      expect(loaded.addresses.first).to be_a(DefaultAddress)
+      expect(loaded.addresses.first.street).to eq('Single')
+    ensure
+      person.destroy! if person&.persisted?
     end
   end
 end
