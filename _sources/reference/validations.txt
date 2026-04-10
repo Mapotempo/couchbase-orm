@@ -1,0 +1,22 @@
+.. _validations:
+
+**********
+Validation
+**********
+
+.. default-domain:: woop
+
+.. contents:: On this page
+   :local:
+   :backlinks: none
+   :depth: 2
+   :class: singlecol
+
+CouchbaseOrm includes ``ActiveModel::Validations`` to supply the basic
+validation plus an additional associated and uniqueness validator.
+
+See the `Active Record Validations
+<https://guides.rubyonrails.org/active_record_validations.html>`_
+Rails guide and `ActiveModel::Validations
+<https://api.rubyonrails.org/classes/ActiveModel/Validations.html>`_
+documentation for more information.

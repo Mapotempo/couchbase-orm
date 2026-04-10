@@ -1,0 +1,87 @@
+.. _callbacks:
+
+*********
+Callbacks
+*********
+
+.. default-domain:: woop
+
+.. contents:: On this page
+   :local:
+   :backlinks: none
+   :depth: 2
+   :class: singlecol
+
+CouchbaseOrm implements many of the `ActiveRecord callbacks
+<https://guides.rubyonrails.org/active_record_callbacks.html>`_.
+
+
+Document Callbacks
+==================
+
+CouchbaseOrm supports the following callbacks for documents:
+
+-  ``after_initialize``
+-  ``after_build``
+-  ``before_validation``
+-  ``after_validation``
+-  ``before_create``
+-  ``around_create``
+-  ``after_create``
+-  ``after_find``
+-  ``before_update``
+-  ``around_update``
+-  ``after_update``
+-  ``before_upsert``
+-  ``around_upsert``
+-  ``after_upsert``
+-  ``before_save``
+-  ``around_save``
+-  ``after_save``
+-  ``before_destroy``
+-  ``around_destroy``
+-  ``after_destroy``
+
+Callbacks are available on any document, whether it is embedded within
+another document or not. Note that to be efficient, CouchbaseOrm only invokes
+the callback on the document that the persistence action was executed on.
+This enables CouchbaseOrm to support large hierarchies and to handle optimized
+atomic updates efficiently (without invoking callbacks throughout the document
+hierarchy).
+
+Note that using callbacks for domain logic is a bad design practice, and can
+lead to unexpected errors that are hard to debug when callbacks in
+the chain halt execution. It is our recommendation to only use them
+for cross-cutting concerns, like queueing up background jobs.
+
+.. code-block:: ruby
+
+   class Article < CouchabseOrm::Base
+     attribute :name, type: String
+     attribute :body, type: String
+     attribute :slug, type: String
+
+     before_create :send_message
+
+     after_save do |document|
+       # Handle callback here.
+     end
+
+     protected
+     def send_message
+       # Message sending code here.
+     end
+   end
+
+Callbacks are coming from Active Support, so you can use the new
+syntax as well:
+
+.. code-block:: ruby
+
+   class Article < CouchabseOrm::Base
+     attribute :name, type: String
+
+     set_callback(:create, :before) do |document|
+       # Message sending code here.
+     end
+   end
