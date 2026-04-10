@@ -24,6 +24,17 @@ class BaseTestWithIgnoredProperties < CouchbaseOrm::Base
   attribute :job, :string
 end
 
+class ApplicationRecord < CouchbaseOrm::Base
+end
+
+class EventBase < ApplicationRecord
+  attribute :name, :string
+end
+
+class SendSmsEvent < EventBase
+  attribute :phone_number, :string
+end
+
 describe CouchbaseOrm::Base do
   it 'is comparable to other objects' do
     base = BaseTest.create!(name: 'joe')
@@ -151,6 +162,18 @@ describe CouchbaseOrm::Base do
     expect(obj).to eq(base)
   ensure
     base.destroy
+  end
+
+  it 'tries to load with descendant chain ApplicationRecord -> EventBase -> SendSmsEvent' do
+    event = SendSmsEvent.create!(name: 'sms', phone_number: '+15551234567')
+    loaded = CouchbaseOrm.try_load(event.id)
+
+    expect(loaded).to be_a(SendSmsEvent)
+    expect(loaded.id).to eq(event.id)
+    expect(loaded.name).to eq('sms')
+    expect(loaded.phone_number).to eq('+15551234567')
+  ensure
+    event&.destroy
   end
 
   it 'is able to create model with a custom ID' do

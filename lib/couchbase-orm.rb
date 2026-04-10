@@ -87,11 +87,22 @@ module CouchbaseOrm
     ddoc = result&.content&.[]('type')
     return nil unless ddoc
 
-    ::CouchbaseOrm::Base.descendants.each do |model|
-      if model.design_document == ddoc
+    models_to_visit = [::CouchbaseOrm::Base]
+    visited_models = {}
+
+    until models_to_visit.empty?
+      model = models_to_visit.shift
+      next if visited_models[model]
+
+      visited_models[model] = true
+
+      if model != ::CouchbaseOrm::Base && model.design_document == ddoc
         return model.instantiate(result.content, id, nil, model)
       end
+
+      models_to_visit.concat(Array.wrap(model.descendants)) if model.respond_to?(:descendants)
     end
+
     nil
   end
 end
