@@ -14,6 +14,10 @@ module CouchbaseOrm
       def status(**options)
         new(**options).status
       end
+
+      def adopt(**options)
+        new(**options).adopt
+      end
     end
 
     def initialize(context: IndexMigrationContext.new, schema_migration: IndexSchemaMigration.new, out: nil)
@@ -52,6 +56,14 @@ module CouchbaseOrm
 
       @out.puts(lines.join("\n")) unless lines.empty?
       lines
+    end
+
+    def adopt
+      migration_def = @context.migrations.max_by(&:version)
+      return nil unless migration_def
+
+      @schema_migration.add_version(migration_def.version)
+      migration_def.version
     end
   end
 end
