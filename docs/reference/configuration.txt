@@ -27,6 +27,9 @@ named "dev_bucket".
     development:
       <<: *common
       bucket: dev_bucket
+      index:
+        migrations_path: db/indexes
+        num_replica: 0
 
     test:
       <<: *common
@@ -38,10 +41,20 @@ named "dev_bucket".
       bucket: <%= ENV['COUCHBASE_BUCKET'] %>
       username: <%= ENV['COUCHBASE_USER'] %>
       password: <%= ENV['COUCHBASE_PASSWORD'] %>
+      index:
+        bucket: <%= ENV['COUCHBASE_INDEX_BUCKET'] %>
+        num_replica: 1
 
 The top level key in the configuration file, ``development`` in the above
 example, refers to the environment name which the application is executing in,
 i.e. ``development``, ``test`` or ``production``.
+
+Index migration settings for Rails applications may also be configured in the
+nested ``index`` section. Supported keys are ``bucket``, ``migrations_path``
+and ``num_replica``.
+
+When ``index.bucket`` is omitted, CouchbaseOrm uses the top-level connection
+``bucket`` as the default index bucket.
 
 Generating Default Configuration
 ================================
@@ -53,12 +66,13 @@ configuration file for you by running the following command:
 
   rails g couchbase_orm:config
 
-The configuration file will be placed in ``config/couchbase.yml``. An
-It is recommended that all configuration
+The configuration file will be placed in ``config/couchbase.yml``. It
+is recommended that all configuration
 be specified in ``config/couchbase.yml``, but if you prefer, the ``couchbase_orm.rb``
 initializer may also be used to set configuration options. Note, though, that
-settings in ``couchbase.yml`` always take precedence over settings in the
-initializer.
+settings loaded from ``couchbase.yml`` during Rails initialization take
+precedence over values set earlier in an initializer. Later explicit
+``CouchbaseOrm.configure`` calls still override those loaded values at runtime.
 
 If you are not using Rails, you can configure couchbase-orm with an initializer:
 
@@ -79,6 +93,9 @@ Loading CouchbaseOrm Configuration
 If you are using Ruby on Rails, CouchbaseOrm configuration is automatically loaded
 for the current environment as stored in ``Rails.env`` when the application
 loads.
+
+For index migrations, Rails loads the same ``config/couchbase.yml`` entry and
+applies nested ``index`` values after connection settings are loaded.
 
 ERb Preprocessing
 =================
