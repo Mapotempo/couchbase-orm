@@ -19,12 +19,32 @@ definition history in your application code.
 Configuration
 =============
 
-Configure index migration options with ``CouchbaseOrm.configure``:
+Rails applications can configure index migration options in
+``config/couchbase.yml`` using a nested ``index`` section:
+
+.. code-block:: yaml
+
+  development:
+    connection_string: couchbase://localhost
+    username: dev_user
+    password: dev_password
+    bucket: fleet-dev
+
+    index:
+      migrations_path: custom/indexes
+      num_replica: 1
+
+The index bucket defaults to the top-level ``bucket`` unless ``index.bucket``
+is set explicitly.
+
+You can also configure or override index migration options in Ruby with
+``CouchbaseOrm.configure``:
 
 .. code-block:: ruby
 
   CouchbaseOrm.configure do |config|
     config.index.bucket = 'fleet-prod'
+    config.index.migrations_path = 'db/indexes'
     config.index.num_replica = 1
   end
 
@@ -39,14 +59,23 @@ Supported options:
      - Description
 
    * - ``bucket``
-     - required
+     - top-level connection bucket in Rails, otherwise ``nil``
      - Bucket used in generated ``CREATE INDEX`` and ``DROP INDEX`` statements.
+
+   * - ``migrations_path``
+     - ``db/indexes``
+     - Directory used to load and generate index migration files.
 
    * - ``num_replica``
      - ``0``
      - Value used in the index ``WITH`` clause.
 
-Migration files are loaded from ``db/indexes`` by default.
+In Rails, values are applied in this order:
+
+1. Default index configuration values.
+2. The top-level connection ``bucket`` from ``config/couchbase.yml``.
+3. Nested ``index`` values from ``config/couchbase.yml``.
+4. Later explicit ``CouchbaseOrm.configure`` calls.
 
 Creating Migrations
 ===================

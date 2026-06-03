@@ -20,6 +20,7 @@
 
 require 'yaml'
 require 'couchbase-orm/base'
+require 'couchbase-orm/index_config_loader'
 
 module Rails # :nodoc:
   module Couchbase # :nodoc:
@@ -44,6 +45,11 @@ module Rails # :nodoc:
 
       initializer 'couchbase_orm.setup_connection_config' do
         CouchbaseOrm::Connection.config = Rails.application.config_for(:couchbase)
+      end
+
+      initializer 'couchbase_orm.setup_index_config', after: 'couchbase_orm.setup_connection_config' do
+        config_hash = Rails.application.config_for(:couchbase)
+        CouchbaseOrm::IndexConfigLoader.apply(config_hash)
       end
 
         # After initialization we will warn the user if we can't find a couchbase.yml and
