@@ -29,6 +29,7 @@ named "dev_bucket".
       bucket: dev_bucket
       index:
         migrations_path: db/indexes
+        schema_path: db/index_schema.rb
         num_replica: 0
 
     test:
@@ -43,6 +44,7 @@ named "dev_bucket".
       password: <%= ENV['COUCHBASE_PASSWORD'] %>
       index:
         bucket: <%= ENV['COUCHBASE_INDEX_BUCKET'] %>
+        schema_path: <%= ENV['COUCHBASE_INDEX_SCHEMA_PATH'] %>
         num_replica: 1
 
 The top level key in the configuration file, ``development`` in the above
@@ -51,7 +53,7 @@ i.e. ``development``, ``test`` or ``production``.
 
 Index migration settings for Rails applications may also be configured in the
 nested ``index`` section. Supported keys are ``bucket``, ``migrations_path``
-and ``num_replica``.
+``schema_path``, and ``num_replica``.
 
 When ``index.bucket`` is omitted, CouchbaseOrm uses the top-level connection
 ``bucket`` as the default index bucket.
@@ -96,6 +98,12 @@ loads.
 
 For index migrations, Rails loads the same ``config/couchbase.yml`` entry and
 applies nested ``index`` values after connection settings are loaded.
+
+The ``index.schema_path`` value controls where schema snapshot commands read and
+write index state:
+
+* ``bundle exec couchbaseorm index:schema:dump`` writes the schema file.
+* ``bundle exec couchbaseorm index:schema:load`` loads indexes from the schema file.
 
 ERb Preprocessing
 =================

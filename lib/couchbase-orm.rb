@@ -12,6 +12,7 @@ end
 module CouchbaseOrm
   autoload :Configuration, 'couchbase-orm/configuration'
   autoload :IndexMigration, 'couchbase-orm/index_migration'
+  autoload :IndexSchema, 'couchbase-orm/index_schema'
   autoload :IndexMigrationContext, 'couchbase-orm/index_migration_context'
   autoload :IndexMigrator, 'couchbase-orm/index_migrator'
   autoload :IndexSchemaMigration, 'couchbase-orm/index_schema_migration'
