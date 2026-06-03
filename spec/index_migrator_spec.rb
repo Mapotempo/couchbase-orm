@@ -63,4 +63,30 @@ describe CouchbaseOrm::IndexMigrator do
     expect(out.string).to include('up     20250808110000 InitialIndexes')
     expect(out.string).to include('down   20250808120000 AddWorkflowIndex')
   end
+
+  it 'adopts latest migration version without executing migration code' do
+    migration_one = CouchbaseOrm::IndexMigrationContext::Migration.new(
+      version: '20250808110000', name: 'InitialIndexes',
+      klass: Class.new, path: 'db/indexes/20250808110000_initial_indexes.rb'
+    )
+    migration_two = CouchbaseOrm::IndexMigrationContext::Migration.new(
+      version: '20250808120000', name: 'AddWorkflowIndex',
+      klass: Class.new, path: 'db/indexes/20250808120000_add_workflow_index.rb'
+    )
+    allow(context).to receive(:migrations).and_return([migration_one, migration_two])
+    expect(schema_migration).to receive(:add_version).with('20250808120000')
+
+    adopted_version = described_class.new(context: context, schema_migration: schema_migration, out: out).adopt
+
+    expect(adopted_version).to eq('20250808120000')
+  end
+
+  it 'returns nil when there are no migrations to adopt' do
+    allow(context).to receive(:migrations).and_return([])
+    expect(schema_migration).not_to receive(:add_version)
+
+    adopted_version = described_class.new(context: context, schema_migration: schema_migration, out: out).adopt
+
+    expect(adopted_version).to be_nil
+  end
 end

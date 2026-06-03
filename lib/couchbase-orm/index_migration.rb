@@ -5,6 +5,10 @@ require 'couchbase'
 
 module CouchbaseOrm
   class IndexMigration
+    autoload :IndexDefinition, 'couchbase-orm/index_migration/index_definition'
+    autoload :IndexIntrospector, 'couchbase-orm/index_migration/index_introspector'
+    autoload :MigrationGenerator, 'couchbase-orm/index_migration/migration_generator'
+
     class IrreversibleMigration < StandardError; end
 
     module Operations
