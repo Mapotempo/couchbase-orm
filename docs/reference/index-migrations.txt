@@ -145,6 +145,12 @@ Example generated query:
 
   build_indexes :type_company, :date_on_type
 
+To wait until all built indexes are online, pass ``wait: true``:
+
+.. code-block:: ruby
+
+  build_indexes :type_company, :date_on_type, wait: true
+
 Example generated query:
 
 .. code-block:: sql
@@ -154,6 +160,21 @@ Example generated query:
     `type_company`,
     `date_on_type`
   );
+
+When ``wait: true`` is used, CouchbaseOrm polls ``system:indexes`` after the
+``BUILD INDEX`` statement and resumes when every requested index reports
+``state = online``.
+
+Polling query shape:
+
+.. code-block:: sql
+
+  SELECT name, state
+  FROM system:indexes
+  WHERE keyspace_id = 'fleet-prod'
+    AND name IN ['type_company', 'date_on_type']
+
+Polling runs every second and does not apply a timeout.
 
 ``remove_index`` drops an index:
 
@@ -257,6 +278,22 @@ Generated operations:
     `type_company`,
     `date_on_type`
   );
+
+Safe replacement flows can wait for readiness before removing old indexes:
+
+.. code-block:: ruby
+
+  class ChangeFleetByCompanyIndex < CouchbaseOrm::IndexMigration
+    def up
+      add_index :fleet_by_company_v2,
+        keys: [:type, :company_id],
+        defer_build: true
+
+      build_indexes :fleet_by_company_v2, wait: true
+
+      remove_index :fleet_by_company
+    end
+  end
 
 No internal tracking of deferred indexes is performed; migrations must call
 ``build_indexes`` explicitly when builds are required.
