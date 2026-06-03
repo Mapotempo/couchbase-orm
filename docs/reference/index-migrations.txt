@@ -26,7 +26,6 @@ Configure index migration options with ``CouchbaseOrm.configure``:
   CouchbaseOrm.configure do |config|
     config.index.bucket = 'fleet-prod'
     config.index.num_replica = 1
-    config.index.defer_build = true
   end
 
 Supported options:
@@ -45,10 +44,6 @@ Supported options:
 
    * - ``num_replica``
      - ``0``
-     - Value used in the index ``WITH`` clause.
-
-   * - ``defer_build``
-     - ``true``
      - Value used in the index ``WITH`` clause.
 
 Migration files are loaded from ``db/indexes`` by default.
@@ -87,7 +82,8 @@ DSL
   add_index(
     :type_company,
     keys: [:type, :company_id],
-    where: 'type is valued and company_id is valued'
+    where: 'type is valued and company_id is valued',
+    defer_build: true
   )
 
 Example generated query:
