@@ -106,6 +106,18 @@ DSL
 
 ``add_index`` creates an index:
 
+Immediate index example:
+
+.. code-block:: ruby
+
+  add_index(
+    :type_company,
+    keys: [:type, :company_id],
+    where: 'type is valued and company_id is valued'
+  )
+
+Deferred index example:
+
 .. code-block:: ruby
 
   add_index(
@@ -126,6 +138,22 @@ Example generated query:
     "defer_build": true,
     "num_replica": 1
   }
+
+``build_indexes`` explicitly builds one or more deferred indexes:
+
+.. code-block:: ruby
+
+  build_indexes :type_company, :date_on_type
+
+Example generated query:
+
+.. code-block:: sql
+
+  BUILD INDEX ON `fleet-prod`
+  (
+    `type_company`,
+    `date_on_type`
+  );
 
 ``remove_index`` drops an index:
 
@@ -155,8 +183,12 @@ For simple migrations, define ``change``:
 Rollback automatically applies the inverse for supported operations.
 ``add_index`` is reversible and rolls back with ``remove_index``.
 
+``build_indexes`` is irreversible. If it is used inside ``change``, rollback
+raises ``CouchbaseOrm::IndexMigration::IrreversibleMigration``.
+
 If a migration cannot be reversed from ``change`` alone (for example when
-calling ``remove_index``), define explicit ``up`` and ``down`` methods.
+calling ``remove_index`` or ``build_indexes``), define explicit ``up`` and
+``down`` methods.
 
 .. code-block:: ruby
 
@@ -171,6 +203,63 @@ calling ``remove_index``), define explicit ``up`` and ``down`` methods.
       add_index :fleet_by_company, keys: [:company_id, :type]
     end
   end
+
+Execution Example
+=================
+
+Deferred index creation and explicit build operations execute in order:
+
+.. code-block:: ruby
+
+  class InitialIndexes < CouchbaseOrm::IndexMigration
+    def up
+      add_index :type_company,
+        keys: [:type, :company_id],
+        where: 'type is valued and company_id is valued',
+        defer_build: true
+
+      add_index :date_on_type,
+        keys: [:date],
+        where: 'type is valued and date is valued',
+        defer_build: true
+
+      build_indexes :type_company, :date_on_type
+    end
+
+    def down
+      remove_index :date_on_type
+      remove_index :type_company
+    end
+  end
+
+Generated operations:
+
+.. code-block:: sql
+
+  CREATE INDEX `type_company`
+  ON `fleet-prod`(`type`,`company_id`)
+  WHERE (type is valued and company_id is valued)
+  WITH {
+    "defer_build": true,
+    "num_replica": 1
+  }
+
+  CREATE INDEX `date_on_type`
+  ON `fleet-prod`(`date`)
+  WHERE (type is valued and date is valued)
+  WITH {
+    "defer_build": true,
+    "num_replica": 1
+  }
+
+  BUILD INDEX ON `fleet-prod`
+  (
+    `type_company`,
+    `date_on_type`
+  );
+
+No internal tracking of deferred indexes is performed; migrations must call
+``build_indexes`` explicitly when builds are required.
 
 Running Migrations
 ==================
