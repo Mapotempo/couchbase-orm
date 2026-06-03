@@ -10,6 +10,12 @@ end
 
 # Top-level module for project.
 module CouchbaseOrm
+  autoload :Configuration, 'couchbase-orm/configuration'
+  autoload :IndexMigration, 'couchbase-orm/index_migration'
+  autoload :IndexMigrationContext, 'couchbase-orm/index_migration_context'
+  autoload :IndexMigrator, 'couchbase-orm/index_migrator'
+  autoload :IndexSchemaMigration, 'couchbase-orm/index_schema_migration'
+  autoload :IndexMigrationGenerator, 'couchbase-orm/index_migration_generator'
   autoload :Encrypt, 'couchbase-orm/encrypt'
   autoload :Error,       'couchbase-orm/error'
   autoload :Connection,  'couchbase-orm/connection'
@@ -23,6 +29,18 @@ module CouchbaseOrm
   autoload :EmbedsMany, 'couchbase-orm/utilities/embeds_many'
   autoload :EmbeddedAssociatedValidator, 'couchbase-orm/validators/embedded_associated_validator'
   autoload :PolymorphicTypeValidator, 'couchbase-orm/validators/polymorphic_type_validator'
+
+  def self.configure
+    yield(config)
+  end
+
+  def self.config
+    @config ||= Configuration.new
+  end
+
+  def self.reset_config!
+    @config = Configuration.new
+  end
 
   # if COUCHBASE_ORM_DEBUG environement variable exist then logger is set to Logger::DEBUG level
   # else logger is set to Logger::INFO level

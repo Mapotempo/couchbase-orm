@@ -14,6 +14,8 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 3.0'
   gem.require_paths = ['lib']
+  gem.bindir = 'bin'
+  gem.executables = ['couchbaseorm']
 
   gem.add_runtime_dependency     'activemodel',   ENV['ACTIVE_MODEL_VERSION'] || '>= 6.1.7.7', '<= 7.1'
   gem.add_runtime_dependency     'activerecord',  ENV['ACTIVE_MODEL_VERSION'] || '>= 6.1.7.7', '<= 7.1'
