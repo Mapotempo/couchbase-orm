@@ -131,7 +131,7 @@ describe CouchbaseOrm::IndexMigration do
 
     expect(migration).to receive(:execute_operation) do |operation|
       expect(operation.index_names).to eq([:type_company])
-      expect(operation.wait).to eq(false)
+      expect(operation.wait).to be(false)
     end
 
     migration.build_indexes(:type_company)
@@ -142,7 +142,7 @@ describe CouchbaseOrm::IndexMigration do
 
     expect(migration).to receive(:execute_operation) do |operation|
       expect(operation.index_names).to eq([:type_company])
-      expect(operation.wait).to eq(true)
+      expect(operation.wait).to be(true)
     end
 
     migration.build_indexes(:type_company, wait: true)
@@ -182,7 +182,7 @@ describe CouchbaseOrm::IndexMigration do
     poll_count = 0
     allow(cluster).to receive(:query) do |query, _options|
       if query.start_with?('BUILD INDEX ON')
-        instance_double('QueryResult', rows: [])
+        instance_double(Couchbase::Cluster::QueryResult, rows: [])
       elsif query.include?('FROM system:indexes')
         poll_count += 1
         rows = if poll_count == 1
@@ -196,16 +196,15 @@ describe CouchbaseOrm::IndexMigration do
                    { 'name' => 'date_on_type', 'state' => 'online' }
                  ]
                end
-        instance_double('QueryResult', rows: rows)
+        instance_double(Couchbase::Cluster::QueryResult, rows: rows)
       end
     end
 
     migration = migration_class.new
-    allow(migration).to receive(:sleep)
+    expect(migration).to receive(:sleep).once
     migration.migrate(:up)
 
     expect(poll_count).to eq(2)
-    expect(migration).to have_received(:sleep).once
   end
 
   it 'raises irreversible migration when build_indexes is used in change' do
