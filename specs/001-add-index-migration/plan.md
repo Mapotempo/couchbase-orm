@@ -69,7 +69,6 @@ Use configuration:
 ```ruby
 config.index.bucket
 config.index.num_replica
-config.index.defer_build
 ```
 
 ---

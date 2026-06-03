@@ -43,7 +43,6 @@ Users are expected to explicitly create migrations describing changes.
 CouchbaseOrm.configure do |config|
   config.index.bucket = "fleet-prod"
   config.index.num_replica = 1
-  config.index.defer_build = true
 end
 ```
 
@@ -53,8 +52,6 @@ Supported settings:
 | ----------- | -------- |
 | bucket      | required |
 | num_replica | 0        |
-| defer_build | true     |
-
 These values are automatically applied to every index created by migrations.
 
 ---

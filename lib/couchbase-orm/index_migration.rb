@@ -9,20 +9,38 @@ module CouchbaseOrm
 
     module Operations
       class AddIndex
-        attr_reader :name, :keys, :where
+        attr_reader :name, :keys, :where, :defer_build
 
-        def initialize(name, keys:, where: nil)
+        def initialize(name, keys:, where: nil, defer_build: false)
           @name = name
           @keys = keys
           @where = where
+          @defer_build = defer_build
         end
 
         def execute(migration)
-          migration.execute_add_index(name, keys: keys, where: where)
+          migration.execute_add_index(name, keys: keys, where: where, defer_build: defer_build)
         end
 
         def inverse
           RemoveIndex.new(name)
+        end
+      end
+
+      class BuildIndexes
+        attr_reader :index_names
+
+        def initialize(index_names)
+          @index_names = Array(index_names).flatten
+          raise ArgumentError.new('At least one index name is required') if @index_names.empty?
+        end
+
+        def execute(migration)
+          migration.execute_build_indexes(index_names)
+        end
+
+        def inverse
+          raise IrreversibleMigration.new('build_indexes is not reversible. Define down explicitly.')
         end
       end
 
@@ -64,7 +82,7 @@ module CouchbaseOrm
         @config = config
       end
 
-      def add_index(name, keys:, where: nil)
+      def add_index(name, keys:, where: nil, defer_build: false)
         bucket = @config.effective_bucket
         raise ArgumentError.new('Missing index bucket configuration') if bucket.to_s.strip.empty?
         raise ArgumentError.new('Missing index keys configuration') if Array(keys).empty?
@@ -72,8 +90,20 @@ module CouchbaseOrm
         query = +"CREATE INDEX `#{name}`\n"
         query << "ON `#{bucket}`(#{Array(keys).map { |key| "`#{key}`" }.join(',')})"
         query << "\nWHERE (#{where})" if where
-        query << "\nWITH #{JSON.pretty_generate(with_options)}"
+        options = with_options(defer_build: defer_build)
+        query << "\nWITH #{JSON.pretty_generate(options)}" unless options.empty?
         query
+      end
+
+      def build_indexes(index_names)
+        bucket = @config.effective_bucket
+        raise ArgumentError.new('Missing index bucket configuration') if bucket.to_s.strip.empty?
+
+        names = Array(index_names)
+        raise ArgumentError.new('At least one index name is required') if names.empty?
+
+        index_lines = names.map { |name| "  `#{name}`" }.join(",\n")
+        "BUILD INDEX ON `#{bucket}`\n(\n#{index_lines}\n);"
       end
 
       def remove_index(name)
@@ -85,11 +115,11 @@ module CouchbaseOrm
 
       private
 
-      def with_options
-        {
-          'defer_build' => @config.defer_build,
-          'num_replica' => @config.num_replica
-        }
+      def with_options(defer_build:)
+        options = {}
+        options['defer_build'] = true if defer_build
+        options['num_replica'] = @config.num_replica unless @config.num_replica.nil?
+        options
       end
     end
 
@@ -104,20 +134,28 @@ module CouchbaseOrm
       end
     end
 
-    def add_index(name, keys:, where: nil)
-      execute_operation(Operations::AddIndex.new(name, keys: keys, where: where))
+    def add_index(name, keys:, where: nil, defer_build: false)
+      execute_operation(Operations::AddIndex.new(name, keys: keys, where: where, defer_build: defer_build))
     end
 
     def remove_index(name)
       execute_operation(Operations::RemoveIndex.new(name))
     end
 
-    def execute_add_index(name, keys:, where: nil)
-      execute_query(query_builder.add_index(name, keys: keys, where: where))
+    def build_indexes(*index_names)
+      execute_operation(Operations::BuildIndexes.new(index_names))
+    end
+
+    def execute_add_index(name, keys:, where: nil, defer_build: false)
+      execute_query(query_builder.add_index(name, keys: keys, where: where, defer_build: defer_build))
     end
 
     def execute_remove_index(name)
       execute_query(query_builder.remove_index(name))
+    end
+
+    def execute_build_indexes(index_names)
+      execute_query(query_builder.build_indexes(index_names))
     end
 
     private
