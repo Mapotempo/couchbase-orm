@@ -11,7 +11,7 @@ module CouchbaseOrm
     end
 
     def generate(name)
-      raise ArgumentError, 'Migration name is required' if name.to_s.strip.empty?
+      raise ArgumentError.new('Migration name is required') if name.to_s.strip.empty?
 
       timestamp = @now.utc.strftime('%Y%m%d%H%M%S')
       underscored = name.to_s.underscore

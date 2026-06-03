@@ -42,7 +42,7 @@ module CouchbaseOrm
 
     def parse_file_name(file)
       match = File.basename(file).match(/\A(\d+)_(.+)\.rb\z/)
-      raise ArgumentError, "Invalid migration file name: #{file}" unless match
+      raise ArgumentError.new("Invalid migration file name: #{file}") unless match
 
       [match[1], match[2]]
     end

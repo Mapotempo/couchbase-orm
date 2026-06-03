@@ -35,7 +35,7 @@ module CouchbaseOrm
       return nil unless version
 
       migration_def = @context.find(version)
-      raise ArgumentError, "Migration file not found for version #{version}" unless migration_def
+      raise ArgumentError.new("Migration file not found for version #{version}") unless migration_def
 
       migration = migration_def.klass.new
       migration.migrate(:down)
@@ -47,7 +47,7 @@ module CouchbaseOrm
       executed_versions = @schema_migration.versions
       lines = @context.migrations.map do |migration_def|
         state = executed_versions.include?(migration_def.version) ? 'up' : 'down'
-        format('%-6s %s %s', state, migration_def.version, migration_def.name)
+        "#{state.ljust(6)} #{migration_def.version} #{migration_def.name}"
       end
 
       @out.puts(lines.join("\n")) unless lines.empty?

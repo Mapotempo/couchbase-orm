@@ -38,7 +38,7 @@ module CouchbaseOrm
         end
 
         def inverse
-          raise IrreversibleMigration, 'remove_index is not reversible. Define down explicitly.'
+          raise IrreversibleMigration.new('remove_index is not reversible. Define down explicitly.')
         end
       end
     end
@@ -66,8 +66,8 @@ module CouchbaseOrm
 
       def add_index(name, keys:, where: nil)
         bucket = @config.effective_bucket
-        raise ArgumentError, 'Missing index bucket configuration' if bucket.to_s.strip.empty?
-        raise ArgumentError, 'Missing index keys configuration' if Array(keys).empty?
+        raise ArgumentError.new('Missing index bucket configuration') if bucket.to_s.strip.empty?
+        raise ArgumentError.new('Missing index keys configuration') if Array(keys).empty?
 
         query = +"CREATE INDEX `#{name}`\n"
         query << "ON `#{bucket}`(#{Array(keys).map { |key| "`#{key}`" }.join(',')})"
@@ -78,7 +78,7 @@ module CouchbaseOrm
 
       def remove_index(name)
         bucket = @config.effective_bucket
-        raise ArgumentError, 'Missing index bucket configuration' if bucket.to_s.strip.empty?
+        raise ArgumentError.new('Missing index bucket configuration') if bucket.to_s.strip.empty?
 
         "DROP INDEX `#{bucket}`.`#{name}`"
       end
@@ -95,7 +95,7 @@ module CouchbaseOrm
 
     def migrate(direction)
       direction = direction.to_sym
-      raise ArgumentError, 'direction must be :up or :down' unless %i[up down].include?(direction)
+      raise ArgumentError.new('direction must be :up or :down') unless %i[up down].include?(direction)
 
       if direction == :up
         run_up
@@ -168,7 +168,7 @@ module CouchbaseOrm
     end
 
     def change
-      raise NotImplementedError, 'Define change or up/down in your migration'
+      raise NotImplementedError.new('Define change or up/down in your migration')
     end
 
     def up
@@ -176,7 +176,7 @@ module CouchbaseOrm
     end
 
     def down
-      raise NotImplementedError, 'Define down for non-reversible migrations'
+      raise NotImplementedError.new('Define down for non-reversible migrations')
     end
   end
 end

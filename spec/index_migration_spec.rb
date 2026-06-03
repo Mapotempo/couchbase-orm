@@ -44,7 +44,7 @@ describe CouchbaseOrm::IndexMigration do
       end
     end
 
-    cluster = instance_double('cluster')
+    cluster = instance_double(Couchbase::Cluster)
     allow(CouchbaseOrm::Connection).to receive(:cluster).and_return(cluster)
 
     expect(cluster).to receive(:query).with(/CREATE INDEX `type_company`/, instance_of(Couchbase::Options::Query))
