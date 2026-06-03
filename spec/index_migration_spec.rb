@@ -126,6 +126,87 @@ describe CouchbaseOrm::IndexMigration do
       .to raise_error(ArgumentError, /At least one index name is required/)
   end
 
+  it 'build_indexes sets wait to false by default' do
+    migration = described_class.new
+
+    expect(migration).to receive(:execute_operation) do |operation|
+      expect(operation.index_names).to eq([:type_company])
+      expect(operation.wait).to be(false)
+    end
+
+    migration.build_indexes(:type_company)
+  end
+
+  it 'build_indexes sets wait to true when provided' do
+    migration = described_class.new
+
+    expect(migration).to receive(:execute_operation) do |operation|
+      expect(operation.index_names).to eq([:type_company])
+      expect(operation.wait).to be(true)
+    end
+
+    migration.build_indexes(:type_company, wait: true)
+  end
+
+  it 'does not poll index states when build_indexes wait is false' do
+    migration_class = Class.new(CouchbaseOrm::IndexMigration) do
+      def up
+        build_indexes :type_company
+      end
+    end
+
+    cluster = instance_double(Couchbase::Cluster)
+    allow(CouchbaseOrm::Connection).to receive(:cluster).and_return(cluster)
+
+    expect(cluster).to receive(:query).with(<<~SQL.strip, instance_of(Couchbase::Options::Query))
+      BUILD INDEX ON `fleet-prod`
+      (
+        `type_company`
+      );
+    SQL
+    expect(cluster).not_to receive(:query).with(/FROM system:indexes/, instance_of(Couchbase::Options::Query))
+
+    migration_class.new.migrate(:up)
+  end
+
+  it 'polls until all indexes are online when build_indexes wait is true' do
+    migration_class = Class.new(CouchbaseOrm::IndexMigration) do
+      def up
+        build_indexes :type_company, :date_on_type, wait: true
+      end
+    end
+
+    cluster = instance_double(Couchbase::Cluster)
+    allow(CouchbaseOrm::Connection).to receive(:cluster).and_return(cluster)
+
+    poll_count = 0
+    allow(cluster).to receive(:query) do |query, _options|
+      if query.start_with?('BUILD INDEX ON')
+        instance_double(Couchbase::Cluster::QueryResult, rows: [])
+      elsif query.include?('FROM system:indexes')
+        poll_count += 1
+        rows = if poll_count == 1
+                 [
+                   { 'name' => 'type_company', 'state' => 'online' },
+                   { 'name' => 'date_on_type', 'state' => 'building' }
+                 ]
+               else
+                 [
+                   { 'name' => 'type_company', 'state' => 'online' },
+                   { 'name' => 'date_on_type', 'state' => 'online' }
+                 ]
+               end
+        instance_double(Couchbase::Cluster::QueryResult, rows: rows)
+      end
+    end
+
+    migration = migration_class.new
+    expect(migration).to receive(:sleep).once
+    migration.migrate(:up)
+
+    expect(poll_count).to eq(2)
+  end
+
   it 'raises irreversible migration when build_indexes is used in change' do
     migration_class = Class.new(CouchbaseOrm::IndexMigration) do
       def change

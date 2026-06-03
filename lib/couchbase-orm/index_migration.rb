@@ -28,15 +28,16 @@ module CouchbaseOrm
       end
 
       class BuildIndexes
-        attr_reader :index_names
+        attr_reader :index_names, :wait
 
-        def initialize(index_names)
+        def initialize(index_names, wait: false)
           @index_names = Array(index_names).flatten
+          @wait = wait
           raise ArgumentError.new('At least one index name is required') if @index_names.empty?
         end
 
         def execute(migration)
-          migration.execute_build_indexes(index_names)
+          migration.execute_build_indexes(index_names, wait: wait)
         end
 
         def inverse
@@ -74,6 +75,43 @@ module CouchbaseOrm
         @operations.reverse_each do |operation|
           operation.inverse.execute(migration)
         end
+      end
+    end
+
+    class IndexStateFetcher
+      def initialize(execute_query:)
+        @execute_query = execute_query
+      end
+
+      def states(bucket, index_names)
+        result = @execute_query.call(build_states_query(bucket, index_names))
+
+        result.rows.to_a.each_with_object({}) do |row, states|
+          name = row['name'] || row[:name]
+          state = row['state'] || row[:state]
+          states[name.to_s] = state.to_s.downcase
+        end
+      end
+
+      def online?(bucket, index_names)
+        states_by_name = states(bucket, index_names)
+        Array(index_names).map(&:to_s).all? { |name| states_by_name[name] == 'online' }
+      end
+
+      private
+
+      def build_states_query(bucket, index_names)
+        names = Array(index_names).map { |name| quote(name.to_s) }.join(', ')
+        <<~SQL.strip
+          SELECT name, state
+          FROM system:indexes
+          WHERE keyspace_id = #{quote(bucket.to_s)}
+            AND name IN [#{names}]
+        SQL
+      end
+
+      def quote(value)
+        "'#{value.gsub("'", "''")}'"
       end
     end
 
@@ -143,7 +181,11 @@ module CouchbaseOrm
     end
 
     def build_indexes(*index_names)
-      execute_operation(Operations::BuildIndexes.new(index_names))
+      options = index_names.last.is_a?(Hash) ? index_names.pop : {}
+      unknown_keys = options.keys - [:wait]
+      raise ArgumentError.new("Unknown option(s): #{unknown_keys.join(', ')}") if unknown_keys.any?
+
+      execute_operation(Operations::BuildIndexes.new(index_names, wait: options.fetch(:wait, false)))
     end
 
     def execute_add_index(name, keys:, where: nil, defer_build: false)
@@ -154,8 +196,9 @@ module CouchbaseOrm
       execute_query(query_builder.remove_index(name))
     end
 
-    def execute_build_indexes(index_names)
+    def execute_build_indexes(index_names, wait: false)
       execute_query(query_builder.build_indexes(index_names))
+      wait_for_indexes_online(index_names) if wait
     end
 
     private
@@ -197,8 +240,33 @@ module CouchbaseOrm
       CouchbaseOrm::Connection.cluster.query(query, Couchbase::Options::Query.new)
     end
 
+    def wait_for_indexes_online(index_names)
+      names = Array(index_names).map(&:to_s)
+
+      loop do
+        return if index_state_fetcher.online?(index_bucket, names)
+
+        sleep(index_build_wait_interval_seconds)
+      end
+    end
+
     def query_builder
       @query_builder ||= QueryBuilder.new
+    end
+
+    def index_state_fetcher
+      @index_state_fetcher ||= IndexStateFetcher.new(execute_query: method(:execute_query))
+    end
+
+    def index_bucket
+      bucket = CouchbaseOrm.config.index.effective_bucket
+      raise ArgumentError.new('Missing index bucket configuration') if bucket.to_s.strip.empty?
+
+      bucket
+    end
+
+    def index_build_wait_interval_seconds
+      1
     end
 
     def method_overridden?(method_name)
