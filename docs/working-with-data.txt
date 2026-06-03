@@ -12,6 +12,7 @@ Working With Data
   reference/crud
   reference/queries
   reference/callbacks
+  reference/index-migrations
 
 Overview
 --------
@@ -21,3 +22,4 @@ See the following sections to learn more about working with data in CouchbaseOrm
 - :ref:`CRUD Operations <crud>`
 - :ref:`Queries <queries>`
 - :ref:`Callbacks <callbacks>`
+- :ref:`Index Migrations <index-migrations>`

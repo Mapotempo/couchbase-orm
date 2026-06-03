@@ -1,0 +1,192 @@
+.. _index-migrations:
+
+****************
+Index Migrations
+****************
+
+.. default-domain:: woop
+
+.. contents:: On this page
+   :local:
+   :backlinks: none
+   :depth: 2
+   :class: singlecol
+
+CouchbaseOrm supports versioned index migrations inspired by ActiveRecord.
+Index migrations let you evolve N1QL indexes over time and keep the index
+definition history in your application code.
+
+Configuration
+=============
+
+Configure index migration options with ``CouchbaseOrm.configure``:
+
+.. code-block:: ruby
+
+  CouchbaseOrm.configure do |config|
+    config.index.bucket = 'fleet-prod'
+    config.index.num_replica = 1
+    config.index.defer_build = true
+  end
+
+Supported options:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 30 40
+
+   * - Option
+     - Default
+     - Description
+
+   * - ``bucket``
+     - required
+     - Bucket used in generated ``CREATE INDEX`` and ``DROP INDEX`` statements.
+
+   * - ``num_replica``
+     - ``0``
+     - Value used in the index ``WITH`` clause.
+
+   * - ``defer_build``
+     - ``true``
+     - Value used in the index ``WITH`` clause.
+
+Migration files are loaded from ``db/indexes`` by default.
+
+Creating Migrations
+===================
+
+Generate a new migration file:
+
+.. code-block:: bash
+
+  bundle exec couchbaseorm index:generate AddWorkflowIndex
+
+This creates a timestamped file in ``db/indexes``:
+
+.. code-block:: text
+
+  db/indexes/20250808130000_add_workflow_index.rb
+
+Template:
+
+.. code-block:: ruby
+
+  class AddWorkflowIndex < CouchbaseOrm::IndexMigration
+    def change
+    end
+  end
+
+DSL
+===
+
+``add_index`` creates an index:
+
+.. code-block:: ruby
+
+  add_index(
+    :type_company,
+    keys: [:type, :company_id],
+    where: 'type is valued and company_id is valued'
+  )
+
+Example generated query:
+
+.. code-block:: sql
+
+  CREATE INDEX `type_company`
+  ON `fleet-prod`(`type`,`company_id`)
+  WHERE (type is valued and company_id is valued)
+  WITH {
+    "defer_build": true,
+    "num_replica": 1
+  }
+
+``remove_index`` drops an index:
+
+.. code-block:: ruby
+
+  remove_index :type_company
+
+Example generated query:
+
+.. code-block:: sql
+
+  DROP INDEX `fleet-prod`.`type_company`
+
+Reversible behavior
+===================
+
+For simple migrations, define ``change``:
+
+.. code-block:: ruby
+
+  class InitialIndexes < CouchbaseOrm::IndexMigration
+    def change
+      add_index :type_company, keys: [:type, :company_id]
+    end
+  end
+
+Rollback automatically applies the inverse for supported operations.
+``add_index`` is reversible and rolls back with ``remove_index``.
+
+If a migration cannot be reversed from ``change`` alone (for example when
+calling ``remove_index``), define explicit ``up`` and ``down`` methods.
+
+.. code-block:: ruby
+
+  class ChangeFleetByCompanyIndex < CouchbaseOrm::IndexMigration
+    def up
+      remove_index :fleet_by_company
+      add_index :fleet_by_company, keys: [:type, :company_id]
+    end
+
+    def down
+      remove_index :fleet_by_company
+      add_index :fleet_by_company, keys: [:company_id, :type]
+    end
+  end
+
+Running Migrations
+==================
+
+Run pending migrations:
+
+.. code-block:: bash
+
+  bundle exec couchbaseorm index:migrate
+
+Rollback the latest applied migration:
+
+.. code-block:: bash
+
+  bundle exec couchbaseorm index:rollback
+
+Show migration status:
+
+.. code-block:: bash
+
+  bundle exec couchbaseorm index:status
+
+Example status output:
+
+.. code-block:: text
+
+  up     20250808110000 InitialIndexes
+  up     20250808120000 AddWorkflowIndex
+  down   20250808130000 ChangeFleetByCompanyIndex
+
+Migration State
+===============
+
+Applied versions are stored in the Couchbase document
+``couchbaseorm::index_schema_migrations`` as:
+
+.. code-block:: json
+
+  {
+    "versions": [
+      "20250808110000",
+      "20250808120000"
+    ]
+  }

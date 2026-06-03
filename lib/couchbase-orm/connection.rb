@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'couchbase'
+require 'active_support/core_ext/object/blank'
+require 'active_support/core_ext/object/try'
 
 module CouchbaseOrm
   class Connection
