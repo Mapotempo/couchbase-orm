@@ -32,6 +32,7 @@ Rails applications can configure index migration options in
 
     index:
       migrations_path: custom/indexes
+      schema_path: custom/index_schema.rb
       num_replica: 1
 
 The index bucket defaults to the top-level ``bucket`` unless ``index.bucket``
@@ -45,6 +46,7 @@ You can also configure or override index migration options in Ruby with
   CouchbaseOrm.configure do |config|
     config.index.bucket = 'fleet-prod'
     config.index.migrations_path = 'db/indexes'
+    config.index.schema_path = 'db/index_schema.rb'
     config.index.num_replica = 1
   end
 
@@ -65,6 +67,10 @@ Supported options:
    * - ``migrations_path``
      - ``db/indexes``
      - Directory used to load and generate index migration files.
+
+   * - ``schema_path``
+     - ``db/index_schema.rb``
+     - Path used to read and write the index schema snapshot.
 
    * - ``num_replica``
      - ``0``
@@ -318,6 +324,22 @@ Show migration status:
 .. code-block:: bash
 
   bundle exec couchbaseorm index:status
+
+Schema dump and load:
+
+.. code-block:: bash
+
+  bundle exec couchbaseorm index:schema:dump
+  bundle exec couchbaseorm index:schema:load
+
+``index:schema:dump`` replays migrations in memory and writes the current index
+state to ``db/index_schema.rb`` (or ``index.schema_path`` when configured).
+
+``index:schema:load`` applies indexes from the schema file directly, without
+replaying migration files.
+
+During schema load, indexes declared with ``defer_build: true`` are collected
+and built automatically in a single ``BUILD INDEX`` statement.
 
 Example status output:
 

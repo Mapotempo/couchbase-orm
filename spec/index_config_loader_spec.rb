@@ -30,6 +30,17 @@ describe CouchbaseOrm::IndexConfigLoader do
     expect(CouchbaseOrm.config.index.num_replica).to eq(1)
   end
 
+  it 'loads schema_path from nested index config' do
+    described_class.apply(
+      bucket: 'fleet-dev',
+      index: {
+        schema_path: 'custom/index_schema.rb'
+      }
+    )
+
+    expect(CouchbaseOrm.config.index.schema_path).to eq('custom/index_schema.rb')
+  end
+
   it 'defaults index bucket to connection bucket from top-level config' do
     described_class.apply(bucket: 'fleet-dev')
 
@@ -51,6 +62,7 @@ describe CouchbaseOrm::IndexConfigLoader do
     described_class.apply(bucket: 'fleet-dev')
 
     expect(CouchbaseOrm.config.index.migrations_path).to eq('db/indexes')
+    expect(CouchbaseOrm.config.index.schema_path).to eq('db/index_schema.rb')
     expect(CouchbaseOrm.config.index.num_replica).to eq(0)
   end
 

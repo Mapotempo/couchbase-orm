@@ -13,17 +13,18 @@ module CouchbaseOrm
 
     module Operations
       class AddIndex
-        attr_reader :name, :keys, :where, :defer_build
+        attr_reader :name, :keys, :where, :num_replica, :defer_build
 
-        def initialize(name, keys:, where: nil, defer_build: false)
+        def initialize(name, keys:, where: nil, num_replica: nil, defer_build: false)
           @name = name
           @keys = keys
           @where = where
+          @num_replica = num_replica
           @defer_build = defer_build
         end
 
         def execute(migration)
-          migration.execute_add_index(name, keys: keys, where: where, defer_build: defer_build)
+          migration.execute_add_index(name, keys: keys, where: where, num_replica: num_replica, defer_build: defer_build)
         end
 
         def inverse
@@ -124,7 +125,7 @@ module CouchbaseOrm
         @config = config
       end
 
-      def add_index(name, keys:, where: nil, defer_build: false)
+      def add_index(name, keys:, where: nil, num_replica: nil, defer_build: false)
         bucket = @config.effective_bucket
         raise ArgumentError.new('Missing index bucket configuration') if bucket.to_s.strip.empty?
         raise ArgumentError.new('Missing index keys configuration') if Array(keys).empty?
@@ -132,7 +133,7 @@ module CouchbaseOrm
         query = +"CREATE INDEX `#{name}`\n"
         query << "ON `#{bucket}`(#{Array(keys).map { |key| "`#{key}`" }.join(',')})"
         query << "\nWHERE (#{where})" if where
-        options = with_options(defer_build: defer_build)
+        options = with_options(defer_build: defer_build, num_replica: num_replica)
         query << "\nWITH #{JSON.pretty_generate(options)}" unless options.empty?
         query
       end
@@ -157,10 +158,11 @@ module CouchbaseOrm
 
       private
 
-      def with_options(defer_build:)
+      def with_options(defer_build:, num_replica:)
         options = {}
         options['defer_build'] = true if defer_build
-        options['num_replica'] = @config.num_replica unless @config.num_replica.nil?
+        effective_num_replica = num_replica.nil? ? @config.num_replica : num_replica
+        options['num_replica'] = effective_num_replica unless effective_num_replica.nil?
         options
       end
     end
@@ -176,8 +178,8 @@ module CouchbaseOrm
       end
     end
 
-    def add_index(name, keys:, where: nil, defer_build: false)
-      execute_operation(Operations::AddIndex.new(name, keys: keys, where: where, defer_build: defer_build))
+    def add_index(name, keys:, where: nil, num_replica: nil, defer_build: false)
+      execute_operation(Operations::AddIndex.new(name, keys: keys, where: where, num_replica: num_replica, defer_build: defer_build))
     end
 
     def remove_index(name)
@@ -192,8 +194,8 @@ module CouchbaseOrm
       execute_operation(Operations::BuildIndexes.new(index_names, wait: options.fetch(:wait, false)))
     end
 
-    def execute_add_index(name, keys:, where: nil, defer_build: false)
-      execute_query(query_builder.add_index(name, keys: keys, where: where, defer_build: defer_build))
+    def execute_add_index(name, keys:, where: nil, num_replica: nil, defer_build: false)
+      execute_query(query_builder.add_index(name, keys: keys, where: where, num_replica: num_replica, defer_build: defer_build))
     end
 
     def execute_remove_index(name)

@@ -48,6 +48,22 @@ describe CouchbaseOrm::IndexMigration do
       SQL
     end
 
+    it 'builds create index query with explicit num_replica override' do
+      query = described_class.new.add_index(
+        :type_company,
+        keys: %i[type company_id],
+        num_replica: 3
+      )
+
+      expect(query).to eq(<<~SQL.strip)
+        CREATE INDEX `type_company`
+        ON `fleet-prod`(`type`,`company_id`)
+        WITH {
+          "num_replica": 3
+        }
+      SQL
+    end
+
     it 'builds build indexes query' do
       query = described_class.new.build_indexes(%i[type_company date_on_type])
 

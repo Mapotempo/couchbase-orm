@@ -4,7 +4,7 @@ require 'active_support/core_ext/hash/indifferent_access'
 
 module CouchbaseOrm
   class IndexConfigLoader
-    SUPPORTED_KEYS = %i[bucket migrations_path num_replica].freeze
+    SUPPORTED_KEYS = %i[bucket migrations_path schema_path num_replica].freeze
 
     def self.apply(config_hash)
       config_hash = config_hash.with_indifferent_access
