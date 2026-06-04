@@ -1,6 +1,17 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+def load_rails_environment_if_present
+  return if defined?(::Rails)
+
+  environment_path = File.expand_path('config/environment.rb', Dir.pwd)
+  return unless File.file?(environment_path)
+
+  require environment_path
+end
+
+load_rails_environment_if_present
+
 require 'couchbase-orm'
 
 def usage
