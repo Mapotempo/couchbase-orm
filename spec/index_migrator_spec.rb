@@ -7,6 +7,18 @@ describe CouchbaseOrm::IndexMigrator do
   let(:schema_migration) { instance_double(CouchbaseOrm::IndexSchemaMigration) }
   let(:out) { StringIO.new }
 
+  describe '.cleanup' do
+    it 'delegates to instance cleanup' do
+      migrator = instance_double(described_class)
+      allow(described_class).to receive(:new).and_return(migrator)
+      allow(migrator).to receive(:cleanup).and_return(['date_on_type'])
+
+      result = described_class.cleanup
+
+      expect(result).to eq(['date_on_type'])
+    end
+  end
+
   context 'when applying and rolling back migrations' do
     let(:migration_class) { Class.new { def migrate(_direction); end } }
     let(:migration_def) do
@@ -88,5 +100,39 @@ describe CouchbaseOrm::IndexMigrator do
     adopted_version = described_class.new(context: context, schema_migration: schema_migration, out: out).adopt
 
     expect(adopted_version).to be_nil
+  end
+
+  describe '#cleanup' do
+    it 'drops all introspected non-primary indexes and returns sorted names' do
+      introspector = instance_double(CouchbaseOrm::IndexMigration::IndexIntrospector)
+      allow(CouchbaseOrm::IndexMigration::IndexIntrospector).to receive(:new).and_return(introspector)
+      allow(introspector).to receive(:indexes).and_return([
+        { name: 'type_company' },
+        { name: 'date_on_type' }
+      ])
+
+      migration = instance_double(CouchbaseOrm::IndexMigration)
+      allow(CouchbaseOrm::IndexMigration).to receive(:new).and_return(migration)
+      expect(migration).to receive(:remove_index).with('date_on_type').ordered
+      expect(migration).to receive(:remove_index).with('type_company').ordered
+
+      result = described_class.new(context: context, schema_migration: schema_migration, out: out).cleanup
+
+      expect(result).to eq(%w[date_on_type type_company])
+    end
+
+    it 'returns empty array when no secondary indexes are found' do
+      introspector = instance_double(CouchbaseOrm::IndexMigration::IndexIntrospector)
+      allow(CouchbaseOrm::IndexMigration::IndexIntrospector).to receive(:new).and_return(introspector)
+      allow(introspector).to receive(:indexes).and_return([])
+
+      migration = instance_double(CouchbaseOrm::IndexMigration)
+      allow(CouchbaseOrm::IndexMigration).to receive(:new).and_return(migration)
+      expect(migration).not_to receive(:remove_index)
+
+      result = described_class.new(context: context, schema_migration: schema_migration, out: out).cleanup
+
+      expect(result).to eq([])
+    end
   end
 end

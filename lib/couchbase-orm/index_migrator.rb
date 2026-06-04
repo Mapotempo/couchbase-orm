@@ -7,6 +7,10 @@ module CouchbaseOrm
         new(**options).migrate
       end
 
+      def cleanup(**options)
+        new(**options).cleanup
+      end
+
       def rollback(**options)
         new(**options).rollback
       end
@@ -64,6 +68,13 @@ module CouchbaseOrm
 
       @schema_migration.add_version(migration_def.version)
       migration_def.version
+    end
+
+    def cleanup
+      names = IndexMigration::IndexIntrospector.new.indexes.map { |row| row[:name] }.sort
+      migration = IndexMigration.new
+      names.each { |name| migration.remove_index(name) }
+      names
     end
   end
 end
