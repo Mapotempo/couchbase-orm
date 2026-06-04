@@ -1,0 +1,61 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'couchbase-orm'
+
+def usage
+  puts <<~TEXT
+    Usage:
+      couchbaseorm index:migrate
+      couchbaseorm index:rollback
+      couchbaseorm index:status
+      couchbaseorm index:schema:dump
+      couchbaseorm index:schema:load
+      couchbaseorm index:dump
+      couchbaseorm index:dump NAME=FleetIndexes
+      couchbaseorm index:adopt
+      couchbaseorm index:generate NAME=AddWorkflowIndex
+      couchbaseorm index:generate AddWorkflowIndex
+  TEXT
+end
+
+def parse_name_argument(args)
+  positional_name = args.shift
+  named_arg = args.find { |arg| arg.start_with?('NAME=') }
+  named_name = named_arg&.split('=', 2)&.last
+  positional_name = positional_name.split('=', 2).last if positional_name&.start_with?('NAME=')
+  positional_name || named_name
+end
+
+command = ARGV.shift
+
+case command
+when 'index:migrate'
+  CouchbaseOrm::IndexMigrator.migrate
+when 'index:rollback'
+  CouchbaseOrm::IndexMigrator.rollback
+when 'index:status'
+  CouchbaseOrm::IndexMigrator.status
+when 'index:schema:dump'
+  path = CouchbaseOrm::IndexSchema::Dumper.new.dump
+  puts path
+when 'index:schema:load'
+  CouchbaseOrm::IndexSchema::Loader.new.load
+when 'index:dump'
+  name = parse_name_argument(ARGV) || CouchbaseOrm::IndexMigration::MigrationGenerator::DEFAULT_NAME
+  introspected = CouchbaseOrm::IndexMigration::IndexIntrospector.new.indexes
+  definitions = introspected.map { |index_data| CouchbaseOrm::IndexMigration::IndexDefinition.from_introspected(index_data) }
+  path = CouchbaseOrm::IndexMigration::MigrationGenerator.new.generate(definitions, name: name)
+  puts path
+when 'index:adopt'
+  version = CouchbaseOrm::IndexMigrator.adopt
+  puts(version || 'No index migrations found')
+when 'index:generate'
+  name = parse_name_argument(ARGV)
+
+  path = CouchbaseOrm::IndexMigrationGenerator.new.generate(name)
+  puts path
+else
+  usage
+  exit 1
+end
