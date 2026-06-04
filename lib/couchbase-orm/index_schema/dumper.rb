@@ -11,27 +11,27 @@ module CouchbaseOrm
       end
 
       def dump
-        definition = Definition.new
+        indexes = {}
         migrations = @context.migrations
 
         migrations.each do |migration_def|
-          replay_migration(migration_def, definition)
+          replay_migration(migration_def, indexes)
         end
 
-        schema_source = source_for(definition, version: migrations.max_by(&:version)&.version)
+        schema_source = source_for(indexes, version: migrations.max_by(&:version)&.version)
 
         FileUtils.mkdir_p(File.dirname(@path))
         File.write(@path, schema_source)
         @path
       end
 
-      def source_for(definition, version: nil)
+      def source_for(indexes, version: nil)
         lines = []
         lines << definition_header(version)
 
-        index_names = definition.indexes.keys.sort
+        index_names = indexes.keys.sort
         index_names.each_with_index do |name, index|
-          lines.concat(index_lines(name, definition.indexes[name]))
+          lines.concat(index_lines(indexes[name]))
           lines << '' unless index == index_names.length - 1
         end
 
@@ -41,28 +41,59 @@ module CouchbaseOrm
 
       private
 
-      def replay_migration(migration_def, definition)
+      def replay_migration(migration_def, indexes)
         migration = migration_def.klass.new
 
+        me = self
         migration.singleton_class.class_eval do
-          define_method(:add_index) do |name, keys:, where: nil, num_replica: nil, defer_build: false|
-            definition.add_index(name, keys: keys, where: where, num_replica: num_replica, defer_build: defer_build)
-          end
-
-          define_method(:remove_index) do |name|
-            definition.remove_index(name)
-          end
-
-          define_method(:rename_index) do |old_name, new_name|
-            definition.rename_index(old_name, new_name)
-          end
-
-          define_method(:build_indexes) do |*_index_names, **_options|
-            nil
-          end
+          me.send(:define_add_index, self, indexes)
+          me.send(:define_remove_index, self, indexes)
+          me.send(:define_rename_index, self, indexes)
+          me.send(:define_build_indexes, self, indexes)
         end
 
         migration.migrate(:up)
+      end
+
+      def define_add_index(klass, indexes)
+        klass.define_method(:add_index) do |name, keys:, where: nil, num_replica: nil, defer_build: false|
+          index_definition = CouchbaseOrm::IndexDefinition.new(
+            name: name,
+            keys: keys,
+            where: where,
+            defer_build: defer_build,
+            num_replica: num_replica
+          )
+          indexes[index_definition.name] = index_definition
+        end
+      end
+
+      def define_remove_index(klass, indexes)
+        klass.define_method(:remove_index) do |name|
+          indexes.delete(name.to_sym)
+        end
+      end
+
+      def define_rename_index(klass, indexes)
+        klass.define_method(:rename_index) do |old_name, new_name|
+          index_definition = indexes.delete(old_name.to_sym)
+          next unless index_definition
+
+          renamed_index = CouchbaseOrm::IndexDefinition.new(
+            name: new_name,
+            keys: index_definition.keys,
+            where: index_definition.where,
+            defer_build: index_definition.defer_build,
+            num_replica: index_definition.num_replica
+          )
+          indexes[renamed_index.name] = renamed_index
+        end
+      end
+
+      def define_build_indexes(klass, _indexes)
+        klass.define_method(:build_indexes) do |*_index_names, **_options|
+          nil
+        end
       end
 
       def definition_header(version)
@@ -73,13 +104,13 @@ module CouchbaseOrm
         end
       end
 
-      def index_lines(name, options)
-        lines = ["  add_index :#{name},"]
+      def index_lines(index_definition)
+        lines = ["  add_index :#{index_definition.name},"]
 
-        option_lines = ["keys: #{ruby_array(options[:keys])}"]
-        option_lines << "where: #{options[:where].inspect}" if options.key?(:where)
-        option_lines << "num_replica: #{options[:num_replica]}" if options.key?(:num_replica)
-        option_lines << 'defer_build: true' if options[:defer_build]
+        option_lines = ["keys: #{ruby_array(index_definition.keys)}"]
+        option_lines << "where: #{index_definition.where.inspect}" if index_definition.where
+        option_lines << "num_replica: #{index_definition.num_replica}" unless index_definition.num_replica.nil?
+        option_lines << 'defer_build: true' if index_definition.defer_build
 
         option_lines.each_with_index do |line, index|
           suffix = index == option_lines.length - 1 ? '' : ','
