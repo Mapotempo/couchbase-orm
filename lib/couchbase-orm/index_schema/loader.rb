@@ -9,8 +9,8 @@ module CouchbaseOrm
       end
 
       def load
-        definition, version = read_definition
-        apply_definition(definition)
+        indexes, version = read_definition
+        apply_definition(indexes)
         version
       end
 
@@ -37,20 +37,16 @@ module CouchbaseOrm
       def apply_definition(definition)
         migration = @migration_class.new
         deferred_indexes = []
+        create_operation_class = @migration_class::Operations::CreateIndex
+        build_operation_class = @migration_class::Operations::BuildIndexes
 
-        definition.indexes.keys.sort.each do |name|
-          options = definition.indexes[name]
-          migration.execute_add_index(
-            name,
-            keys: options[:keys],
-            where: options[:where],
-            num_replica: options[:num_replica],
-            defer_build: options.fetch(:defer_build, false)
-          )
-          deferred_indexes << name if options[:defer_build]
+        definition.keys.sort.each do |name|
+          index_definition = definition[name]
+          create_operation_class.new(index_definition).execute(migration)
+          deferred_indexes << name if index_definition.defer_build
         end
 
-        migration.execute_build_indexes(deferred_indexes.sort) if deferred_indexes.any?
+        build_operation_class.new(deferred_indexes.sort).execute(migration) if deferred_indexes.any?
       end
     end
   end

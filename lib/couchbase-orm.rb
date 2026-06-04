@@ -11,6 +11,7 @@ end
 # Top-level module for project.
 module CouchbaseOrm
   autoload :Configuration, 'couchbase-orm/configuration'
+  autoload :IndexDefinition, 'couchbase-orm/index_definition'
   autoload :IndexMigration, 'couchbase-orm/index_migration'
   autoload :IndexSchema, 'couchbase-orm/index_schema'
   autoload :IndexMigrationContext, 'couchbase-orm/index_migration_context'

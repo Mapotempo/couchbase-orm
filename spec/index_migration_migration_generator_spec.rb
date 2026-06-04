@@ -5,7 +5,7 @@ require 'tmpdir'
 
 describe CouchbaseOrm::IndexMigration::MigrationGenerator do
   let(:date_on_type) do
-    CouchbaseOrm::IndexMigration::IndexDefinition.new(
+    CouchbaseOrm::IndexDefinition.new(
       name: 'date_on_type',
       keys: [:date],
       where: 'type is valued and date is valued'
@@ -13,7 +13,7 @@ describe CouchbaseOrm::IndexMigration::MigrationGenerator do
   end
 
   let(:type_company) do
-    CouchbaseOrm::IndexMigration::IndexDefinition.new(
+    CouchbaseOrm::IndexDefinition.new(
       name: 'type_company',
       keys: %i[type company_id],
       where: 'type is valued and company_id is valued'

@@ -13,10 +13,12 @@ describe CouchbaseOrm::IndexMigration do
 
   describe CouchbaseOrm::IndexMigration::QueryBuilder do
     it 'builds create index query without deferred build option by default' do
-      query = described_class.new.add_index(
-        :type_company,
-        keys: %i[type company_id],
-        where: 'type is valued and company_id is valued'
+      query = described_class.new.create_index(
+        CouchbaseOrm::IndexDefinition.new(
+          name: :type_company,
+          keys: %i[type company_id],
+          where: 'type is valued and company_id is valued'
+        )
       )
 
       expect(query).to eq(<<~SQL.strip)
@@ -30,11 +32,13 @@ describe CouchbaseOrm::IndexMigration do
     end
 
     it 'builds create index query with deferred build option' do
-      query = described_class.new.add_index(
-        :type_company,
-        keys: %i[type company_id],
-        where: 'type is valued and company_id is valued',
-        defer_build: true
+      query = described_class.new.create_index(
+        CouchbaseOrm::IndexDefinition.new(
+          name: :type_company,
+          keys: %i[type company_id],
+          where: 'type is valued and company_id is valued',
+          defer_build: true
+        )
       )
 
       expect(query).to eq(<<~SQL.strip)
@@ -49,10 +53,12 @@ describe CouchbaseOrm::IndexMigration do
     end
 
     it 'builds create index query with explicit num_replica override' do
-      query = described_class.new.add_index(
-        :type_company,
-        keys: %i[type company_id],
-        num_replica: 3
+      query = described_class.new.create_index(
+        CouchbaseOrm::IndexDefinition.new(
+          name: :type_company,
+          keys: %i[type company_id],
+          num_replica: 3
+        )
       )
 
       expect(query).to eq(<<~SQL.strip)
