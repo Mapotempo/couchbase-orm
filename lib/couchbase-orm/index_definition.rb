@@ -23,7 +23,7 @@ module CouchbaseOrm
     end
 
     def <=>(other)
-      name <=> other.name
+      name.to_s <=> other.name.to_s
     end
 
     private

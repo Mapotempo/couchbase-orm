@@ -25,7 +25,7 @@ module CouchbaseOrm
       end
 
       def source_for(index_definitions, class_name: DEFAULT_NAME)
-        definitions = Array(index_definitions).sort_by(&:name)
+        definitions = Array(index_definitions).sort_by { |d| d.name.to_s }
 
         <<~RUBY
           class #{migration_class_name(class_name)} < CouchbaseOrm::IndexMigration
