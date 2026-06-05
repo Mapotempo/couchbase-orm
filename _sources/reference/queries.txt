@@ -1,0 +1,355 @@
+.. _queries:
+
+*******
+Queries
+*******
+
+.. default-domain:: woop
+
+.. contents:: On this page
+   :local:
+   :backlinks: none
+   :depth: 2
+   :class: singlecol
+
+
+CouchbaseOrm provides a rich query DSL inspired by ActiveRecord. A trivial query
+looks as follows:
+
+.. code-block:: ruby
+
+  Band.where(name: "Depeche Mode")
+
+A more complex query utilizing various CouchbaseOrm features could be as follows:
+
+.. code-block:: ruby
+
+  Band.
+    where(:founded.gte => "1980-01-01").
+    where(name: [ "Tool", "Deftones" ]).
+
+The query methods return ``CouchbaseOrm::Relation::CouchbaseOrm_Relation`` objects, which are chainable
+and lazily evaluated wrappers for Couchbase query language (SQL).
+The queries are executed when their result sets are iterated. For example:
+
+.. code-block:: ruby
+
+  # Construct a CouchbaseOrm_Relation object:
+
+  Band.where(name: 'Deftones')
+  # => #<CouchbaseOrm::Relation::CouchbaseOrm_Relation
+  #   where: [{"name"=>"Deftones"}]
+  #   model:    Band>
+
+  # Evaluate the query and get matching documents:
+
+  Band.where(name: 'Deftones').to_a
+  # => [#<Band _id: 5ebdeddfe1b83265a376a760, name: "Deftones", description: nil>]
+
+Methods like ``first`` and ``last`` return the individual documents immediately.
+Otherwise, iterating a CouchbaseOrm_Relation object with methods like ``each`` or ``map``
+retrieves the documents from the server. ``to_a`` can be used to force
+execution of a query that returns an array of documents, literally converting
+a CouchbaseOrm_Relation object to an Array.
+
+When a query method is called on a CouchbaseOrm_Relation instance, the method returns a new
+CouchbaseOrm_Relation instance with the new conditions added to the existing conditions:
+
+.. code-block:: ruby
+
+  scope = Band.where(:founded.gte => "1980-01-01")
+  # => #<CouchbaseOrm::Relation::CouchbaseOrm_Relation
+  #   where: [{"founded"=>{"$gte"=>"1980-01-01"}}]
+  #   model:    Band>
+
+  scope.where(:founded.lte => "2020-01-01")
+  # => #<CouchbaseOrm::Relation::CouchbaseOrm_Relation
+  #   where: [{"founded"=>{"$gte"=>"1980-01-01", "$lte"=>"2020-01-01"}}]
+  #   model:    Band>
+
+  scope
+  # => #<CouchbaseOrm::Relation::CouchbaseOrm_Relation
+  #   where: [{"founded"=>{"$gte"=>"1980-01-01"}}]
+  #   class:    Band>
+
+
+Condition Syntax
+================
+
+CouchbaseOrm supports three ways of specifying individual conditions:
+
+1. Attribute syntax.
+2. SQL syntax.
+3. Symbol operator syntax.
+
+All syntaxes support querying embedded documents using the dot notation.
+All syntaxes respect attribute types, if the attribute being queried is defined in the
+model class, and attribute aliases.
+
+The examples in this section use the following model definition:
+
+.. code-block:: ruby
+
+  class Band < CouchbaseOrm::Base
+
+    attribute :name, type: String
+    attribute :founded, type: Integer
+    attribute :m, as: :member_count, type: Integer
+
+    belongs_to :manager
+  end
+
+  class Manager < CouchbaseOrm::Base
+
+    has_many :band
+
+    attribute :name, type: String
+  end
+
+Attribute Syntax
+----------------
+
+The simplest querying syntax utilizes the basic Ruby hashes. Keys can be
+symbols or strings, and correspond to attribute names in Couchbase documents:
+
+.. code-block:: ruby
+
+  Band.where(name: "Depeche Mode")
+  #   => #<CouchbaseOrm::Relation::CouchbaseOrm_Relation
+  #   where: [{"name"=>"Depeche Mode"}]
+  #   model:    Band>
+
+  # Equivalent to:
+
+  Band.where("name" => "Depeche Mode")
+
+SQL Syntax
+----------
+
+An SQL operator may be specified on any attribute using the string syntax:
+
+.. code-block:: ruby
+
+  Band.where(founded: {'$gt' => 1980})
+  # => #<CouchbaseOrm::Relation::CouchbaseOrm_Relation
+  #   where: [{"founded"=>{"$gt"=>1980}}]
+  #   model:  Band>
+
+  # Equivalent to:
+
+  Band.where('founded > 1980')
+
+.. _logical-operations:
+
+Logical Operations
+==================
+
+CouchbaseOrm supports ``where`` and ``not`` logical operations on
+``CouchbaseOrm_Relation`` objects. These methods take one hash of conditions.
+
+.. code-block:: ruby
+
+  # and with conditions
+  Band.where(label: 'Trust in Trance').where(name: 'Astral Projection')
+
+``not`` Behavior
+----------------
+
+``not`` method can be called without arguments, in which case it will negate
+the next condition that is specified. ``not`` can also be called with one
+or more hash conditions or ``CouchbaseOrm_Relation`` objects, which will all be negated and
+added to the criteria.
+
+.. code-block:: ruby
+
+  # not negates subsequent where
+  Band.not.where(name: 'Best')
+  # => {"name"=>{"$ne"=>"Best"}}
+
+  # not negates its argument
+  Band.not(name: 'Best')
+  # => {"name"=>{"$ne"=>"Best"}}
+
+.. _ordering:
+
+Ordering
+========
+
+CouchbaseOrm provides the ``order`` method on ``CouchbaseOrm_Relation`` objects and its alias,
+``order_by``, to specify the ordering of documents. These methods take a
+hash indicating which attributes to order the documents by, and whether to use
+ascending or descending order for each attribute.
+
+.. code-block:: ruby
+
+  Band.order(name: asc)
+  # => #<CouchbaseOrm::Relation::CouchbaseOrm_Relation
+  #   where: []
+  #   order:  [{"name"=>asc}]
+  #   model:    Band>
+
+  Band.order_by(name: :desc, description: :asc)
+  # => #<CouchbaseOrm::Relation::CouchbaseOrm_Relation
+  #   where: []
+  #   order:  [{"name"=>:desc}, {"description"=>:asc}]
+  #   class:    Band
+  #   embedded: false>
+
+The direction may be specified with Symbol ``:asc`` and ``:desc`` for ascending
+and descending, respectively
+
+Finding By ``_id``
+==================
+
+CouchbaseOrm provides the ``find`` method on ``CouchbaseOrm_Relation`` objects to find documents
+by their ``_id`` values:
+
+.. code-block:: ruby
+
+  Band.find('5f0e41d92c97a64a26aabd10')
+  # => #<Band _id: 5f0e41d92c97a64a26aabd10, name: "Juno Reactor">
+
+The ``find`` method can accept an array of arguments.
+In either case each of the arguments or array elements is taken to be an ``_id``
+value, and documents with all of the specified ``_id`` values are returned in
+an array:
+
+.. code-block:: ruby
+
+  Band.find('5f0e41d92c97a64a26aabd10', '5f0e41b02c97a64a26aabd0e')
+  # => [#<Band _id: 5f0e41b02c97a64a26aabd0e, name: "SUN Project", description: nil, likes: nil>,
+    #<Band _id: 5f0e41d92c97a64a26aabd10, name: "Juno Reactor", description: nil, likes: nil>]
+
+  Band.find(['5f0e41d92c97a64a26aabd10', '5f0e41b02c97a64a26aabd0e'])
+  # => [#<Band _id: 5f0e41b02c97a64a26aabd0e, name: "SUN Project", description: nil, likes: nil>,
+    #<Band _id: 5f0e41d92c97a64a26aabd10, name: "Juno Reactor", description: nil, likes: nil>]
+
+If any of the ``_id`` values are not found in the database, the behavior of
+``find`` depends on the value of the ``quiet`` configuration
+option. If the option is set to ``false``, ``find`` raises
+``CouchbaseOrm::Errors::DocumentNotFound`` if any of the ``_id``\s are not found.
+If the option is set to ``true`` and ``find`` is given a single ``_id`` to
+find and there is no matching document, ``find`` returns ``nil``. If the
+option is set to ``false`` and ``find`` is given an array of ids to find
+and some are not found, the return value is an array of documents that were
+found (which could be empty if no documents were found at all).
+
+.. _additional-query-methods:
+
+Additional Query Methods
+========================
+
+CouchbaseOrm also has some helpful methods on criteria.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 60
+
+   * - Operation
+     - Example
+
+   * - ``CouchbaseOrm_Relation#count``
+
+       *Get the total number of documents matching a filter, or the total
+       number of documents in a collection. Note this will always hit
+       the database for the count.*
+
+     -
+        .. code-block:: ruby
+
+          Band.count
+          Band.where(name: "Photek").count
+
+   * - ``CouchbaseOrm_Relation#each``
+
+       *Iterate over all matching documents in the criteria.*
+
+     -
+        .. code-block:: ruby
+
+          Band.where(members: 1).each do |band|
+            p band.name
+          end
+
+   * - ``CouchbaseOrm_Relation#find_by``
+
+       *Find a document by the provided attributes. If not found,
+       raise an error or return nil depending on the value of the*
+       ``raise_not_found_error`` *configuration option.*
+
+     -
+        .. code-block:: ruby
+
+          Band.find_by(name: "Photek")
+
+          Band.find_by(name: "Tool") do |band|
+            band.impressions += 1
+          end
+
+   * - ``CouchbaseOrm_Relation#first|last``
+
+       *Finds a single document given the provided criteria. Get a list of
+       documents by passing in a limit argument. This method automatically adds
+       a sort on _id. This can cause performance issues, so if the sort is
+       undesirable, CouchbaseOrm_Relation#take can be used instead.*
+
+     -
+        .. code-block:: ruby
+
+          Band.first
+          Band.where(:members.with_size => 3).first
+          Band.where(:members.with_size => 3).last
+          Band.first(2)
+
+   * - ``CouchbaseOrm_Relation#length|size``
+
+       *Same as count but caches subsequent calls to the database*
+
+     -
+        .. code-block:: ruby
+
+          Band.length
+          Band.where(name: "FKA Twigs").size
+
+   * - ``CouchbaseOrm_Relation#pluck``
+
+       *Get all the values for the provided attribute.
+       Returns nil for unset attributes and for non-existent attributes.*
+
+     -
+        .. code-block:: ruby
+
+          Band.all.pluck(:name)
+            #=> ["Daft Punk", "Aphex Twin", "Ween"]
+
+          Band.all.pluck('address.city')
+            #=> ["Paris", "Limerick", "New Hope"]
+
+          # Using the earlier definition of Manager,
+          # expands out to "managers.name" in the query:
+          Band.all.pluck('managers.n')
+            #=> [ ["Berry Gordy", "Tommy Mottola"], [], ["Quincy Jones"] ]
+
+          # Accepts multiple attribute arguments, in which case
+          # the result will be returned as an Array of Arrays.
+          Band.all.pluck(:name, :likes)
+            #=> [ ["Daft Punk", 342], ["Aphex Twin", 98], ["Ween", 227] ]
+
+Class Methods
+-------------
+
+Class methods on models that return criteria objects are also
+treated like scopes, and can be chained as well.
+
+.. code-block:: ruby
+
+  class Band < CouchbaseOrm::Base
+    attribute :name, type: String
+    attribute :active, type: Boolean, default: true
+
+    def self.active
+      where(active: true)
+    end
+  end
+
+  Band.active

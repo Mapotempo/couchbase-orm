@@ -1,0 +1,384 @@
+.. _index-migrations:
+
+****************
+Index Migrations
+****************
+
+.. default-domain:: woop
+
+.. contents:: On this page
+   :local:
+   :backlinks: none
+   :depth: 2
+   :class: singlecol
+
+CouchbaseOrm supports versioned index migrations inspired by ActiveRecord.
+Index migrations let you evolve N1QL indexes over time and keep the index
+definition history in your application code.
+
+Configuration
+=============
+
+Rails applications can configure index migration options in
+``config/couchbase.yml`` using a nested ``index`` section:
+
+.. code-block:: yaml
+
+  development:
+    connection_string: couchbase://localhost
+    username: dev_user
+    password: dev_password
+    bucket: fleet-dev
+
+    index:
+      migrations_path: custom/indexes
+      schema_path: custom/index_schema.rb
+      num_replica: 1
+
+The index bucket defaults to the top-level ``bucket`` unless ``index.bucket``
+is set explicitly.
+
+You can also configure or override index migration options in Ruby with
+``CouchbaseOrm.configure``:
+
+.. code-block:: ruby
+
+  CouchbaseOrm.configure do |config|
+    config.index.bucket = 'fleet-prod'
+    config.index.migrations_path = 'db/indexes'
+    config.index.schema_path = 'db/index_schema.rb'
+    config.index.num_replica = 1
+  end
+
+Supported options:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 30 40
+
+   * - Option
+     - Default
+     - Description
+
+   * - ``bucket``
+     - top-level connection bucket in Rails, otherwise ``nil``
+     - Bucket used in generated ``CREATE INDEX`` and ``DROP INDEX`` statements.
+
+   * - ``migrations_path``
+     - ``db/indexes``
+     - Directory used to load and generate index migration files.
+
+   * - ``schema_path``
+     - ``db/index_schema.rb``
+     - Path used to read and write the index schema snapshot.
+
+   * - ``num_replica``
+     - ``0``
+     - Value used in the index ``WITH`` clause.
+
+In Rails, values are applied in this order:
+
+1. Default index configuration values.
+2. The top-level connection ``bucket`` from ``config/couchbase.yml``.
+3. Nested ``index`` values from ``config/couchbase.yml``.
+4. Later explicit ``CouchbaseOrm.configure`` calls.
+
+Creating Migrations
+===================
+
+Generate a new migration file:
+
+.. code-block:: bash
+
+  bundle exec couchbaseorm index:generate AddWorkflowIndex
+
+This creates a timestamped file in ``db/indexes``:
+
+.. code-block:: text
+
+  db/indexes/20250808130000_add_workflow_index.rb
+
+Template:
+
+.. code-block:: ruby
+
+  class AddWorkflowIndex < CouchbaseOrm::IndexMigration
+    def change
+    end
+  end
+
+DSL
+===
+
+``add_index`` creates an index:
+
+Immediate index example:
+
+.. code-block:: ruby
+
+  add_index(
+    :type_company,
+    keys: [:type, :company_id],
+    where: 'type is valued and company_id is valued'
+  )
+
+Deferred index example:
+
+.. code-block:: ruby
+
+  add_index(
+    :type_company,
+    keys: [:type, :company_id],
+    where: 'type is valued and company_id is valued',
+    defer_build: true
+  )
+
+Index names can be provided as symbols or strings.
+
+Use strings for non-conventional names (for example names containing ``-``):
+
+.. code-block:: ruby
+
+  add_index(
+    'type-company',
+    keys: [:type, :company_id]
+  )
+
+The same rule applies to ``remove_index`` and ``rename_index``.
+
+Example generated query:
+
+.. code-block:: sql
+
+  CREATE INDEX `type_company`
+  ON `fleet-prod`(`type`,`company_id`)
+  WHERE (type is valued and company_id is valued)
+  WITH {
+    "defer_build": true,
+    "num_replica": 1
+  }
+
+``build_indexes`` explicitly builds one or more deferred indexes:
+
+.. code-block:: ruby
+
+  build_indexes :type_company, :date_on_type
+
+To wait until all built indexes are online, pass ``wait: true``:
+
+.. code-block:: ruby
+
+  build_indexes :type_company, :date_on_type, wait: true
+
+Example generated query:
+
+.. code-block:: sql
+
+  BUILD INDEX ON `fleet-prod`
+  (
+    `type_company`,
+    `date_on_type`
+  );
+
+When ``wait: true`` is used, CouchbaseOrm polls ``system:indexes`` after the
+``BUILD INDEX`` statement and resumes when every requested index reports
+``state = online``.
+
+Polling query shape:
+
+.. code-block:: sql
+
+  SELECT name, state
+  FROM system:indexes
+  WHERE keyspace_id = 'fleet-prod'
+    AND name IN ['type_company', 'date_on_type']
+
+Polling runs every second and does not apply a timeout.
+
+``remove_index`` drops an index:
+
+.. code-block:: ruby
+
+  remove_index :type_company
+
+For names containing ``-``, pass a string:
+
+.. code-block:: ruby
+
+  remove_index 'type-company'
+
+Example generated query:
+
+.. code-block:: sql
+
+  DROP INDEX `fleet-prod`.`type_company`
+
+Reversible behavior
+===================
+
+For simple migrations, define ``change``:
+
+.. code-block:: ruby
+
+  class InitialIndexes < CouchbaseOrm::IndexMigration
+    def change
+      add_index :type_company, keys: [:type, :company_id]
+    end
+  end
+
+Rollback automatically applies the inverse for supported operations.
+``add_index`` is reversible and rolls back with ``remove_index``.
+
+``build_indexes`` is irreversible. If it is used inside ``change``, rollback
+raises ``CouchbaseOrm::IndexMigration::IrreversibleMigration``.
+
+If a migration cannot be reversed from ``change`` alone (for example when
+calling ``remove_index`` or ``build_indexes``), define explicit ``up`` and
+``down`` methods.
+
+.. code-block:: ruby
+
+  class ChangeFleetByCompanyIndex < CouchbaseOrm::IndexMigration
+    def up
+      remove_index :fleet_by_company
+      add_index :fleet_by_company, keys: [:type, :company_id]
+    end
+
+    def down
+      remove_index :fleet_by_company
+      add_index :fleet_by_company, keys: [:company_id, :type]
+    end
+  end
+
+Execution Example
+=================
+
+Deferred index creation and explicit build operations execute in order:
+
+.. code-block:: ruby
+
+  class InitialIndexes < CouchbaseOrm::IndexMigration
+    def up
+      add_index :type_company,
+        keys: [:type, :company_id],
+        where: 'type is valued and company_id is valued',
+        defer_build: true
+
+      add_index :date_on_type,
+        keys: [:date],
+        where: 'type is valued and date is valued',
+        defer_build: true
+
+      build_indexes :type_company, :date_on_type
+    end
+
+    def down
+      remove_index :date_on_type
+      remove_index :type_company
+    end
+  end
+
+Generated operations:
+
+.. code-block:: sql
+
+  CREATE INDEX `type_company`
+  ON `fleet-prod`(`type`,`company_id`)
+  WHERE (type is valued and company_id is valued)
+  WITH {
+    "defer_build": true,
+    "num_replica": 1
+  }
+
+  CREATE INDEX `date_on_type`
+  ON `fleet-prod`(`date`)
+  WHERE (type is valued and date is valued)
+  WITH {
+    "defer_build": true,
+    "num_replica": 1
+  }
+
+  BUILD INDEX ON `fleet-prod`
+  (
+    `type_company`,
+    `date_on_type`
+  );
+
+Safe replacement flows can wait for readiness before removing old indexes:
+
+.. code-block:: ruby
+
+  class ChangeFleetByCompanyIndex < CouchbaseOrm::IndexMigration
+    def up
+      add_index :fleet_by_company_v2,
+        keys: [:type, :company_id],
+        defer_build: true
+
+      build_indexes :fleet_by_company_v2, wait: true
+
+      remove_index :fleet_by_company
+    end
+  end
+
+No internal tracking of deferred indexes is performed; migrations must call
+``build_indexes`` explicitly when builds are required.
+
+Running Migrations
+==================
+
+Run pending migrations:
+
+.. code-block:: bash
+
+  bundle exec couchbaseorm index:migrate
+
+Rollback the latest applied migration:
+
+.. code-block:: bash
+
+  bundle exec couchbaseorm index:rollback
+
+Show migration status:
+
+.. code-block:: bash
+
+  bundle exec couchbaseorm index:status
+
+Schema dump and load:
+
+.. code-block:: bash
+
+  bundle exec couchbaseorm index:schema:dump
+  bundle exec couchbaseorm index:schema:load
+
+``index:schema:dump`` replays migrations in memory and writes the current index
+state to ``db/index_schema.rb`` (or ``index.schema_path`` when configured).
+
+``index:schema:load`` applies indexes from the schema file directly, without
+replaying migration files.
+
+During schema load, indexes declared with ``defer_build: true`` are collected
+and built automatically in a single ``BUILD INDEX`` statement.
+
+Example status output:
+
+.. code-block:: text
+
+  up     20250808110000 InitialIndexes
+  up     20250808120000 AddWorkflowIndex
+  down   20250808130000 ChangeFleetByCompanyIndex
+
+Migration State
+===============
+
+Applied versions are stored in the Couchbase document
+``couchbaseorm::index_schema_migrations`` as:
+
+.. code-block:: json
+
+  {
+    "versions": [
+      "20250808110000",
+      "20250808120000"
+    ]
+  }
