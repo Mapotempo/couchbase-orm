@@ -27,6 +27,19 @@ describe CouchbaseOrm::IndexSchema::Dumper do
     end
   end
 
+  it 'dumps non-conventional names as valid ruby values' do
+    indexes = {
+      'type-company' => CouchbaseOrm::IndexDefinition.new(name: 'type-company', keys: [:type]),
+      :date_on_type => CouchbaseOrm::IndexDefinition.new(name: :date_on_type, keys: [:date])
+    }
+
+    source = described_class.new.source_for(indexes, version: 20260101120000)
+
+    expect(source).to include('add_index :date_on_type,')
+    expect(source).to include('add_index "type-company",')
+    expect { RubyVM::InstructionSequence.compile(source) }.not_to raise_error
+  end
+
   def write_migrations(migrations_path)
     FileUtils.mkdir_p(migrations_path)
 

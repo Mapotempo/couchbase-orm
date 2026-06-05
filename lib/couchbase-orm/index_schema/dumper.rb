@@ -29,7 +29,7 @@ module CouchbaseOrm
         lines = []
         lines << definition_header(version)
 
-        index_names = indexes.keys.sort
+        index_names = indexes.keys.sort_by(&:to_s)
         index_names.each_with_index do |name, index|
           lines.concat(index_lines(indexes[name]))
           lines << '' unless index == index_names.length - 1
@@ -70,13 +70,13 @@ module CouchbaseOrm
 
       def define_remove_index(klass, indexes)
         klass.define_method(:remove_index) do |name|
-          indexes.delete(name.to_sym)
+          indexes.delete(CouchbaseOrm::IndexDefinition.normalize_name(name))
         end
       end
 
       def define_rename_index(klass, indexes)
         klass.define_method(:rename_index) do |old_name, new_name|
-          index_definition = indexes.delete(old_name.to_sym)
+          index_definition = indexes.delete(CouchbaseOrm::IndexDefinition.normalize_name(old_name))
           next unless index_definition
 
           renamed_index = CouchbaseOrm::IndexDefinition.new(
@@ -105,7 +105,7 @@ module CouchbaseOrm
       end
 
       def index_lines(index_definition)
-        lines = ["  add_index :#{index_definition.name},"]
+        lines = ["  add_index #{ruby_value(index_definition.name)},"]
 
         option_lines = ["keys: #{ruby_array(index_definition.keys)}"]
         option_lines << "where: #{index_definition.where.inspect}" if index_definition.where
@@ -125,7 +125,7 @@ module CouchbaseOrm
       end
 
       def ruby_value(value)
-        value.is_a?(Symbol) ? ":#{value}" : value.inspect
+        value.inspect
       end
     end
   end

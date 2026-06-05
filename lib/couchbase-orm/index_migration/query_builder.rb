@@ -15,7 +15,7 @@ module CouchbaseOrm
         raise ArgumentError.new('Missing index keys configuration') if Array(index_definition.keys).empty?
 
         query = +"CREATE INDEX `#{index_definition.name}`\n"
-        query << "ON `#{bucket}`(#{Array(index_definition.keys).map { |key| "`#{key}`" }.join(',')})"
+        query << "ON `#{bucket}`(#{Array(index_definition.keys).map { |key| format_key(key) }.join(',')})"
         query << "\nWHERE (#{index_definition.where})" if index_definition.where
         options = with_options(defer_build: index_definition.defer_build, num_replica: index_definition.num_replica)
         query << "\nWITH #{JSON.pretty_generate(options)}" unless options.empty?
@@ -51,6 +51,10 @@ module CouchbaseOrm
       end
 
       private
+
+      def format_key(key)
+        key.is_a?(Symbol) ? "`#{key}`" : key.to_s
+      end
 
       def with_options(defer_build:, num_replica:)
         options = {}

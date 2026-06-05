@@ -40,7 +40,7 @@ module CouchbaseOrm
         create_operation_class = @migration_class::Operations::CreateIndex
         build_operation_class = @migration_class::Operations::BuildIndexes
 
-        definition.keys.sort.each do |name|
+        definition.keys.sort_by(&:to_s).each do |name|
           index_definition = definition[name]
           create_operation_class.new(index_definition).execute(migration)
           deferred_indexes << name if index_definition.defer_build

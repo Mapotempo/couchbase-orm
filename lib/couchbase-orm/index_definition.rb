@@ -4,6 +4,8 @@ module CouchbaseOrm
   class IndexDefinition
     attr_reader :name, :keys, :where, :defer_build, :num_replica
 
+    NAME_SYMBOL_PATTERN = /\A[a-zA-Z_][a-zA-Z0-9_]*\z/
+
     def initialize(name:, keys:, where: nil, defer_build: false, num_replica: nil)
       @name = normalize_name(name)
       @keys = normalize_keys(keys)
@@ -21,13 +23,22 @@ module CouchbaseOrm
     end
 
     def <=>(other)
-      name <=> other.name
+      name.to_s <=> other.name.to_s
     end
 
     private
 
     def normalize_name(name)
-      name.to_sym
+      self.class.normalize_name(name)
+    end
+
+    class << self
+      def normalize_name(name)
+        value = name.to_s.strip
+        return value.to_sym if value.match?(NAME_SYMBOL_PATTERN)
+
+        value
+      end
     end
 
     def normalize_keys(raw_keys)

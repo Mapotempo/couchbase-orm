@@ -22,11 +22,11 @@ module CouchbaseOrm
       end
 
       def remove_index(name)
-        @indexes.delete(name.to_sym)
+        @indexes.delete(CouchbaseOrm::IndexDefinition.normalize_name(name))
       end
 
       def rename_index(old_name, new_name)
-        index_definition = @indexes.delete(old_name.to_sym)
+        index_definition = @indexes.delete(CouchbaseOrm::IndexDefinition.normalize_name(old_name))
         return unless index_definition
 
         renamed_index = CouchbaseOrm::IndexDefinition.new(

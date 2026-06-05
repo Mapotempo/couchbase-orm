@@ -17,4 +17,16 @@ describe CouchbaseOrm::IndexSchema do
     expect(indexes[:date_on_type_v2].where).to eq('type is valued')
     expect(indexes[:date_on_type_v2].defer_build).to be(true)
   end
+
+  it 'supports renaming and removing non-conventional names' do
+    indexes = described_class.define do
+      add_index('date-on-type', keys: [:date])
+      rename_index('date-on-type', 'date-on-type-v2')
+      remove_index('date-on-type-v2')
+      add_index('date-on-type-v3', keys: [:date])
+    end
+
+    expect(indexes.keys).to eq(['date-on-type-v3'])
+    expect(indexes['date-on-type-v3']).to be_a(CouchbaseOrm::IndexDefinition)
+  end
 end

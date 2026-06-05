@@ -21,6 +21,12 @@ describe CouchbaseOrm::IndexDefinition do
     expect(definition.keys).to eq(['LOWER(`name`)'])
   end
 
+  it 'keeps non-conventional names as strings' do
+    definition = described_class.new(name: 'type-company', keys: [:type])
+
+    expect(definition.name).to eq('type-company')
+  end
+
   it 'tracks defer_build and num_replica attributes' do
     definition = described_class.new(
       name: :type_company,
