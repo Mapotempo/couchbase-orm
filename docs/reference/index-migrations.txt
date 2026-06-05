@@ -133,6 +133,19 @@ Deferred index example:
     defer_build: true
   )
 
+Index names can be provided as symbols or strings.
+
+Use strings for non-conventional names (for example names containing ``-``):
+
+.. code-block:: ruby
+
+  add_index(
+    'type-company',
+    keys: [:type, :company_id]
+  )
+
+The same rule applies to ``remove_index`` and ``rename_index``.
+
 Example generated query:
 
 .. code-block:: sql
@@ -187,6 +200,12 @@ Polling runs every second and does not apply a timeout.
 .. code-block:: ruby
 
   remove_index :type_company
+
+For names containing ``-``, pass a string:
+
+.. code-block:: ruby
+
+  remove_index 'type-company'
 
 Example generated query:
 

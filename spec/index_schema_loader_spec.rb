@@ -53,6 +53,35 @@ describe CouchbaseOrm::IndexSchema::Loader do
     end
   end
 
+  it 'loads schema file containing non-conventional index names' do
+    schema_with_hyphen_name = <<~RUBY
+      CouchbaseOrm::IndexSchema.define(version: 20260101120001) do
+        add_index "type-company",
+          keys: [:type],
+          defer_build: true
+      end
+    RUBY
+
+    Dir.mktmpdir do |dir|
+      schema_path = File.join(dir, 'index_schema.rb')
+      File.write(schema_path, schema_with_hyphen_name)
+
+      cluster = instance_double(Couchbase::Cluster)
+      allow(CouchbaseOrm::Connection).to receive(:cluster).and_return(cluster)
+
+      expect(cluster).to receive(:query).with(/CREATE INDEX `type-company`/, instance_of(Couchbase::Options::Query)).ordered
+      expect(cluster).to receive(:query).with(<<~SQL.strip, instance_of(Couchbase::Options::Query)).ordered
+        BUILD INDEX ON `fleet-prod`
+        (
+          `type-company`
+        );
+      SQL
+
+      version = described_class.new(path: schema_path).load
+      expect(version).to eq(20260101120001)
+    end
+  end
+
   def expect_schema_load_queries(cluster)
     expect(cluster).to receive(:query).with(/CREATE INDEX `date_on_type`/, instance_of(Couchbase::Options::Query)).ordered
     expect(cluster).to receive(:query).with(/CREATE INDEX `type_company`/, instance_of(Couchbase::Options::Query)).ordered

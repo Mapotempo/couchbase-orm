@@ -149,6 +149,16 @@ The DSL supports:
 add_index
 ```
 
+Index names can be symbols or strings.
+For non-conventional names (for example with a hyphen `-`), use strings:
+
+```ruby
+add_index "type-company",
+  keys: [:type, :company_id]
+```
+
+The same applies to `remove_index` and `rename_index`.
+
 ---
 
 # Schema Dump
@@ -192,6 +202,9 @@ Generated schema:
 CouchbaseOrm::IndexSchema.define(version: 2026_01_01_120000) do
   add_index :type_company,
     keys: [:type, :company_id]
+
+  add_index "type-company",
+    keys: [:type]
 end
 ```
 
