@@ -66,14 +66,14 @@ module CouchbaseOrm
       end
 
       def down_body(definitions)
-        lines = definitions.reverse.map { |definition| "remove_index :#{definition.name}" }
+        lines = definitions.reverse.map { |definition| "remove_index #{ruby_value(definition.name)}" }
         indent(lines)
       end
 
       def add_index_lines(definition)
         lines = [
           'add_index(',
-          "  :#{definition.name},",
+          "  #{ruby_value(definition.name)},",
           "  keys: #{ruby_array(definition.keys)},"
         ]
         lines << "  where: #{definition.where.inspect}," if definition.where
@@ -86,7 +86,7 @@ module CouchbaseOrm
         lines = ['build_indexes(']
         definitions.each_with_index do |definition, index|
           suffix = index == definitions.length - 1 ? '' : ','
-          lines << "  :#{definition.name}#{suffix}"
+          lines << "  #{ruby_value(definition.name)}#{suffix}"
         end
         lines << ')'
         lines
