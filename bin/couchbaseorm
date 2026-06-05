@@ -20,6 +20,7 @@ def usage
       couchbaseorm index:migrate
       couchbaseorm index:rollback
       couchbaseorm index:status
+      couchbaseorm index:cleanup
       couchbaseorm index:schema:dump
       couchbaseorm index:schema:load
       couchbaseorm index:dump
@@ -47,6 +48,14 @@ when 'index:rollback'
   CouchbaseOrm::IndexMigrator.rollback
 when 'index:status'
   CouchbaseOrm::IndexMigrator.status
+when 'index:cleanup'
+  removed = CouchbaseOrm::IndexMigrator.cleanup
+  if removed.any?
+    puts 'Removed indexes:'
+    removed.each { |name| puts name }
+  else
+    puts 'No secondary indexes found'
+  end
 when 'index:schema:dump'
   path = CouchbaseOrm::IndexSchema::Dumper.new.dump
   puts path
