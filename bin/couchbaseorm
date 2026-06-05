@@ -64,7 +64,7 @@ when 'index:schema:load'
 when 'index:dump'
   name = parse_name_argument(ARGV) || CouchbaseOrm::IndexMigration::MigrationGenerator::DEFAULT_NAME
   introspected = CouchbaseOrm::IndexMigration::IndexIntrospector.new.indexes
-  definitions = introspected.map { |index_data| CouchbaseOrm::IndexMigration::IndexDefinition.from_introspected(index_data) }
+  definitions = introspected.map { |index_data| CouchbaseOrm::IndexDefinition.from_introspected(index_data) }
   path = CouchbaseOrm::IndexMigration::MigrationGenerator.new.generate(definitions, name: name)
   puts path
 when 'index:adopt'
