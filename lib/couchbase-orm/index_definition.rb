@@ -34,8 +34,6 @@ module CouchbaseOrm
 
     class << self
       def normalize_name(name)
-        return name if name.is_a?(Symbol)
-
         value = name.to_s.strip
         return value.to_sym if value.match?(NAME_SYMBOL_PATTERN)
 
